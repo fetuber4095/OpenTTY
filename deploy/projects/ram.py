@@ -26,7 +26,7 @@ def verificar_ram():
 
 if os.name == "posix":
 	while True:
-		try: verificar_ram(), time.sleep(0.6), os.system("clear")
+		try: os.system("clear"), verificar_ram(), time.sleep(0.6)
 		except (KeyboardInterrupt, EOFError): break
 
 else: print("ram: only avaliable for Linux systems.")
