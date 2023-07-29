@@ -310,7 +310,7 @@ class OpenTTY:
 				elif f"{cmd.split()[0]}.sh" in os.listdir(self.root): self.execshell(f"/{cmd.split()[0]}.sh", ispkg=True, admin=admin)
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 
-				elif cmd.split()[0] in library['resources'] and library['resources'][cmd.split()[0]]['filename'].endswith(".py") or library['resources'][cmd.split()[0]]['filename'].endswith(".sh"): print(f"{cmd.split()[0]}: asset not installed")
+				elif cmd.split()[0] in library['resources']: print(f"{cmd.split()[0]}: asset not installed")
 
 				else: return print(f"{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
 				
