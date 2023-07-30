@@ -248,10 +248,11 @@ class OpenTTY:
 				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.py", self.replace(cmd), ispkg=True)
 				elif f"{cmd.split()[0]}.sh" in os.listdir(self.root): self.execshell(f"/{cmd.split()[0]}.sh", ispkg=True)
-				elif cmd.split()[0] in library['resources'] and os.path.isfile(f"{self.root}/{cmd.split()[0]}"): print(f"{cmd.split()[0]}: asset is actived.")
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 
-				elif cmd.split()[0] in library['resources']: print(f"{cmd.split()[0]}: asset not installed")
+				elif cmd.split()[0] in library['resources']:
+					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
+					else: print(f"{cmd.split()[0]}: asset not installed.")
 
 				else: return print(f"{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
 				
