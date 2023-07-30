@@ -38,10 +38,12 @@ library = {
     "version": "1.0-preIII", "build": "06H3",
     "subject": "The OpenTTY Upgrade",
 	"patch": [
+		"First complete stable release",
 		"Added command repo with OpenTTY Github link",
 		"Added command 'venv' - Profile creator",
+		"Added expression runner '(expr)' and duble qoutes"
 		"Added Forge Profile at asset database",
-		"First complete stable release",
+		"Removed command 'expr'"
 	],
     
     "developer": "Mr. Lima",
@@ -192,7 +194,9 @@ class OpenTTY:
 			elif cmd.split()[0] == "var": self.shell(f": {self.replace(cmd)}", mkprocess=False)
 			elif cmd.startswith("print"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
-			elif cmd.startswith("("): self.expr(cmd)
+			elif cmd.startswith("(") or cmd.startswith('"'):
+				try: print(eval(cmd, self.globals, self.locals))
+				except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
 
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
@@ -764,18 +768,6 @@ class OpenTTY:
 	def sleep(self, time):
 		try: timeout(int(time))
 		except ValueError: print(f"sleep: invalid time interval '{time}'" if time else f"sleep: missing operand [delay: sec]...")
-	def expr(self, expressions):
-		def expr(expression):
-			try: return eval(expression)
-			except: return None
-
-		if expressions:
-			result = expr(expressions)
-
-			if result is not None: print(result)
-			else: print(f"expr: invalid expression '{expressions}'")
-
-		else: print("expr: missing operand [expression]...")
 	def sequence(self, limit): 
 		if limit:
 			try: cache = int(limit) + 1
