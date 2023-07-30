@@ -35,15 +35,10 @@ import shutil, getpass, zipfile, datetime, shlex
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.0-preIII", "build": "06H3",
+    "version": "1.0-preIII", "build": "06H3b",
     "subject": "The OpenTTY Upgrade",
 	"patch": [
-		"First complete stable release",
-		"Added command repo with OpenTTY Github link",
-		"Added command 'venv' - Profile creator",
-		"Added expression runner '(expr)' and duble qoutes"
-		"Added Forge Profile at asset database",
-		"Removed command 'expr'"
+		"Bug fix: [NameError] Admin not defined."
 	],
     
     "developer": "Mr. Lima",
@@ -168,7 +163,7 @@ class OpenTTY:
 			print(f"Press return to continue"), input(), close()
 		except (KeyboardInterrupt, EOFError): print(), close()
 	
-	def execfile(self, filename, cmd="", ispkg=False, admin=False):
+	def execfile(self, filename, cmd="", ispkg=False):
 		if self.basename(filename).split()[0] not in library['whitelist'] and not admin and not ispkg: raise PermissionError
 
 		if filename.startswith("/"): filename = f"{self.root}{filename}"
@@ -186,7 +181,7 @@ class OpenTTY:
 			cmd = str(self.recognize(cmd)).strip()
 
 			if cmd.split()[0] == ".": 
-				if cmd: self.execfile(self.replace(cmd).split()[0], self.replace(self.replace(cmd)), admin=admin)
+				if cmd: self.execfile(self.replace(cmd).split()[0], self.replace(self.replace(cmd)))
 			elif cmd.split()[0] == ":":
 				try: exec(self.replace(cmd), self.globals, self.locals)
 				except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
