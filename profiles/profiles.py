@@ -11,6 +11,7 @@ from opentty import *
 library['profile'] = "NAME-OF-PROFILE" # Set name of profile
 
 library['debugmode'] = False # Enable or disable OpenTTY [debug mode]
+library['ipinfo-token'] = "" # Setup your "https://ipinfo.io" acess token for command FW
 
 library['alias']['ALIAS-NAME'] = "COMMAND" # Modify "ALIAS-NAME" with asset name and "COMMAND" with alias content 
 library['whitelist'].append("filename") # Add files permanently at whitelist
