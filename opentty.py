@@ -35,7 +35,7 @@ import shutil, getpass, zipfile, datetime, shlex
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.0-preIII", "build": "06H3b",
+    "version": "1.0-preIII", "build": "06H3c",
     "subject": "The OpenTTY Upgrade",
 	"patch": [
 		"Bug fix: [NameError] Admin not defined."
@@ -164,7 +164,7 @@ class OpenTTY:
 		except (KeyboardInterrupt, EOFError): print(), close()
 	
 	def execfile(self, filename, cmd="", ispkg=False):
-		if self.basename(filename).split()[0] not in library['whitelist'] and not admin and not ispkg: raise PermissionError
+		if self.basename(filename).split()[0] not in library['whitelist'] and not ispkg: raise PermissionError
 
 		if filename.startswith("/"): filename = f"{self.root}{filename}"
 		if os.name == "nt": filename = filename.replace("/", "\\")
