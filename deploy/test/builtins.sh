@@ -1,131 +1,100 @@
-# Script for OpenTTY Shell
-# 
-# This script is part of OpenTTY test package
-# it was maked for debug and prevent future erros
-#
+# Testing all OpenTTY (Python SHELL) Resources
 
-mkdir oi
-rmdir oi
+print("Starting test...")
+
+var a = "builtin <3"
+print(a)
+
+echo This is an stdout message printed with 'echo' command
+prompt Press ENTER <return> to continue
+
+basename /usr/bin/python4
+basename C:\Windows\System32\explorer.exe
+
+ps 
+kill
+kill eoajife
+
+mkdir test
+rmdir test
+
+rm
+rmdir
+mkdir
+touch
+cp
+mv
 
 touch file.txt
 rm file.txt
 
-ls
+pushd &root
 
-cd &root
-cp opentty.py testfile.py
-mv testfile.py nothing.py
+cp opentty.py app.py
+mv app.py module.py
+dd module.py module.bin
 
-gzip archive.zip nothing.py
+gzip archive.zip module.bin
+
+cat opentty.py
+
+rm module.bin
+
 zipinfo archive.zip
-rm nothing.py
 unzip archive.zip
-unzip archive.zip . 
-cat nothing.py
-
-clear
-echo teste.
-cls
-
-rm nothing.py
 
 head opentty.py
 tail opentty.py
+diff opentty.py module.py
 
-basename /usr/bin/python3.8
-basename C:\Windows\System32\cmd.exe
+rm module.py
 
-tree
+env
 
-echo
-echo
+export TEST ITS A TEST OF EXPORT!!! <3
 
-dd opentty.py opentty.bin
 
-nl opentty.py
-diff opentty.py 
-
-export LOGNAME fetuber4095
-
-env 
-
-echo
-echo
-
-uname -a
-uname -r
-uname -s
-uname -v
-uname -s
-uname -w
-uname 
-
-passwd
-
-hostname
-whoami
-
-build
-
-asf a
-asset
-
-ps 
-kill
-kill eruhgr
+set x = "pi is 3,15. lol"
+print(x)
 
 local
 
-status
-
-ls
-
-wget https://github.com/fetuber4095/OpenTTY/raw/main/assets/favicon.ico
-gaddr www.google.com
-
-echo
-
-fw 142.251.132.36
-
-rr 142.251.132.36
-
-rr www.google.com
-
 clear
 
-by
-date
-version
-logname
-profile
+stty
+tty
 
-echo
-echo 
+popd
+pwd
+popd
 
-chmod
-chmod opentty.py
-chmod test.py
-chmod env.py
-chmod oef.py
+alias test echo oi
+test 
+alias test
+unalias tesst
 
-chmod opentty.py
-chmod test.py
-chmod env.py
-chmod oef.py
+gaddr github.com
+fw 20.201.28.151
 
 cal 
-seq 200000
-expr 200 * 200
-expr 2 / 3
-eval print((None, True, False, "OIE"))
-echo
-echo
+sleep 2
+seq 10000
+passwd
+github
+repo
+cls
+date
+version
+by
+logname
+whoami
+profile
 
+whoami
+hostname
 
-patch
-
+echo TEST!
 true
-echo RETURNED TRUE
 
 false
-echo THIS TEXT CANT APPEAR
+echo This message will not appear!
