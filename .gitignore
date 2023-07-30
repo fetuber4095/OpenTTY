@@ -1,6 +1,9 @@
 __pycache__/
 home/
 
-app.bin
+
+
+# Ignoring deploy files
+app.bin 
 test.py
 file.py
