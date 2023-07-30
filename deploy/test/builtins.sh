@@ -1,100 +1,120 @@
-# Testing all OpenTTY (Python SHELL) Resources
+# Testing OpenTTY Functions
 
-print("Starting test...")
+var a = 10
+(a / 5)
 
-var a = "builtin <3"
-print(a)
+echo $a
 
-echo This is an stdout message printed with 'echo' command
-prompt Press ENTER <return> to continue
+print("Welcome To OpenTTY envirronment Test!\m")
+prompt Press ENTER <return> to continue. . .
 
 basename /usr/bin/python4
 basename C:\Windows\System32\explorer.exe
 
-ps 
+ps
+
 kill
-kill eoajife
+kill PID NOT FOUND
 
-mkdir test
-rmdir test
+mkdir TEST
 
-rm
-rmdir
-mkdir
-touch
-cp
-mv
+profile
 
-touch file.txt
-rm file.txt
+touch TEST/file.py
 
-pushd &root
-
-cp opentty.py app.py
-mv app.py module.py
-dd module.py module.bin
-
-gzip archive.zip module.bin
-
-cat opentty.py
-
-rm module.bin
+gzip archive.zip TEST
 
 zipinfo archive.zip
 unzip archive.zip
+unzip archive.zip . 
+
+ls
+
+rmdir TEST
+
+tree
+
+cp opentty.py 
+cp opentty.py app.py
+
+mv app.py application.py
+dd application.py app.bin
+
+rm application.py
+
+cat opentty.py
 
 head opentty.py
 tail opentty.py
-diff opentty.py module.py
 
-rm module.py
+nl opentty.py
+
+diff opentty.py opentty.py
 
 env
-
-export TEST ITS A TEST OF EXPORT!!! <3
-
-
-set x = "pi is 3,15. lol"
-print(x)
-
 local
+
+set 
+
+uname 
+uname -a 
+uname -r
+uname -v
+uname -m
+
+df
 
 clear
 
+chmod
+chmod opentty.py
+chmod 
+chmod opentty.py
+
 stty
-tty
+tty 
 
+cd /
 popd
-pwd
-popd
 
-alias test echo oi
-test 
-alias test
-unalias tesst
+status
 
-gaddr github.com
-fw 20.201.28.151
+alias TESTING echo ITS TRUE
 
-cal 
+alias TESTING
+
+TESTING
+
+unalias ed
+unalias TESTING
+unalias
+
+gaddr www.google.com
+fw 142.251.132.36
+
+cal
 sleep 2
-seq 10000
-passwd
+
+seq 200000
+
 github
 repo
-cls
+
 date
 version
 by
-logname
-whoami
-profile
 
-whoami
+asset
+
+pacth
+
+pwd
+
 hostname
+whoami
 
-echo TEST!
 true
+echo THIS IS THE END.
 
 false
-echo This message will not appear!
+echo THIS TEXT WILL NOT APPEAR. FUCKING BEAT <3

@@ -1,2 +1,6 @@
 __pycache__/
 home/
+
+app.bin
+test.py
+file.py
