@@ -35,7 +35,7 @@ import shutil, getpass, zipfile, datetime, shlex
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.0-preIII", "build": "06H3c",
+    "version": "1.0-preIII", "build": "06H3b",
     "subject": "The OpenTTY Upgrade",
 	"patch": [
 		"Bug fix: [NameError] Admin not defined."
