@@ -1,0 +1,19 @@
+&appname v&version [Mail Inbox]
+
+Title: Hello!
+Subject: It's an test of OpenTTY Mail
+
+From: (Owner) Mr. Lima
+-----------------------------------------------
+
+    Hi guys, how are you? I am here to test
+OpenTTY Mail box, its an application that's 
+connnect with a sercommmands ver and show a 
+message from developers to other users. 
+
+    Dont forget of use commands status, to 
+verify if a new version of OpenTTY released
+and (sync: if you install with github) or
+(upgrade: if you install with pip - python).
+
+> FeTuber4095
