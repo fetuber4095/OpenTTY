@@ -100,13 +100,21 @@ seq 200000
 github
 repo
 
+snapshot
+inbox
+repo
+update favicon ram
+
+name
+envname
+
 date
 version
 by
 
 asset
 
-pacth
+patch
 
 pwd
 
