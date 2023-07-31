@@ -35,10 +35,13 @@ import shutil, getpass, zipfile, datetime, shlex
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.0-preIII", "build": "06H3b",
+    "version": "1.0-preIV", "build": "06H5",
     "subject": "The OpenTTY Upgrade",
 	"patch": [
-		"Bug fix: [NameError] Admin not defined."
+		"Add final touches at code",
+		"Better internal app logic",
+		"Added other builtins functions",
+		"First version uploaded to PyPi"
 	],
     
     "developer": "Mr. Lima",
@@ -61,7 +64,8 @@ library = {
 	"aliases": {},
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
-		"type": "cat", "logname": "whoami", "profile": "echo [&profile]", "repo": "github"
+		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
+		"envname": "print(__name__)"
 	},
 	
 	# Firewall and root settings
@@ -104,9 +108,14 @@ library = {
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"}
 	},
 
+	"docs": {
+		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
+		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/server/services/inbox"
+	},
+
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
 	"opentty.py": "https://github.com/fetuber4095/OpenTTY/raw/main/opentty.py",
-	
+
 	"sync": "https://github.com/fetuber4095/OpenTTY/raw/main/server/release.json",
 	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/profiles.py"
 }
@@ -127,20 +136,21 @@ class OpenTTY:
 		self.functions = {}
 		
 		self.globals = {
-			"app": self, "library": library, "os": os, "sys": sys, "time": time, "json": json, "platform": platform, 
-			"urllib": urllib, "socket": socket, "socketserver": socketserver, "http": http, "shutil": shutil,
-			"random": random
+			"app": self, "library": library, "__name__": library['sh']
 		}
 		self.locals = {}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080):
 		self.ttyname = host
-		self.process['psh'] = str(port)
+		self.process[library['sh']] = str(port)
+
+		for asset in os.listdir(self.root): 
+			if asset.endswith(".sh"): self.build(f"{self.root}/{asset}", root=True)
 		
 		self.clear(), print(f"\n\n{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
 		
-		while "psh" in self.process:
+		while library['sh'] in self.process:
 			if not "python" in self.process: close()
 
 			try:
@@ -187,10 +197,15 @@ class OpenTTY:
 				except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
 			
 			elif cmd.split()[0] == "var": self.shell(f": {self.replace(cmd)}", mkprocess=False)
+			elif cmd.split()[0] == "del": self.shell(f": {self.replace(cmd)}", mkprocess=False)
+			elif cmd.startswith("from") or cmd.startswith("import"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("print"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
-			elif cmd.startswith("(") or cmd.startswith('"'):
-				try: print(eval(cmd, self.globals, self.locals))
+			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
+				try: 
+					run = eval(cmd, self.globals, self.locals)
+
+					if run: print(run)
 				except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
 
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
@@ -236,6 +251,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
 			elif cmd.split()[0] == "status": self.status()
 			elif cmd.split()[0] == "sync": self.updater()
+			elif cmd.split()[0] == "upgrade": local("pip install opentty --upgrade")
 			elif cmd.split()[0] == "asset": self.asset()
 			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd))
 			elif cmd.split()[0] == "build": self.build(self.replace(cmd))
@@ -246,7 +262,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "server": self.server(self.replace(cmd))
 			elif cmd.split()[0] == "cal": self.calendar()
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
-			elif cmd.split()[0] == "expr": self.expr(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
 			elif cmd.split()[0] == "github": print(library['github.com'])
 			elif cmd.split()[0] == "passwd": print(f"passwd: your password is {library['passwd']}")
@@ -255,6 +270,11 @@ class OpenTTY:
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd))
 			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
+			elif cmd.split()[0] == "rraw": self.rraw(self.replace(cmd), show=True)
+			elif cmd.split()[0] == "exec": local(self.replace(cmd))
+			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
+			elif cmd.split()[0] == "snapshot": print(library['build'])
+			elif cmd.split()[0] == "name": print(__name__)
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
@@ -279,7 +299,6 @@ class OpenTTY:
 		except IsADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
 		except NotADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
-		except ValueError: raise ValueError("No closing quotation. [StdinError]")
 		except PermissionError: return print(f"{cmd.split()[0]}: permission denied")
 		
 		return True, self.rmprocess(cmd.split()[0])
@@ -434,7 +453,7 @@ class OpenTTY:
 		else: print(f"mv: missing operand [source >> path]...")
 	def copy(self, cmdline=""): 
 		if cmdline:
-			if len(shlex.split(cmdline)) < 2: return print(f"cp: {cmdline}: missing operand [new path]...")
+			if len(shlex.split(cmdline)) < 2: return print(f"cp: {cmdline}: missing operand [copy.path]...")
 
 			shutil.copy(shlex.split(cmdline)[0], shlex.split(cmdline)[1])
 
@@ -617,7 +636,7 @@ class OpenTTY:
 		except Exception as traceback: return print("status: failed to connect with github.")
 
 		if package['version'] != library['version']: return print(f"status: a new version of {self.appname} was released.")
-		elif package['build'] != library['build']: return print(f"status: a new build of {self.appname} was released.")
+		elif package['build'] != library['build']: return print(f"status: a new snapshot of {self.appname} was released.")
 		else: print(f"status: {self.appname} is up-to-date.")
 	def updater(self):
 		def status():
@@ -639,11 +658,12 @@ class OpenTTY:
 
 				self.pushdir(self.puppydir)
 
-				return print(f"{self.appname} was updated. Restart to apply charges.")
+				return print(f"{self.appname} was updated. Reload to apply charges.")
 
 			except Exception as traceback: return print("sync: failed to connect with github.")
 
 		elif releases is None: print("sync: failded to connect with github.")
+
 		else: print(f"sync: {self.appname} is up-to-date.")	
 	def venv(self, venvname):
 		if venvname:
@@ -670,9 +690,9 @@ class OpenTTY:
 				try: urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), print(f"get: asset '{resource}' installed.")
 				except Exception as traceback: print(f"get: bad. asset installation failed.")
 		else: print("get: missing operand [asset]...")
-	def build(self, filename):
+	def build(self, filename, root=False):
 		if filename: 
-			if self.basename(filename) not in library['whitelist']: raise PermissionError
+			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError
 
 			with open(filename, "r") as script:
 				script = script.read().splitlines()
@@ -721,7 +741,7 @@ class OpenTTY:
 		def get_ip_info(ip):
 			try:
 				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
-			except urllib.error.URLError as e: return print(f"fw: failed to dialog with {ipadress}")
+			except urllib.error.URLError as e: return print(f"fw: failed to dialog with {ipadress}.")
 
 		if ipadress != "":
 			try:
@@ -730,13 +750,13 @@ class OpenTTY:
 
 				if ip_info:
 					for key, value in ip_info.items(): print(f"{key}: {value}")
-			except socket.error: print(f"fw: {ipadress}: invalid ip")
+			except socket.error: print(f"fw: {ipadress}: ip adress is invalid.")
 
 		else: print("fw: missing operand [ip adress]...")
 	def wget(self, cmdline):
 		if len(cmdline.split()) < 2:
 			if cmdline: return self.wget(f"{cmdline} {self.basename(cmdline)}")
-			else: print("wget: missing operand [url]...")
+			else: return print("wget: missing operand [url]...")
 
 		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.replace(cmdline)}: download complete.")
 		except urllib.error.URLError: return print("wget: the url is inacessible or invalid")
@@ -754,6 +774,16 @@ class OpenTTY:
 			except ValueError: return print(f"server: invalid port '{port}'")
 
 		else: self.server(randint(1000, 9999))
+	def rraw(self, url, show=False, report="rraw", tbmsg="bad. dialog with website failed."):
+		if url:
+			try: html = urllib.request.urlopen(url).read().decode()
+			except Exception as traceback: return print(f"{report}: {tbmsg}")
+
+			if show: print(self.recognize(html))
+			
+			return html
+		
+		else: print(f"{report}: missing operand [url]...")
 	#
 	# [Other Utilities]
 	def calendar(self): 
@@ -770,7 +800,6 @@ class OpenTTY:
 			else:
 				for i in range(cache):
 					if i != 0: print(i)
-
 
 
 if __name__ == "__main__":
