@@ -1,9 +1,6 @@
 __pycache__/
+*.egg-info/
+build/
+dist/
 home/
 
-
-
-# Ignoring deploy files
-app.bin 
-test.py
-file.py
