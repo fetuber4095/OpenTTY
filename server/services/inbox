@@ -1,19 +1,21 @@
 &appname v&version [Mail Inbox]
 
-Title: Hello!
-Subject: It's an test of OpenTTY Mail
+Title: OpenTTY is now avaliable in PyPI
+Subject: Now you can install it with pip
 
-From: (Owner) Mr. Lima
+From: (Owner) Mr. Lima [Mon Jul 31 17:48 2023]
 -----------------------------------------------
 
-    Hi guys, how are you? I am here to test
-OpenTTY Mail box, its an application that's 
-connnect with a sercommmands ver and show a 
-message from developers to other users. 
+    It's true... Now users can install 
+OpenTTY using pip: 'pip install opentty' and
+to open it 'python -m opentty' or downloading/
+creating profiles to personalize your experience
+with OpenTTY.
 
-    Dont forget of use commands status, to 
-verify if a new version of OpenTTY released
-and (sync: if you install with github) or
-(upgrade: if you install with pip - python).
+    Dont forget of use 'inbox' to read the
+menssages and update your OpenTTY installed 
+version. If you just download app file use 'sync'
+and for pip users run command 'upgrade' or in
+terminal run 'pip install opentty --upgrade'
 
 > FeTuber4095
