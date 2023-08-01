@@ -1,6 +1,0 @@
--	29/07/23	1.0-preI		06H1	First official release
--	30/07/23	1.0-preII		06H2	In this release Asset system start to work
--	30/07/23	1.0-preIII		06H3	File in directories with 2 or more names work now 
-	30/07/23	1.0-preIV		06H5	Last Pre-Release (Added final touches in code)
-	31/07/23	1.0				06H6
-	

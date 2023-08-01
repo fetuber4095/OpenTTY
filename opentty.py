@@ -30,18 +30,17 @@ from sys import exit as close
 
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
-import shutil, getpass, zipfile, datetime, shlex
+import shutil, getpass, zipfile, datetime, shlex, traceback
 
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.0-preIV", "build": "06H5",
+    "version": "1.0", "build": "06H6",
     "subject": "The OpenTTY Upgrade",
 	"patch": [
-		"Add final touches at code",
-		"Better internal app logic",
-		"Added other builtins functions",
-		"First version uploaded to PyPi"
+		"The first official release",
+		"Now psh envirronment name is '__main__'",
+		""
 	],
     
     "developer": "Mr. Lima",
@@ -65,7 +64,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"envname": "print(__name__)"
+		"whoami": "echo &self", "hostname": "echo &hostname"
 	},
 	
 	# Firewall and root settings
@@ -77,6 +76,9 @@ library = {
 	"head-lines": 10,
 	"max-byte-len": 128, 
 	"ipinfo-token": "",
+
+	"openai-api": "sk-lyUE0nYEgxTbGotkD4IIT3BllbkFJO8YcM8DyzFLvpEsX8bEG",
+	"openai-max-tokens": 150,
 
 	"hidden-files-prefix": ".", # Prefix for hidden files
 	"dircolors": {
@@ -136,25 +138,28 @@ class OpenTTY:
 		self.functions = {}
 		
 		self.globals = {
-			"app": self, "library": library, "__name__": library['sh']
+			"app": self, "library": library, "__name__": "__main__"
 		}
 		self.locals = {}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080):
-		self.ttyname = host
-		self.process[library['sh']] = str(port)
 
 		for asset in os.listdir(self.root): 
 			if asset.endswith(".sh"): self.build(f"{self.root}/{asset}", root=True)
 		
-		self.clear(), print(f"\n\n{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
-		
+		if library['sh'] not in self.process: 
+			self.ttyname = host
+			self.process[library['sh']] = str(port)
+
+			self.clear(), print(f"\n\n{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+
+
 		while library['sh'] in self.process:
 			if not "python" in self.process: close()
 
 			try:
-				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd()} {library['sh-prefix']}\033[m")
+				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd()} {library['sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
@@ -163,7 +168,7 @@ class OpenTTY:
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
 
-		print("There are stopped jobs.\n")
+		self.__init__(), print("There are stopped jobs.\n")
 	def disconnect(self, code=""):
 		if not code: code = 0
 
@@ -180,8 +185,8 @@ class OpenTTY:
 		if os.name == "nt": filename = filename.replace("/", "\\")
 
 		with open(filename, "r") as script:
-			try: exec(self.recognize(script.read()))
-			except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
+			try: exec(self.recognize(script.read()), self.globals, self.locals)
+			except Exception as error: traceback.print_exc()
 
 	# OpenTTY "Shell"
 	def shell(self, cmd, mkprocess=True):
@@ -190,30 +195,29 @@ class OpenTTY:
 		try:
 			cmd = str(self.recognize(cmd)).strip()
 
-			if cmd.split()[0] == ".": 
-				if cmd: self.execfile(self.replace(cmd).split()[0], self.replace(self.replace(cmd)))
+			if cmd.split()[0] == ".":
+				if self.replace(cmd): self.execfile(self.replace(cmd), self.replace(self.replace(cmd)))
 			elif cmd.split()[0] == ":":
 				try: exec(self.replace(cmd), self.globals, self.locals)
-				except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
+				except Exception as error: traceback.print_exc()
 			
-			elif cmd.split()[0] == "var": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif cmd.split()[0] == "del": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif cmd.startswith("from") or cmd.startswith("import"): self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.startswith("print"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
+			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
+			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.split()[0] == "del": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
-				try: 
+				try:
 					run = eval(cmd, self.globals, self.locals)
 
 					if run: print(run)
-				except Exception as traceback: print(f"{traceback.__class__.__name__}: {traceback}")
+				except Exception as error: traceback.print_exc()
 
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
 			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"basename: missing operand [path]...")
 			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
-			elif cmd.split()[0] == "ps": self.pslist() 
+			elif cmd.split()[0] == "ps": self.pslist()
 			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd))
 			elif cmd.split()[0] == "mkdir": self.makedir(self.replace(cmd))
 			elif cmd.split()[0] == "rmdir": self.removedir(self.replace(cmd))
@@ -236,7 +240,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "diff": self.diff(self.replace(cmd))
 			elif cmd.split()[0] == "env": self.environ(self.replace(cmd))
 			elif cmd.split()[0] == "export": self.export(self.replace(cmd))
-			elif cmd.split()[0] == "set": self.set(self.replace(cmd))
 			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
 			elif cmd.split()[0] == "uname": self.uname(self.replace(cmd))
 			elif cmd.split()[0] == "chmod": self.chmod(self.replace(cmd))
@@ -261,8 +264,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "wget": self.wget(self.replace(cmd))
 			elif cmd.split()[0] == "server": self.server(self.replace(cmd))
 			elif cmd.split()[0] == "cal": self.calendar()
-			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
-			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
 			elif cmd.split()[0] == "github": print(library['github.com'])
 			elif cmd.split()[0] == "passwd": print(f"passwd: your password is {library['passwd']}")
 			elif cmd.split()[0] == "whoami": print(getpass.getuser())
@@ -272,9 +273,10 @@ class OpenTTY:
 			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
 			elif cmd.split()[0] == "rraw": self.rraw(self.replace(cmd), show=True)
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
+			elif cmd.split()[0] == "insmod": self.build(self.replace(cmd), root=True)
 			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
 			elif cmd.split()[0] == "snapshot": print(library['build'])
-			elif cmd.split()[0] == "name": print(__name__)
+			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
@@ -299,9 +301,11 @@ class OpenTTY:
 		except IsADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
 		except NotADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
+		except IndexError as missing: print(f"{cmd.split()[0]}: missing operand [{missing}]...")
 		except PermissionError: return print(f"{cmd.split()[0]}: permission denied")
+
 		
-		return True, self.rmprocess(cmd.split()[0])
+		return True, self.rmprocess(cmd)
 			
 	# OpenTTY "Text API"
 	def basename(self, path): return os.path.basename(path)
@@ -343,15 +347,13 @@ class OpenTTY:
 		try: 
 			if pname in ['sh', 'python']: return 
 
-			del self.process[pname]
-		except KeyError: return
+			del self.process[pname.split()[0]]
+		except Exception as error: return
 	
 	def pslist(self):
 		print(f"     PID  CMD")
 		for process in self.process:
 			print(f"    {self.process[process]}  {process}")
-
-		return self.process
 	def kill(self, pid):
 		for process in self.process:
 			if self.process[process] == str(pid): 
@@ -366,13 +368,13 @@ class OpenTTY:
 	# [File Utilities]
 	def makedir(self, dirname):
 		if dirname: os.makedirs(dirname)
-		else: print(f"mkdir: missing operand [dirname]...")
+		else: raise IndexError("dirname")
 	def removedir(self, dirname):
 		if dirname: shutil.rmtree(dirname)
-		else: print(f"rmdir: missing operand [dirname]...")
+		else: raise IndexError("dirname")
 	def remove(self, filename):
 		if filename != "": os.remove(filename)
-		else: print(f"rm: missing operand [filename]...")
+		else: raise IndexError("filename")
 	def listdir(self, path=""):
 		if path:
 			files = os.listdir(path)
@@ -398,7 +400,7 @@ class OpenTTY:
 			return len(hashbytes(text)), len(text.splitlines())
 
 		if len(shlex.split(filenames)) < 2:
-			if filenames: return print("dd: missing operand [output]...")
+			if filenames: raise IndexError("output")
 
 			text = []
 
@@ -422,16 +424,16 @@ class OpenTTY:
 
 			except zipfile.BadZipFile: print(f"zipinfo: {zip_path}: zip file is invalid or corromped")
 			except zipfile.LargeZipFile: print(f"zipinfo: {zip_path}: zip file is too Large")
-		else: print("zipinfo: missing operand [filename]...")
+		else: raise IndexError("filename")
 	def unzip(self, cmdline):
-		if len(shlex.split(cmdline)) < 2: return print("unzip: missing operand [extract path]..." if cmdline != "" else "unzip: missing operand [archive >> path]...")
+		if len(shlex.split(cmdline)) < 2: raise IndexError("extract path" if cmdline != "" else "archive >> path")
 		
 		with zipfile.ZipFile(shlex.split(cmdline)[0], 'r') as zf:
 			try: zf.extractall(shlex.split(cmdline)[1])
 			except Exception as traceback: print(traceback)
 	def touch(self, filename): 
 		if filename: open(filename, "wt+").close()
-		else: print("touch: missing operand [filename]... ")
+		else: raise IndexError("filename")
 	def tree(self, directory, indent=""):
 		if directory:
 			print(indent + os.path.basename(directory))
@@ -446,21 +448,21 @@ class OpenTTY:
 		else: self.tree(".")
 	def move(self, cmdline=""): 
 		if cmdline:
-			if len(shlex.split(cmdline)) < 2: return print(f"mv: {cmdline}: missing operand [new path]...")
+			if len(shlex.split(cmdline)) < 2: raise IndexError("new.path")
 
 			shutil.move(shlex.split(cmdline)[0], shlex.split(cmdline)[1])
 
-		else: print(f"mv: missing operand [source >> path]...")
+		else: raise IndexError("sorce >> path")
 	def copy(self, cmdline=""): 
 		if cmdline:
-			if len(shlex.split(cmdline)) < 2: return print(f"cp: {cmdline}: missing operand [copy.path]...")
+			if len(shlex.split(cmdline)) < 2: raise IndexError("copy.path")
 
 			shutil.copy(shlex.split(cmdline)[0], shlex.split(cmdline)[1])
 
-		else: print(f"cp: missing operand [source >> copy]...")
+		else: raise IndexError("source >> copy")
 	def gunzip(self, cmdline):
 		if cmdline:
-			if len(shlex.split(cmdline)) < 2: return print(f"gzip: missing operand [source: folder | file]...")
+			if len(shlex.split(cmdline)) < 2: raise IndexError("source: folder | file")
 				
 			zip_filename = shlex.split(cmdline)[0]
 			source_path = shlex.split(cmdline)[1]
@@ -475,13 +477,13 @@ class OpenTTY:
 							file_path = os.path.join(foldername, filename)
 							zipf.write(file_path, os.path.relpath(file_path, source_path))
 
-		else: print(f"gzip: missing operand [filename << source]...")
+		else: raise IndexError("filename << source")
 	def install(self, filename):
 		if filename: 
 			if self.basename(filename) in library['whitelist']: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
 			else: raise PermissionError
 		
-		print("install: missing operand [filename]...")
+		raise IndexError("filename")
 	#
 	# [Text Utilities]
 	def catfile(self, filename): 
@@ -530,7 +532,7 @@ class OpenTTY:
 			except json.decoder.JSONDecodeError as traceback: print(f"json: file is malformed [{traceback}]")
 		
 		elif jsoniten: explore_json(jsoniten, indent)
-		else: print(f"json: missing operand [filename]...")
+		else: raise IndexError("filename")
 	def nl(self, filename):
 		if filename:
 			with open(filename, "r") as file:
@@ -555,7 +557,7 @@ class OpenTTY:
 
 		else: self.ThreadIn()
 	def diff(self, filenames):
-		if len(shlex.split(filenames)) < 2: return print("diff: missing operand [2filename]..." if filenames else "diff: missing operand [filename <> filename]...")
+		if len(shlex.split(filenames)) < 2: raise IndexError("2filename" if filenames else "filename <> filename")
 			
 		print(shlex.split(filenames)[0])
 		print(shlex.split(filenames)[1])
@@ -576,16 +578,6 @@ class OpenTTY:
 	def export(self, cmdline=""):
 		if cmdline: os.environ[cmdline.split()[0]] = self.replace(cmdline)
 		else: print('from opentty import *\n\n\nif __name__ == "__main__":\n\tapp = OpenTTY()\n\n\tapp.connect("localhost")\n\tapp.disconnect(0)')
-	def set(self, cmdline):
-		if cmdline:
-			if len(cmdline.split()) < 2:
-				print(f"local {cmdline}='{self.locals[cmdline]}'" if cmdline in self.locals else f"set: {cmdline}: value not found")
-
-				return False
-
-			self.locals[cmdline.split()[0]] = self.replace(cmdline)
-		
-		else: self.ThreadList(self.locals)
 	def uname(self, argv=""):
 		if argv:
 			if "-a" in argv: print(f"{platform.system()} {platform.node()} {platform.release()} {platform.version()} {platform.machine()}")
@@ -630,7 +622,6 @@ class OpenTTY:
 	def diskfree(self, cmdline=""):
 		if os.name == "posix": os.system(f"df {cmdline}")
 		elif os.name == "nt": os.system("wmic logicaldisk get deviceid,size,freespace")
-		else: print(f"df: this tool doesnt support {platform.system()} systems")
 	def status(self):
 		try: package = json.load(urllib.request.urlopen(library['sync']))
 		except Exception as traceback: return print("status: failed to connect with github.")
@@ -670,8 +661,8 @@ class OpenTTY:
 			try: urllib.request.urlretrieve(library['venv'], f"{self.root}/{venvname}.py")
 			except Exception as traceback: print("venv: bad. download of template failed.")
 		
-		else: print("venv: missing operand [profile.name]...")
-	#
+		else: raise IndexError("profile.name")
+	# 
 	# [Asset Manager]
 	def asset(self):
 		root_files = os.listdir(self.root)
@@ -689,7 +680,8 @@ class OpenTTY:
 			for resource in asset.split():
 				try: urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), print(f"get: asset '{resource}' installed.")
 				except Exception as traceback: print(f"get: bad. asset installation failed.")
-		else: print("get: missing operand [asset]...")
+				
+		else: raise IndexError("asset")
 	def build(self, filename, root=False):
 		if filename: 
 			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError
@@ -699,7 +691,7 @@ class OpenTTY:
 
 				self.functions[self.basename(filename).split(".")[0].replace(" ", ".")] = script
 
-		else: print("build: missing operand [script]...")
+		else: raise IndexError("script")
 	def function(self, function):
 		if function:
 			commands = []
@@ -711,7 +703,7 @@ class OpenTTY:
 			self.functions[function.replace(" ", ".")] = commands
 			print()
 		
-		else: print("function: missing operand [method.name]...")
+		else: raise IndexError("method.name")
 	
 	def callmethod(self, function):
 		if function in self.functions:
@@ -752,11 +744,11 @@ class OpenTTY:
 					for key, value in ip_info.items(): print(f"{key}: {value}")
 			except socket.error: print(f"fw: {ipadress}: ip adress is invalid.")
 
-		else: print("fw: missing operand [ip adress]...")
+		else: raise IndexError("ip.adress")
 	def wget(self, cmdline):
 		if len(cmdline.split()) < 2:
 			if cmdline: return self.wget(f"{cmdline} {self.basename(cmdline)}")
-			else: return print("wget: missing operand [url]...")
+			else: raise IndexError("url")
 
 		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.replace(cmdline)}: download complete.")
 		except urllib.error.URLError: return print("wget: the url is inacessible or invalid")
@@ -783,7 +775,7 @@ class OpenTTY:
 			
 			return html
 		
-		else: print(f"{report}: missing operand [url]...")
+		else: raise IndexError("url")
 	#
 	# [Other Utilities]
 	def calendar(self): 
@@ -792,7 +784,7 @@ class OpenTTY:
 		calendar.setfirstweekday(calendar.SUNDAY), print(calendar.month(now.year, now.month), end="")
 	def sleep(self, time):
 		try: timeout(int(time))
-		except ValueError: print(f"sleep: invalid time interval '{time}'" if time else f"sleep: missing operand [delay: sec]...")
+		except ValueError: print(f"sleep: invalid time interval '{time}'" if time else f"sleep: missing operand [delay]...")
 	def sequence(self, limit): 
 		if limit:
 			try: cache = int(limit) + 1

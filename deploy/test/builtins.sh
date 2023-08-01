@@ -1,6 +1,6 @@
 # Testing OpenTTY Functions
 
-var a = 10
+set a = 10
 (a / 5)
 
 echo $a
