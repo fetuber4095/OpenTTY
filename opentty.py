@@ -39,8 +39,9 @@ library = {
     "subject": "The OpenTTY Upgrade",
 	"patch": [
 		"The first official release",
+		"Better tracebacks messages",
+		"Revised all module OpenTTY code Syntax",
 		"Now psh envirronment name is '__main__'",
-		""
 	],
     
     "developer": "Mr. Lima",
@@ -107,7 +108,8 @@ library = {
 	"resources": {
 		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/favicon.ico"},
 		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/ram.py"},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"}
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"}
 	},
 
 	"docs": {
@@ -290,6 +292,7 @@ class OpenTTY:
 
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
+					elif library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
 					else: print(f"{cmd.split()[0]}: asset not installed.")
 
 				else: return print(f"{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
@@ -662,7 +665,6 @@ class OpenTTY:
 			except Exception as traceback: print("venv: bad. download of template failed.")
 		
 		else: raise IndexError("profile.name")
-	# 
 	# [Asset Manager]
 	def asset(self):
 		root_files = os.listdir(self.root)
@@ -792,7 +794,6 @@ class OpenTTY:
 			else:
 				for i in range(cache):
 					if i != 0: print(i)
-
 
 if __name__ == "__main__":
 	app = OpenTTY()
