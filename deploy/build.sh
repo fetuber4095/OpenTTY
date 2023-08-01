@@ -5,4 +5,4 @@ python setup.py sdist bdist_wheel
 
 prompt Press ENTER to continue or Ctrl+C to cancel. . . 
 
-exec twine upload dist/* --verbbose
+exec twine upload dist/* --verbose
