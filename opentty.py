@@ -35,13 +35,11 @@ import shutil, getpass, zipfile, datetime, shlex, traceback
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.0", "build": "06H6",
-    "subject": "The OpenTTY Upgrade",
+    "version": "1.0.1", "build": "08H1",
+    "subject": "The Sunset Update",
 	"patch": [
-		"The first official release",
-		"Better tracebacks messages",
-		"Revised all module OpenTTY code Syntax",
-		"Now psh envirronment name is '__main__'",
+		"Added file CONFIG.SYS and command REM",
+		"Added Network Utility 'PING' and ''"
 	],
     
     "developer": "Mr. Lima",
@@ -75,9 +73,11 @@ library = {
 	
 	# Commands settings
 	"head-lines": 10,
-	"max-byte-len": 128, 
+	"max-byte-len": 32, 
 	"ipinfo-token": "",
-
+	
+	"timeout": 12,
+	
 	"openai-api": "sk-lyUE0nYEgxTbGotkD4IIT3BllbkFJO8YcM8DyzFLvpEsX8bEG",
 	"openai-max-tokens": 150,
 
@@ -131,13 +131,15 @@ class OpenTTY:
 		self.appname = library['appname'] # Saving application name
 		self.version = library['version'] # Saving application version
 		self.subject = library['subject'] # Saving release name
-		
+				
 		self.ttyname = "localhost"
 		self.process = {"python": str(randint(1000, 9999))}
 		
 		self.root, self.puppydir = library['root-dir'], library['root-dir']
 		self.aliases = library['aliases']
 		self.functions = {}
+		
+		self.write32u(show=False)
 		
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__"
@@ -154,7 +156,7 @@ class OpenTTY:
 			self.ttyname = host
 			self.process[library['sh']] = str(port)
 
-			self.clear(), print(f"\n\n{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+			self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
 
 
 		while library['sh'] in self.process:
@@ -189,7 +191,7 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
-
+	
 	# OpenTTY "Shell"
 	def shell(self, cmd, mkprocess=True):
 		if mkprocess: self.mkprocess(cmd.split()[0])
@@ -205,8 +207,8 @@ class OpenTTY:
 			
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
+			elif cmd.split()[0] == "del" or cmd.split()[0] == "global": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.split()[0] == "del": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
 					run = eval(cmd, self.globals, self.locals)
@@ -278,13 +280,16 @@ class OpenTTY:
 			elif cmd.split()[0] == "insmod": self.build(self.replace(cmd), root=True)
 			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
 			elif cmd.split()[0] == "snapshot": print(library['build'])
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
+			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
+			elif cmd.split()[0] == "connect": self.dialup(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
 
 			else:
+				
 				if cmd.split()[0] in self.aliases: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.py", self.replace(cmd), ispkg=True)
@@ -665,6 +670,17 @@ class OpenTTY:
 			except Exception as traceback: print("venv: bad. download of template failed.")
 		
 		else: raise IndexError("profile.name")
+	def write32u(self, setting="", show=True):
+		if setting:
+			if setting == ".": setting = ""
+			
+			with open(f"{self.root}/CONFIG.SYS", "a") as configsys:
+				configsys.write(f"{setting}\n")
+				
+		else: 
+			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
+			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
+	#
 	# [Asset Manager]
 	def asset(self):
 		root_files = os.listdir(self.root)
@@ -778,6 +794,65 @@ class OpenTTY:
 			return html
 		
 		else: raise IndexError("url")
+	def ping(self, host, timeout=library['timeout']):
+		if host:
+			try:
+				net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+				net_item.settimeout(timeout)
+				
+				start_time = time.time()
+				
+				net_item.connect((host, 80))
+
+				end_time = time.time()
+
+				ping_time_ms = (end_time - start_time) * 1000
+
+				print(f"{host}: ping is {ping_time_ms:.0f} ms")
+
+			except (socket.timeout, ConnectionRefusedError): print(f"{host}: bad. connection failed.")
+			except socket.gaierror: print(f"ping: adress '{host}' is invalid")
+			finally: net_item.close()
+			
+		else: raise IndexError("adress")
+	def dialup(self, target, timeout=library['timeout']):
+		if target:
+			if len(target.split()) < 2: target = f"{target} 80"
+			
+			try:
+				host = target.split()[0]
+				port = int(target.split()[1])
+				
+				net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				net_item.settimeout(timeout * timeout)
+				
+				net_item.connect((host, port))
+				
+				while True:
+					try:
+						command = self.recognize(input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m [~]\033[m ")).strip()
+						
+						if command == "/exit": raise KeyboardInterrupt
+						
+						else: net_item.send(f"{command}\n".encode())
+						
+						try: 
+							spack = net_item.recv(9600).decode()
+							
+							if not spack: raise ConnectionResetError("[Errno 56] Server dont answer your request")
+							
+							
+							print(spack)
+							
+						except (KeyboardInterrupt, EOFError): print()
+						
+					
+					except (KeyboardInterrupt, EOFError): return net_item.close()
+				
+			except Exception as error: traceback.print_exc()
+		
+		else: raise IndexError("ip.adress")
 	#
 	# [Other Utilities]
 	def calendar(self): 
