@@ -283,8 +283,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
 			elif cmd.split()[0] == "connect": self.dialup(self.replace(cmd))
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "root": self.pushdir(self.root)
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
