@@ -1,21 +1,14 @@
 &appname v&version [Mail Inbox]
 
-Title: OpenTTY is now avaliable in PyPI
-Subject: Now you can install it with pip
+Title: Ops! ITS A NEW TIME FOR AN UPDATE
+Subject: A new version of OpenTTY was released
 
-From: (Owner) Mr. Lima [Mon Jul 31 17:48 2023]
+From: (Owner) Mr. Lima [Thu Aug 3 20:19 2023]
 -----------------------------------------------
-
-    It's true... Now users can install 
-OpenTTY using pip: 'pip install opentty' and
-to open it 'python -m opentty' or downloading/
-creating profiles to personalize your experience
-with OpenTTY.
-
-    Dont forget of use 'inbox' to read the
-menssages and update your OpenTTY installed 
-version. If you just download app file use 'sync'
-and for pip users run command 'upgrade' or in
-terminal run 'pip install opentty --upgrade'
-
+    
+    Yes, now OpenTTY is at version 1.0.1, its 
+fix some bugs and add some functions, for more
+informations update and see notes with command
+'patch'.
+    
 > FeTuber4095
