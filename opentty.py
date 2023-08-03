@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #    
-#  Copyright (c) 2023 "Mr. Lima"
+#  Copyright (C) 2023 "Mr. Lima"
 #  
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ from sys import exit as close
 
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
-import shutil, getpass, zipfile, datetime, shlex, traceback
+import shutil, getpass, zipfile, datetime, shlex, traceback, code
 
 library = {
 	# Informations for current installation
@@ -39,7 +39,10 @@ library = {
     "subject": "The Sunset Update",
 	"patch": [
 		"Added file CONFIG.SYS and command REM",
-		"Added Network Utility 'PING' and ''"
+		"Added Network Utility 'PING' and 'CONNECT'",
+		"Added direct call for python 'lambda' and 'raise'",
+		"Better traceback messages and exception handlers",
+		"Command 'BUILD' moved to only 'INSMOD'"
 	],
     
     "developer": "Mr. Lima",
@@ -63,7 +66,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &self", "hostname": "echo &hostname"
+		"whoami": "echo &username", "hostname": "echo &hostname"
 	},
 	
 	# Firewall and root settings
@@ -76,10 +79,7 @@ library = {
 	"max-byte-len": 32, 
 	"ipinfo-token": "",
 	
-	"timeout": 12,
-	
-	"openai-api": "sk-lyUE0nYEgxTbGotkD4IIT3BllbkFJO8YcM8DyzFLvpEsX8bEG",
-	"openai-max-tokens": 150,
+	"timeout": 5,
 
 	"hidden-files-prefix": ".", # Prefix for hidden files
 	"dircolors": {
@@ -109,7 +109,8 @@ library = {
 		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/favicon.ico"},
 		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/ram.py"},
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"}
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
+		"upgrade": {"filename": "upgrade.sh", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Scripts/upgrade.sh"}
 	},
 
 	"docs": {
@@ -123,7 +124,6 @@ library = {
 	"sync": "https://github.com/fetuber4095/OpenTTY/raw/main/server/release.json",
 	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/profiles.py"
 }
-
 
 class OpenTTY:
 	def __init__(self):
@@ -141,6 +141,7 @@ class OpenTTY:
 		
 		self.write32u(show=False)
 		
+		
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__"
 		}
@@ -149,18 +150,19 @@ class OpenTTY:
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080):
 
-		for asset in os.listdir(self.root): 
-			if asset.endswith(".sh"): self.build(f"{self.root}/{asset}", root=True)
-		
 		if library['sh'] not in self.process: 
 			self.ttyname = host
 			self.process[library['sh']] = str(port)
 
-			self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+		self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
 
 
 		while library['sh'] in self.process:
 			if not "python" in self.process: close()
+
+			for asset in os.listdir(self.root): 
+				if asset.endswith(".sh"): self.insmod(f"{self.root}/{asset}", root=True)
+				
 
 			try:
 				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd()} {library['sh-prefix']}\033[m").strip()
@@ -172,7 +174,7 @@ class OpenTTY:
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
 
-		self.__init__(), print("There are stopped jobs.\n")
+		print("There are stopped jobs.\n")
 	def disconnect(self, code=""):
 		if not code: code = 0
 
@@ -187,6 +189,8 @@ class OpenTTY:
 
 		if filename.startswith("/"): filename = f"{self.root}{filename}"
 		if os.name == "nt": filename = filename.replace("/", "\\")
+
+		self.globals['cmd'] = cmd
 
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
@@ -208,14 +212,15 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
 			elif cmd.split()[0] == "del" or cmd.split()[0] == "global": self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.split()[0] == "lambda" or cmd.split()[0] == "raise" or cmd.split()[0] == "assert": self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
 					run = eval(cmd, self.globals, self.locals)
 
 					if run: print(run)
 				except Exception as error: traceback.print_exc()
-
+		
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
@@ -258,10 +263,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
 			elif cmd.split()[0] == "status": self.status()
 			elif cmd.split()[0] == "sync": self.updater()
-			elif cmd.split()[0] == "upgrade": local("pip install opentty --upgrade")
 			elif cmd.split()[0] == "asset": self.asset()
 			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd))
-			elif cmd.split()[0] == "build": self.build(self.replace(cmd))
 			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
 			elif cmd.split()[0] == "gaddr": self.gaddr(self.replace(cmd))
 			elif cmd.split()[0] == "fw": self.fwadress(self.replace(cmd))
@@ -270,36 +273,35 @@ class OpenTTY:
 			elif cmd.split()[0] == "cal": self.calendar()
 			elif cmd.split()[0] == "github": print(library['github.com'])
 			elif cmd.split()[0] == "passwd": print(f"passwd: your password is {library['passwd']}")
-			elif cmd.split()[0] == "whoami": print(getpass.getuser())
-			elif cmd.split()[0] == "hostname": print(hostname())
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd))
 			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
 			elif cmd.split()[0] == "rraw": self.rraw(self.replace(cmd), show=True)
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
-			elif cmd.split()[0] == "insmod": self.build(self.replace(cmd), root=True)
+			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd))
 			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
-			elif cmd.split()[0] == "snapshot": print(library['build'])
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
 			elif cmd.split()[0] == "connect": self.dialup(self.replace(cmd))
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
 
 			else:
-				
 				if cmd.split()[0] in self.aliases: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
+								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.py", self.replace(cmd), ispkg=True)
-				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
-
+				
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
-					elif library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
 					else: print(f"{cmd.split()[0]}: asset not installed.")
-
+					
+				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
+				
 				else: return print(f"{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
 				
 		except (KeyboardInterrupt, EOFError): return self.rmprocess(cmd.split()[0])	
@@ -309,7 +311,7 @@ class OpenTTY:
 		except IsADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
 		except NotADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
-		except IndexError as missing: print(f"{cmd.split()[0]}: missing operand [{missing}]...")
+		except IndexError as missing: return print(f"{cmd.split()[0]}: missing operand [{missing}]...")
 		except PermissionError: return print(f"{cmd.split()[0]}: permission denied")
 
 		
@@ -325,7 +327,7 @@ class OpenTTY:
 			"&ipadress": library['ipadress'], "&subject": library['subject'], "&developer": library['developer'],
 
 			"&system": library['system'], "&root": self.root, "&path": os.getcwd(), "&profile": library['profile'],
-			"&time": time.ctime(), "&self": getpass.getuser(), "&sh": library['sh'],
+			"&time": time.ctime(), "&username": getpass.getuser(), "&sh": library['sh'],
 
 			# Colorama Utilities
 			"&black": "\033[30m", "&red": "\033[31m", "&green": "\033[32m", "&yellow": "\033[33m", 
@@ -534,7 +536,7 @@ class OpenTTY:
 					jsondata = json.load(jsonfile)
 
 					if jsondata:
-						print(f"Key mapper for JSON File: \033[1m[{filename}]\033[m\n")
+						print(f"Key mapper for JSON File: \033[1m[{self.basename(filename)}]\033[m\n")
 						explore_json(jsondata, indent)
 
 			except json.decoder.JSONDecodeError as traceback: print(f"json: file is malformed [{traceback}]")
@@ -696,11 +698,13 @@ class OpenTTY:
 	def get_asset(self, asset):
 		if asset:
 			for resource in asset.split():
+				if resource not in library['resources']: return print(f"get: {resource}: asset not found")
+
 				try: urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), print(f"get: asset '{resource}' installed.")
 				except Exception as traceback: print(f"get: bad. asset installation failed.")
 				
 		else: raise IndexError("asset")
-	def build(self, filename, root=False):
+	def insmod(self, filename, root=False):
 		if filename: 
 			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError
 
@@ -768,7 +772,7 @@ class OpenTTY:
 			if cmdline: return self.wget(f"{cmdline} {self.basename(cmdline)}")
 			else: raise IndexError("url")
 
-		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.replace(cmdline)}: download complete.")
+		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.basename(self.replace(cmdline))}: download complete.")
 		except urllib.error.URLError: return print("wget: the url is inacessible or invalid")
 		except urllib.error.HTTPError: return print("wget: page not found or url is inacessible")
 		except socket.timeout: return print("wget: timeout: server dont answer your request")
@@ -834,6 +838,7 @@ class OpenTTY:
 						command = self.recognize(input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m [~]\033[m ")).strip()
 						
 						if command == "/exit": raise KeyboardInterrupt
+						elif command == "/clear": self.clear()
 						
 						else: net_item.send(f"{command}\n".encode())
 						
