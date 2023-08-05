@@ -1,5 +1,6 @@
 {
-	"08H2": {"version": "?", "patch": "Unknown", "url": ""},
+	"08H3": {"version": "1.1", "patch": "The ROOT Update", "url": ""},
+	"08H2": {"version": "?", "patch": "Unknown", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/build/Archive/opentty-08H3.py"},
 	"08H1": {"version": "1.0.1", "patch": "The Sunset Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.0.1/opentty.py"},
 	"06H6": {"version": "1.0", "patch": "The OpenTTY Upgrade", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.0/opentty.py"}
 }

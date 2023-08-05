@@ -12,11 +12,14 @@ library['debugmode'] = True
 
 library['root'] = f"{hostname()}.forge@root-opentty.py",
 
+library['do-auth'] = False
+library['goto-home'] = True
+
 library['whitelist'].append("opentty.py") 
 library['whitelist'].append("forge.py")
 
 library['head-lines'] = 10
-library['max-byte-len'] = 1024 
+library['max-byte-len'] = 2048 
 # ----------------------------
 
 # User settings
@@ -28,5 +31,5 @@ library['ipinfo-token'] = ""
 if __name__ == "__main__":
     app = OpenTTY() 
 
-    app.connect("/dev/forge.py")
+    app.connect("/dev/forge.py") # Put 'admin=True' in command line if you want start PSH as root
 

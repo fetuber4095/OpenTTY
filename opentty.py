@@ -28,18 +28,22 @@ from random import randint, choice
 from time import sleep as timeout
 from sys import exit as close
 
+from sys import stdin, stdout
+
+
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
-import shutil, getpass, zipfile, datetime, shlex, traceback, code
+import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "?", "build": "08H3",
-    "subject": "Unknown",
+    "version": "1.1", "build": "08H4",
+    "subject": "The ROOT Update",
 	"patch": [
-		"Added generator 'GENN'",
-		"Added direct support for SYS.STDIN and STDOUT"
+		"Added OpenTTY Security System",
+		"Added commands 'SUDO' and 'SU'",
+		"Added file utilitie 'SEARCH' "
 	],
     
     "developer": "Mr. Lima",
@@ -47,6 +51,9 @@ library = {
 	# Development Settings
 	"debugmode": False,
 	"profile": "Fabric",
+	
+	"goto-home": True,
+	"do-auth": False,
     
     # Getting informations about machine
     "hostname": socket.gethostname(),
@@ -56,22 +63,14 @@ library = {
 	"root-dir": os.getcwd(), # Installation path
 	
 	# Terminal settings
-	"sh": "psh", "sh-prefix": "\033[32m\033[1m$ ",
+	"sh": "psh", "sh-prefix": "\033[32m\033[1m$ ", "root-sh-prefix": "\033[31m\033[1m# ",
 	
 	# Aliases for users [client; root]
 	"aliases": {},
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "hostname": "echo &hostname", "type": "stdin.read()",
-
-
-		"?": "echo Oh, you discover a misterius upgrade!",
-		"unknown": "echo It's true! This build doesnt have a version name",
-		"bug": "raise SystemExit", "win95": "echo This is the family for futher release family",
-		"easter-egg": "echo Stuck me, please!", "www.google.com": "echo Dont trust on me!",
-		"ce": "echo Same Windows CE 6.0", "minecraft": "Do you discover that releases code are same of minecraft?",
-		"gang": "echo I dont sell c0cc4in3!!! Good bye! <3"
+		"whoami": "echo &username", "hostname": "echo &hostname", "type": "stdin.read()", "ash": "exec busybox sh"
 	},
 	
 	# Firewall and root settings
@@ -115,7 +114,6 @@ library = {
 		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/ram.py"},
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
-		"upgrade": {"filename": "upgrade.sh", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Scripts/upgrade.sh"}
 	},
 
 	"docs": {
@@ -148,12 +146,16 @@ class OpenTTY:
 		
 		
 		self.globals = {
-			"app": self, "library": library, "__name__": "__main__", "stdin": sys.stdin, "stdout": sys.stdout
+			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout
 		}
 		self.locals = {}
-		
+
 	# OpenTTY - Client Interface [Module API]
-	def connect(self, host, port=8080):
+	def connect(self, host, port=8080, admin=False):
+
+		if library['goto-home']: os.chdir(os.path.expanduser("~"))
+		if library['do-auth']: self.runas("clear")
+
 
 		if library['sh'] not in self.process: 
 			self.ttyname = host
@@ -170,12 +172,12 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd()} {library['sh-prefix']}\033[m").strip()
+				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd()} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
 					
-					self.shell(cmd, mkprocess=True)
+					self.shell(cmd, mkprocess=True, root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
 
@@ -189,8 +191,8 @@ class OpenTTY:
 			print(f"Press return to continue"), input(), close()
 		except (KeyboardInterrupt, EOFError): print(), close()
 	
-	def execfile(self, filename, cmd="", ispkg=False):
-		if self.basename(filename).split()[0] not in library['whitelist'] and not ispkg: raise PermissionError
+	def execfile(self, filename, cmd="", ispkg=False, root=False):
+		if self.basename(filename).split()[0] not in library['whitelist'] and not ispkg and not root: raise PermissionError("Script not in Whitelist. Are you root?")
 
 		if filename.startswith("/"): filename = f"{self.root}{filename}"
 		if os.name == "nt": filename = filename.replace("/", "\\")
@@ -202,14 +204,14 @@ class OpenTTY:
 			except Exception as error: traceback.print_exc()
 	
 	# OpenTTY "Shell"
-	def shell(self, cmd, mkprocess=True):
+	def shell(self, cmd, mkprocess=True, root=False):
 		if mkprocess: self.mkprocess(cmd.split()[0])
 		
 		try:
 			cmd = str(self.recognize(cmd)).strip()
 
 			if cmd.split()[0] == ".":
-				if self.replace(cmd): self.execfile(self.replace(cmd), self.replace(self.replace(cmd)))
+				if self.replace(cmd): self.execfile(self.replace(cmd), self.replace(self.replace(cmd)), root=root)
 			elif cmd.split()[0] == ":":
 				try: exec(self.replace(cmd), self.globals, self.locals)
 				except Exception as error: traceback.print_exc()
@@ -246,7 +248,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "mv": self.move(self.replace(cmd))
 			elif cmd.split()[0] == "cp": self.copy(self.replace(cmd))
 			elif cmd.split()[0] == "gzip": self.gunzip(self.replace(cmd))
-			elif cmd.split()[0] == "install": self.install(self.replace(cmd))
+			elif cmd.split()[0] == "install": self.install(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "cat": self.catfile(self.replace(cmd))
 			elif cmd.split()[0] == "head": self.headfile(self.replace(cmd))
 			elif cmd.split()[0] == "json": self.json_explorer(self.replace(cmd))
@@ -267,24 +269,23 @@ class OpenTTY:
 			elif cmd.split()[0] == "alias": self.alias(self.replace(cmd))
 			elif cmd.split()[0] == "unalias": self.unalias(self.replace(cmd))
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
-			elif cmd.split()[0] == "status": self.status()
 			elif cmd.split()[0] == "sync": self.updater()
 			elif cmd.split()[0] == "asset": self.asset()
-			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd))
+			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
 			elif cmd.split()[0] == "gaddr": self.gaddr(self.replace(cmd))
 			elif cmd.split()[0] == "fw": self.fwadress(self.replace(cmd))
 			elif cmd.split()[0] == "wget": self.wget(self.replace(cmd))
-			elif cmd.split()[0] == "server": self.server(self.replace(cmd))
+			elif cmd.split()[0] == "server": self.server(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "cal": self.calendar()
 			elif cmd.split()[0] == "github": print(library['github.com'])
 			elif cmd.split()[0] == "passwd": print(f"passwd: your password is {library['passwd']}")
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
-			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd))
+			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
 			elif cmd.split()[0] == "rraw": self.rraw(self.replace(cmd), show=True)
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
-			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd))
+			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "build": print(library['build'])
@@ -294,7 +295,10 @@ class OpenTTY:
 			elif cmd.split()[0] == "home": self.pushdir(os.path.expanduser("~"))
 			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd))
 			elif cmd.split()[0] == "sort": self.sort(self.replace(cmd))
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "sudo": self.runas(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "search": self.search(self.replace(cmd))
+			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
+			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
@@ -324,7 +328,7 @@ class OpenTTY:
 		except NotADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
 		except IndexError as missing: return print(f"{cmd.split()[0]}: missing operand [{missing}]...")
-		except PermissionError: return print(f"{cmd.split()[0]}: permission denied")
+		except PermissionError: return print(f"{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 
 		
 		return True, self.rmprocess(cmd)
@@ -367,7 +371,7 @@ class OpenTTY:
 	def mkprocess(self, pname): self.process[pname] = str(randint(1000, 9999)) # Create process
 	def rmprocess(self, pname): # Kill process by name
 		try: 
-			if pname in ['sh', 'python']: return 
+			if pname in ['psh', 'python']: return 
 
 			del self.process[pname.split()[0]]
 		except Exception as error: return
@@ -452,13 +456,14 @@ class OpenTTY:
 		
 		with zipfile.ZipFile(shlex.split(cmdline)[0], 'r') as zf:
 			try: zf.extractall(shlex.split(cmdline)[1])
-			except Exception as traceback: print(traceback)
+			except Exception as error: traceback.print_exc()
 	def touch(self, filename): # Touch a file reseting it modify date and the content 
 		if filename: open(filename, "wt+").close()
 		else: raise IndexError("filename")
 	def tree(self, directory, indent=""): # Show directory tree [Folder, subfolders and files] 
 		if directory:
-			print(indent + os.path.basename(directory))
+			print(indent + f"\033[34m\033[1m{os.path.basename(directory)}\033[m" if os.path.isdir(directory) else indent + os.path.basename(directory)) 
+			
 			if os.path.isdir(directory):
 				indent += "│   "
 				files = os.listdir(directory)
@@ -500,12 +505,25 @@ class OpenTTY:
 							zipf.write(file_path, os.path.relpath(file_path, source_path))
 
 		else: raise IndexError("filename << source")
-	def install(self, filename): # Install file and enable it as OpenTTY local asset 
+	def install(self, filename, root=False): # Install file and enable it as OpenTTY local asset 
 		if filename: 
-			if self.basename(filename) in library['whitelist']: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
-			else: raise PermissionError
+			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError("File not in Whitelist. Are you root?")
+			else: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
 		
 		raise IndexError("filename")
+	def search(self, target_name, show=True): 
+		if target_name:
+
+			found_files = []
+
+			for root, _, files in os.walk(os.getcwd()):
+				for filename in files:
+					if filename in target_name:
+						found_files.append(os.path.join(root, filename))
+
+			if show: print('\n'.join(found_files) if found_files else f"search: no files found.")
+
+			return found_files
 	#
 	# [Text Utilities]
 	def catfile(self, filename): # Show file content 
@@ -592,7 +610,7 @@ class OpenTTY:
 				print(f"   {i} - {self.basename(shlex.split(filenames)[0])}: {line1.strip()}")
 				print(f"   {i} - {self.basename(shlex.split(filenames)[1])}: {line2.strip()}")
 				print()
-	def sort(self, words, show=True):
+	def sort(self, words, show=True): # Avalue a phrase and choice a random word 
 		if words:
 			result = random.choice(words.split())
 
@@ -654,47 +672,18 @@ class OpenTTY:
 	def diskfree(self, cmdline=""): # Show disk usage 
 		if os.name == "posix": os.system(f"df {cmdline}")
 		elif os.name == "nt": os.system("wmic logicaldisk get deviceid,size,freespace")
-	def status(self): # Verify if have new releases for OpenTTY
-		try: package = json.load(urllib.request.urlopen(library['sync']))
-		except Exception as traceback: return print("status: failed to connect with github.")
-
-		if package['version'] != library['version']: return print(f"status: a new version of {self.appname} was released.")
-		elif package['build'] != library['build']: return print(f"status: a new snapshot of {self.appname} was released.")
-		else: print(f"status: {self.appname} is up-to-date.")
-	def updater(self): # Update OpenTTY 
-		def status():
-			try: package = json.load(urllib.request.urlopen(library['sync']))
-			except Exception as traceback: return None
-
-			if package['version'] != library['version'] or package['build'] != library['build']: return True 
-			
-			return False
-		
-		releases = status()
-
-		if releases:
-			try: 
-				self.pushdir(self.root)
-
-				print("Detected a new released version. downloading...")
-				urllib.request.urlretrieve(library['opentty.py'], "opentty.py")
-
-				self.pushdir(self.puppydir)
-
-				return print(f"{self.appname} was updated. Reload to apply charges.")
-
-			except Exception as traceback: return print("sync: failed to connect with github.")
-
-		elif releases is None: print("sync: failded to connect with github.")
-
-		else: print(f"sync: {self.appname} is up-to-date.")	
-	def venv(self, venvname): # Create profiles from network template 
+	def updater(self, root=False): # Update OpenTTY
+		if root: local("pip install opentty --upgrade")
+		else: raise PermissionError(f"Unable to update {self.appname}. Are you root?")
+	def venv(self, venvname, root=False): # Create profiles from network template 
 		if venvname:
+			if not root: raise PermissionError("Unable to create profiles. Are you root?")
+
 			try: urllib.request.urlretrieve(library['venv'], f"{self.root}/{venvname}.py")
 			except Exception as traceback: print("venv: bad. download of template failed.")
 		
 		else: raise IndexError("profile.name")
-	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager
+	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager 
 		if setting:
 			if setting == ".": setting = ""
 			
@@ -705,20 +694,37 @@ class OpenTTY:
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
 	#
+	# [Root]
+	def runas(self, cmdline, root=False):
+		if cmdline:
+			if root: return self.shell(cmdline, mkprocess=True, root=True)
+
+
+			passwd = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
+
+			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, root=True)
+			else: raise PermissionError("wrong password.")
+	#
 	# [Asset Manager]
 	def asset(self): # Show installed assets 
 		root_files = os.listdir(self.root)
+
 		assets = []
 
 		for file in root_files:
 			if file.startswith(library['hidden-files-prefix']): continue
 			elif os.path.isfile(f"{self.root}/{file}"): assets.append(file)
 
-		print(f"{len(assets)} assets installed. listing:\n")
+		if assets:
+			print(f"{len(assets)} assets installed. listing:\n")
 
-		for asset in assets: print(f"    {asset}")
-	def get_asset(self, asset): # Install assets
+			for asset in assets: print(f"    {asset}")
+
+		else: print("asset: no assets installed.")
+	def get_asset(self, asset, root=False): # Install assets
 		if asset:
+			if not root: raise PermissionError("Unable write in profile dir. Are you root?")
+
 			for resource in asset.split():
 				if resource not in library['resources']: return print(f"get: {resource}: asset not found")
 
@@ -728,7 +734,7 @@ class OpenTTY:
 		else: raise IndexError("asset")
 	def insmod(self, filename, root=False): # Load PSH Scripts 
 		if filename: 
-			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError
+			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError("Script not in Whitelist. Are you root?")
 
 			with open(filename, "r") as script:
 				script = script.read().splitlines()
@@ -773,7 +779,7 @@ class OpenTTY:
 			except (UnicodeError, OverflowError): print("gaddr: label is empty or hostname is too long")
 
 		else: print(library['ipadress'])
-	def fwadress(self, ipadress): # Get informations about IP Adress (like hostname, time zone, country and others)
+	def fwadress(self, ipadress): # Get informations about IP Adress (like hostname, time zone, country and others) 
 		def get_ip_info(ip):
 			try:
 				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
@@ -799,8 +805,10 @@ class OpenTTY:
 		except urllib.error.HTTPError: return print("wget: page not found or url is inacessible")
 		except socket.timeout: return print("wget: timeout: server dont answer your request")
 		except FileNotFoundError: return print("wget: path for save file was not found")
-	def server(self, port): # Open a localhost server in current working directory 
+	def server(self, port, root=False): # Open a localhost server in current working directory 
 		if port:
+			if not root: raise PermissionError("Unable to start server. Are you root?")
+
 			try:
 				with socketserver.TCPServer(("", int(port)), http.server.SimpleHTTPRequestHandler) as httpd:
 					print(f"Server openned at http://localhost:{port}...\n")
@@ -809,7 +817,7 @@ class OpenTTY:
 			except (KeyboardInterrupt, EOFError): return print("\nServer stopped.")
 			except ValueError: return print(f"server: invalid port '{port}'")
 
-		else: self.server(randint(1000, 9999))
+		else: self.server(randint(2048, 4096), root=root)
 	def rraw(self, url, show=False, report="rraw", tbmsg="bad. dialog with website failed."): # See a website url 
 		if url:
 			try: html = urllib.request.urlopen(url).read().decode()
@@ -888,17 +896,17 @@ class OpenTTY:
 		calendar.setfirstweekday(calendar.SUNDAY), print(calendar.month(now.year, now.month), end="")
 	def sleep(self, time): # Delay any seconds 
 		try: timeout(int(time))
-		except ValueError: print(f"sleep: invalid time interval '{time}'" if time else f"sleep: missing operand [delay]...")
-	def sequence(self, limit): # Show numbers from 1 to argument 'LIMIT' 
+		except ValueError: print(f"sleep: invalid time interval '{time}'\n" if time else f"sleep: missing operand [delay]...\n"), traceback.print_exc()
+	def sequence(self, limit): # Show numbers from 1 to argument 'LIMIT'
 		if limit:
 			try: cache = int(limit) + 1
-			except: print(f"seq: range need be a int number")
+			except ValueError: print(f"seq: range need be a int number\n"), traceback.print_exc()
 			else:
 				for i in range(cache):
 					if i != 0: print(i)
 	#
 	# [Mistical Utilities]
-	def gen_numner(self, limit, show=True): # Generate a random number from 0 until argument 'LIMIT'
+	def gen_numner(self, limit, show=True): # Generate a random number from 0 until argument 'LIMIT' 
 		if limit:
 			try:
 				result = random.randint(0, int(limit))
@@ -907,12 +915,13 @@ class OpenTTY:
 
 				return limit
 
-			except Exception as error: traceback.print_exc()
+			except ValueError: print(f"genn: invalid range '{limit}'\n"), traceback.print_exc()
 
 		else: raise IndexError("max.number")
-	
+
+
 
 if __name__ == "__main__":
 	app = OpenTTY()
-	
+
 	app.connect("localhost")
