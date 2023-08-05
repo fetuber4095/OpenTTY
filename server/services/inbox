@@ -1,16 +1,14 @@
 &appname v&version [Mail Inbox]
 
-Title: Today a new Update will come
-Subject: ITS AN UPDATE NOTICE!!!
+Title: ITS A FATAL ERRROR!!!!!!!
+Subject: This is a important message
 
 From: (Owner) Mr. Lima [Thu Aug 6 0:32 2023]
 -----------------------------------------------
     
-    I'm developing a new release with a 
-permission plugin that better security and user
-control of OpenTTY actions and invaders that 
-wants to implement malwares at your device. It
-add command 'SUDO' that run applications with
-OpenTTY superuser permission.
+    To update OpenTTY from 1.1.1 you need use
+'pip install --upgrade opentty' cause have a 
+bug in permission plugin that is blocking the
+update system. 
     
 > FeTuber4095
