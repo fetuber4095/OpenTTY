@@ -77,8 +77,6 @@ tty
 cd /
 popd
 
-status
-
 alias TESTING echo ITS TRUE
 
 alias TESTING
@@ -100,13 +98,8 @@ seq 200000
 github
 repo
 
-snapshot
 inbox
 repo
-update favicon ram
-
-name
-envname
 
 date
 version

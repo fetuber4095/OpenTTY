@@ -1,55 +1,28 @@
-OpenTTY 1.1 "The ROOT Update"
+OpenTTY 1.1.1 "The ROOT Update"
 
-	In this version OpenTTY move all installation
-support for Pypi and was implemented Permission Plugin
-at OpenTTY PSH Client, it turn better whitelist control
-and add command 'SUDO' that works like *nix systems, it
-run utilities with superuser permission.
+	In this release Mr. Lima had fixed many
+bugs with permission plugin like sync in 1.1
+doesnt works 'cause PSH didnt sent information
+for app that it was running with superuser 
+permission. 
 
-1. Running scripts with Whitelist and ROOT
-	
-	Everybody knows that to run and build scripts in
-OpenTTY it need be in Whitelist, but now you can use
-'SUDO' to run, build and install it without put this
-file in whitelist.
+1. Fixed SYNC Permission denied.
 
-	Example:
+	In 1.1 command sync was blocked for root
+only, but PSH didnt sent the superuser config
+for applet and it cant be runned. To upgrade
+from 1.1 to 1.1.1 run command:
 
-		If you try run a python script in OpenTTY env:
+	'pip install --upgrade opentty'
 
-		After:
-			$ . script.py
-			.: permission denied.
+	It will update your local version of opentty
+to PyPi latest release. Dont remember to update,
+it become your experience with opentty better and
+bring more security for users. 
 
-		Now: 
-			$ sudo . script.py
-			< script is running >
+2. Now command not found error stop script execution
 
-	It help who have a most commum filename as 'file.py' or
-'test.py' and cant put this file at whitelist, but it will
-run the script with superuser permission what can be bad if
-you dont trust totally in developer(s).
-
-2. Commands that now requires ROOT Permissions
-	
-	To control more uses of applications, now the commands:
-
-	- INSTALL "Install third assets"
-	- SYNC    "Update OpenTTY local installation"
-	- VENV    "Create profiles"
-	- GET     "Install assets from mirrors"
-	- INSMOD  "Build a Shell Script"
-	- SERVER  "Open a localhost server"
-
-	It add more security for machine admins blocking invaders
-actions as use 'SERVER' to acess your files by other machine 
-and 'INSTALL' to modify and add assets that make bad things at
-your device.
- 
-3. The OpenTTY Session authenticator
-
-	Now you can enable the security authenticator, it can be
-enabled in profile settings charging "library['do-auth']" for
-True and the next time that you try open PSH will require password
-and if anyone insert password incorrectly it will be ended session
-with exception PermissionError
+	Command continue excuting after a unknown 
+command report is a "bug" in code, it was forgotted
+by Mr. Lima since 1.0rc4 the first official release
+at PyPi. 

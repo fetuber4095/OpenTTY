@@ -38,12 +38,12 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.1", "build": "08H4",
+    "version": "1.1.1", "build": "08H4",
     "subject": "The ROOT Update",
 	"patch": [
-		"Added OpenTTY Security System",
-		"Added commands 'SUDO' and 'SU'",
-		"Added file utilitie 'SEARCH' "
+		"Added command 'cl0' to clear local values",
+		"Fixed: PermissionError. when try use SYNC",
+		"Fixed: Unknown command, but script still running"
 	],
     
     "developer": "Mr. Lima",
@@ -204,7 +204,7 @@ class OpenTTY:
 			except Exception as error: traceback.print_exc()
 	
 	# OpenTTY "Shell"
-	def shell(self, cmd, mkprocess=True, root=False):
+	def shell(self, cmd, mkprocess=True, report="", root=False):
 		if mkprocess: self.mkprocess(cmd.split()[0])
 		
 		try:
@@ -220,7 +220,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
 			elif cmd.split()[0] == "del" or cmd.split()[0] == "global": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.split()[0] == "lambda" or cmd.split()[0] == "raise" or cmd.split()[0] == "assert": self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
@@ -269,7 +269,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "alias": self.alias(self.replace(cmd))
 			elif cmd.split()[0] == "unalias": self.unalias(self.replace(cmd))
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
-			elif cmd.split()[0] == "sync": self.updater()
+			elif cmd.split()[0] == "sync": self.updater(root=root)
 			elif cmd.split()[0] == "asset": self.asset()
 			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
@@ -299,8 +299,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "search": self.search(self.replace(cmd))
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "cl0": self.locals = {}
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
@@ -313,22 +312,23 @@ class OpenTTY:
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.py", self.replace(cmd), ispkg=True)
+				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}/{cmd}")
 					
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
-					else: print(f"{cmd.split()[0]}: asset not installed.")
+					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
 			
-				else: return print(f"{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
+				else: return print(f"{report}{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
 				
 		except (KeyboardInterrupt, EOFError): return self.rmprocess(cmd.split()[0])	
 
-		except FileNotFoundError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: file not found")
-		except FileExistsError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: file with this name already exists")
-		except IsADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
-		except NotADirectoryError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
-		except UnicodeDecodeError: return print(f"{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
-		except IndexError as missing: return print(f"{cmd.split()[0]}: missing operand [{missing}]...")
-		except PermissionError: return print(f"{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
+		except FileNotFoundError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: file not found")
+		except FileExistsError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: file with this name already exists")
+		except IsADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
+		except NotADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
+		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
+		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]...")
+		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 
 		
 		return True, self.rmprocess(cmd)
@@ -511,17 +511,17 @@ class OpenTTY:
 			else: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
 		
 		raise IndexError("filename")
-	def search(self, target_name, show=True): 
+	def search(self, target_name, show=True): # Search files in current directory tree
 		if target_name:
 
 			found_files = []
 
 			for root, _, files in os.walk(os.getcwd()):
 				for filename in files:
-					if filename in target_name:
+					if target_name in filename:
 						found_files.append(os.path.join(root, filename))
 
-			if show: print('\n'.join(found_files) if found_files else f"search: no files found.")
+			if show: print('\n'.join(found_files) if found_files else f"search: {target_name}: no files found.")
 
 			return found_files
 	#
@@ -680,7 +680,7 @@ class OpenTTY:
 			if not root: raise PermissionError("Unable to create profiles. Are you root?")
 
 			try: urllib.request.urlretrieve(library['venv'], f"{self.root}/{venvname}.py")
-			except Exception as traceback: print("venv: bad. download of template failed.")
+			except Exception as error: print("venv: bad. download of template failed.\n"), traceback.print_exc()
 		
 		else: raise IndexError("profile.name")
 	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager 
@@ -702,7 +702,7 @@ class OpenTTY:
 
 			passwd = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
 
-			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, root=True)
+			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
 			else: raise PermissionError("wrong password.")
 	#
 	# [Asset Manager]
@@ -760,12 +760,12 @@ class OpenTTY:
 
 			for cmd in self.functions[function]:
 				if cmd:
-					if cmd.startswith("#"): run = True
-					else: run = self.shell(cmd, mkprocess=True)
+					if cmd.startswith("#"): run = (True, True)
+					else: run = self.shell(cmd, mkprocess=True, report=f"{function}: ")
 
-					if not run: break
+					if not run or not True in run: return 
 
-			return function
+			return
 
 		if function: raise NameError("[InternalError] Function not found")
 	#

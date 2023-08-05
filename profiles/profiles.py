@@ -33,8 +33,9 @@ library['resources']['RESOURCE-NAME'] = { # Setup your assets
 }
 
 
-if __name__ == "__main__":
-    app = OpenTTY() 
+app = OpenTTY() # Start OpenTTY Method instance
 
+if __name__ == "__main__":
+    
     app.connect("NAME-OF-SESSION", port=8080) # Start PSH session [PORT is PID of psh at OpenTTY Envirronment]
 
