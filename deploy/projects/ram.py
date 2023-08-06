@@ -6,6 +6,11 @@
 #  Copyright 2023 Felipe Souza <lubuntu@lubuntu>
 #  
 
+
+
+global subprocess
+global os, time
+
 import subprocess
 import os, time
 
