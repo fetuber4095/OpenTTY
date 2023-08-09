@@ -1,6 +1,6 @@
 {
 	"08H5": {"version": "1.2rc", "patch": "The Netman Upgrade", "url": ""},
-	"08H4": {"version": "1.1.1", "patch": "The ROOT Update II", "url": ""},
+	"08H4": {"version": "1.1.1", "patch": "The ROOT Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.1.1/opentty.py"},
 	"08H3": {"version": "1.1", "patch": "The ROOT Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.1/opentty.py"},
 	"08H2": {"version": "?", "patch": "Unknown", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/build/Archive/opentty-08H3.py"},
 	"08H1": {"version": "1.0.1", "patch": "The Sunset Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.0.1/opentty.py"},

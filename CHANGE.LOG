@@ -1,28 +1,27 @@
-OpenTTY 1.1.1 "The ROOT Update"
+OpenTTY 1.2rc "The Netman Upgrade"
 
-	In this release Mr. Lima had fixed many
-bugs with permission plugin like sync in 1.1
-doesnt works 'cause PSH didnt sent information
-for app that it was running with superuser 
-permission. 
+	In this release Mr. Lima test new network
+envirronment for OpenTTY, it add same methods
+to know app behavior.
 
-1. Fixed SYNC Permission denied.
 
-	In 1.1 command sync was blocked for root
-only, but PSH didnt sent the superuser config
-for applet and it cant be runned. To upgrade
-from 1.1 to 1.1.1 run command:
+1. [NETMAN] Direct object for SOCKET 
 
-	'pip install --upgrade opentty'
+	Now users can acess a socket object with
+command nm, it is setup with AF_INET and method
+SOCK_STREAM for default. With this module is
+possible create connections and bind socket
+servers.
 
-	It will update your local version of opentty
-to PyPi latest release. Dont remember to update,
-it become your experience with opentty better and
-bring more security for users. 
+2. [NETMAN] Added IP Generator
 
-2. Now command not found error stop script execution
+	In this build Mr. Lima add GENIP, it
+generate random ip adress for test netman
+generic systems. IS IMPORTANT SAY THAT THIS
+TOOL IS ONLY FOR REVIEW NETMAN UTILITIES! THE
+DEVELOPMENT TEAM IS NOT RESPONSABLE BY BAD
+USE OF THIS APP.
 
-	Command continue excuting after a unknown 
-command report is a "bug" in code, it was forgotted
-by Mr. Lima since 1.0rc4 the first official release
-at PyPi. 
+3. Added command RSS to avalue a RSS Feed
+4. Added support for python WITH extructure
+5. Added tool 'NETSTAT' to verify if you are connected

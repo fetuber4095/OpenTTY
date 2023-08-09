@@ -44,7 +44,8 @@ library = {
 	"patch": [
 		"Added plugin NETMAN",
 		"Added direct api for socket-object",
-		"Netman moved command 'RRAW' to 'CURL'"
+		"Added utitlity GENIP to netman test",
+		"Netman moved command 'RRAW' to 'CURL'",
 	],
     
     "developer": "Mr. Lima",
@@ -311,7 +312,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
 			elif cmd.split()[0] == "rss": self.rss_review(self.replace(cmd))
 			elif cmd.split()[0] == "genip": print(self.gen_adress())
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "netstat": print(self.netstat())
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
@@ -939,8 +940,12 @@ class OpenTTY:
 			except Exception as error: traceback.print_exc()
 
 		else: raise IndexError("url")
-	
-	#
+	def netstat(self, test_url="https://www.google.com", truecode="Online.", falsecode="Offline."): # Verify network status
+		try: urllib.request.urlopen(test_url)
+		except Exception as error: return falsecode
+
+		return truecode	
+
 	# [Other Utilities]
 	def calendar(self): # Show calendar for this month 
 		now = datetime.datetime.now()
