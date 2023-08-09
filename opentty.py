@@ -30,6 +30,7 @@ from sys import exit as close
 
 from sys import stdin, stdout
 
+import xml.etree.ElementTree as ET
 
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
@@ -38,12 +39,12 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.1.1", "build": "08H4",
-    "subject": "The ROOT Update",
+    "version": "1.2rc", "build": "08H5",
+    "subject": "The Netman Upgrade",
 	"patch": [
-		"Added command 'cl0' to clear local values",
-		"Fixed: PermissionError. when try use SYNC",
-		"Fixed: Unknown command, but script still running"
+		"Added plugin NETMAN",
+		"Added direct api for socket-object",
+		"Netman moved command 'RRAW' to 'CURL'"
 	],
     
     "developer": "Mr. Lima",
@@ -70,7 +71,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "hostname": "echo &hostname", "type": "stdin.read()", "ash": "exec busybox sh"
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "exec busybox sh"
 	},
 	
 	# Firewall and root settings
@@ -114,6 +115,7 @@ library = {
 		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/ram.py"},
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
+		"lagg": {"filename": "lagg.exe", "url": "https://download2279.mediafire.com/b0k3fgqwlrig84VkX6IEkSq7VWmvzSMDw6nTUjA0JeYNRwtxbslkEDVYQjG8R_lrgSWVhieGmdnr4JtSh19gsGczwG-kGtxgPF2BwHupTU5aQOYm_bGSGwHso5fQXRRS7TSBpw5KsT56Q-TWLuKLRGk46SADBt1YaGqmJKY2xbNVuWua/530b6jocges4x4i/ReduceMemory.exe"}
 	},
 
 	"docs": {
@@ -146,9 +148,14 @@ class OpenTTY:
 		
 		
 		self.globals = {
-			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout
+			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
+			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		}
 		self.locals = {}
+		
+	def __enter__(self): return self
+	def __exit__(self, exc_type, exc_value, traceback): return 
+
 
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
@@ -220,7 +227,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
 			elif cmd.split()[0] == "del" or cmd.split()[0] == "global": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.split()[0] == "lambda" or cmd.split()[0] == "raise" or cmd.split()[0] == "assert": self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
@@ -283,7 +290,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
-			elif cmd.split()[0] == "rraw": self.rraw(self.replace(cmd), show=True)
+			elif cmd.split()[0] == "curl": self.curl(self.replace(cmd), show=True)
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
@@ -300,6 +307,15 @@ class OpenTTY:
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
 			elif cmd.split()[0] == "cl0": self.locals = {}
+			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd))
+			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
+			elif cmd.split()[0] == "rss": self.rss_review(self.replace(cmd))
+			elif cmd.split()[0] == "genip": print(self.gen_adress())
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
@@ -312,7 +328,7 @@ class OpenTTY:
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.py", self.replace(cmd), ispkg=True)
-				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}/{cmd}")
+				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}/{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
 					
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
@@ -752,10 +768,10 @@ class OpenTTY:
 
 			self.functions[function.replace(" ", ".")] = commands
 			print()
-
+		
 		else: raise IndexError("method.name")
-
-	def callmethod(self, function): # Call a function
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+	def callmethod(self, function): # Call a function 
 		if function in self.functions:
 
 			for cmd in self.functions[function]:
@@ -773,17 +789,14 @@ class OpenTTY:
 	def gaddr(self, hostname): # Get IP Adress of a machine with it name 
 		if hostname:
 			try: print(socket.gethostbyname(hostname))
-			except socket.gaierror: print(f"gaddr: {hostname}: this adress couldn't be found on the network")
-			except socket.timeout: print(f"gaddr: timeout: {hostname} didn't respond to your request")
-			except ConnectionRefusedError: print(f"gaddr: {cmdline} refused your request")
-			except (UnicodeError, OverflowError): print("gaddr: label is empty or hostname is too long")
+			except Exception as error: traceback.print_exc()
 
 		else: print(library['ipadress'])
 	def fwadress(self, ipadress): # Get informations about IP Adress (like hostname, time zone, country and others) 
 		def get_ip_info(ip):
 			try:
 				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
-			except urllib.error.URLError as e: return print(f"fw: failed to dialog with {ipadress}.")
+			except Exception as e: return print(f"fw: failed to dialog with {ipadress}.\n"), traceback.print_exc()
 
 		if ipadress != "":
 			try:
@@ -801,10 +814,7 @@ class OpenTTY:
 			else: raise IndexError("url")
 
 		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.basename(self.replace(cmdline))}: download complete.")
-		except urllib.error.URLError: return print("wget: the url is inacessible or invalid")
-		except urllib.error.HTTPError: return print("wget: page not found or url is inacessible")
-		except socket.timeout: return print("wget: timeout: server dont answer your request")
-		except FileNotFoundError: return print("wget: path for save file was not found")
+		except Exception as error: traceback.print_exc()
 	def server(self, port, root=False): # Open a localhost server in current working directory 
 		if port:
 			if not root: raise PermissionError("Unable to start server. Are you root?")
@@ -818,10 +828,10 @@ class OpenTTY:
 			except ValueError: return print(f"server: invalid port '{port}'")
 
 		else: self.server(randint(2048, 4096), root=root)
-	def rraw(self, url, show=False, report="rraw", tbmsg="bad. dialog with website failed."): # See a website url 
+	def curl(self, url, show=False): # See a website html 
 		if url:
 			try: html = urllib.request.urlopen(url).read().decode()
-			except Exception as traceback: return print(f"{report}: {tbmsg}")
+			except Exception as error: return traceback.print_exc()
 
 			if show: print(self.recognize(html))
 			
@@ -846,7 +856,7 @@ class OpenTTY:
 				print(f"{host}: ping is {ping_time_ms:.0f} ms")
 
 			except (socket.timeout, ConnectionRefusedError): print(f"{host}: bad. connection failed.")
-			except socket.gaierror: print(f"ping: adress '{host}' is invalid")
+			except socket.gaierror: traceback.print_exc()
 			finally: net_item.close()
 			
 		else: raise IndexError("adress")
@@ -865,10 +875,11 @@ class OpenTTY:
 				
 				while True:
 					try:
-						command = self.recognize(input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m [~]\033[m ")).strip()
+						command = self.recognize(input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m $\033[m ")).strip()
 						
 						if command == "/exit": raise KeyboardInterrupt
 						elif command == "/clear": self.clear()
+						elif command == "/ping": self.ping(host)
 						
 						else: net_item.send(f"{command}\n".encode())
 						
@@ -888,6 +899,47 @@ class OpenTTY:
 			except Exception as error: traceback.print_exc()
 		
 		else: raise IndexError("ip.adress")
+	def ifconfig(self, target=hostname()): # Get informations about socket objects of a host
+		if target:
+			print("Informations for Network Adapters: \n")
+
+			for conn in socket.getaddrinfo(target, 80, family=0, type=0, proto=0, flags=0):
+				_, proto, _, _, info = conn
+
+				print(info[0])
+				print(proto)
+				print('-' * 22, end="\n\n")
+
+		else: self.ifconfig(hostname())
+	def hostname(self, adress=""): # Get hostname by IP Adress of a host 
+		if adress:
+			try:
+				hostname, _, _ = socket.gethostbyaddr(adress)
+				print(hostname)
+
+			except Exception as error: traceback.print_exc()
+		else: print(library['hostname'])
+	def rss_review(self, url): # OpenTTY RSS Explorer 
+		if url:
+			try:
+				response = urllib.request.urlopen(url)
+				xml_data = response.read()
+
+				root = ET.fromstring(xml_data)
+
+				for item in root.iter('item'):
+					title = item.find('title').text
+					link = item.find('link').text
+					pub_date = item.find('pubDate').text
+
+				print(f"Title: {title}")
+				print(f"Link: {link}")
+				print(f"Published Date: {pub_date}\n")
+
+			except Exception as error: traceback.print_exc()
+
+		else: raise IndexError("url")
+	
 	#
 	# [Other Utilities]
 	def calendar(self): # Show calendar for this month 
@@ -918,10 +970,16 @@ class OpenTTY:
 			except ValueError: print(f"genn: invalid range '{limit}'\n"), traceback.print_exc()
 
 		else: raise IndexError("max.number")
+	def gen_adress(self): # Generate random IP Adress 
+		group1 = f"1{randint(4, 9)}{randint(2, 5)}"
+		group2 = f"{randint(1, 2)}{randint(2, 9)}{randint(1, 9)}"
+		group3 = random.choice(['1', '15', '132', '181'])
+		group4 = f"{randint(1, 64)}"
 
+		return f"{group1}.{group2}.{group3}.{group4}"
 
 
 if __name__ == "__main__":
-	app = OpenTTY()
+	with OpenTTY() as app:
 
-	app.connect("localhost")
+		app.connect("localhost", admin=False)
