@@ -30,8 +30,6 @@ from sys import exit as close
 
 from sys import stdin, stdout
 
-import xml.etree.ElementTree as ET
-
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
 import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
@@ -39,13 +37,11 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.2rc", "build": "08H5",
+    "version": "1.2", "build": "08H6",
     "subject": "The Netman Upgrade",
 	"patch": [
-		"Added plugin NETMAN",
-		"Added direct api for socket-object",
-		"Added utitlity GENIP to netman test",
-		"Netman moved command 'RRAW' to 'CURL'",
+		"OpenTTY 95",
+		"Added "
 	],
     
     "developer": "Mr. Lima",
@@ -72,7 +68,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "exec busybox sh"
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh",
 	},
 	
 	# Firewall and root settings
@@ -91,7 +87,12 @@ library = {
 	"dircolors": {
 		".py": "\033[32m", ".sh": "\033[32m", ".cmd": "\033[32m", ".bat": "\033[32m", ".json": "\033[36m", ".exe": "\033[31m", 
 		".com": "\033[31m", ".dll": "\033[31m", ".jar": "\033[31m", ".zip": "\033[36m", ".tar": "\033[36m", ".tar.gz": "\033[36m",
-		".tar.xz": "\033[36m", ".7z": "\033[36m", ".rar": "\033[36m", ".bin": "\033[36m", "install": "\033[36m"
+		".tar.xz": "\033[36m", ".7z": "\033[36m", ".rar": "\033[36m", ".bin": "\033[36m"
+	},
+
+	# Virtual disks info
+	"fstab": {
+
 	},
 
 	# Systems commands
@@ -99,15 +100,15 @@ library = {
 	# Unix-Like commands support
 	"posix-commands": [
 		"free", "nano", "du", "tail", "sort", "wc", "grep", "find", "cut", "sed", 
-		"tee", "python", "pip", "tar", "sh", "git"
+		"tee", "python", "pip", "tar", "sh", "git", "shutdown"
 	],
 
 	# Windows commands support
 	"nt-commands": [
 		"dir", "del", "ren", "tasklist", "taskkill", "ipconfig", "netsh", "wmic", "start",
 		"systeminfo", "format", "sfc", "powercfg", "diskpart", "regedit", "python", "pip",
-		"explorer", "control", "calc", "notepad", "msconfig", "chkdsk", "cmd", "title", "git"
-
+		"explorer", "control", "calc", "notepad", "msconfig", "chkdsk", "cmd", "title", "git",
+		"shutdown"
 	],
 
 	# Resources Mirrors
@@ -116,9 +117,9 @@ library = {
 		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/ram.py"},
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
-		"lagg": {"filename": "lagg.exe", "url": "https://download2279.mediafire.com/b0k3fgqwlrig84VkX6IEkSq7VWmvzSMDw6nTUjA0JeYNRwtxbslkEDVYQjG8R_lrgSWVhieGmdnr4JtSh19gsGczwG-kGtxgPF2BwHupTU5aQOYm_bGSGwHso5fQXRRS7TSBpw5KsT56Q-TWLuKLRGk46SADBt1YaGqmJKY2xbNVuWua/530b6jocges4x4i/ReduceMemory.exe"}
+		"lagg": {"filename": "lagg.exe", "url": "https://download2279.mediafire.com/b0k3fgqwlrig84VkX6IEkSq7VWmvzSMDw6nTUjA0JeYNRwtxbslkEDVYQjG8R_lrgSWVhieGmdnr4JtSh19gsGczwG-kGtxgPF2BwHupTU5aQOYm_bGSGwHso5fQXRRS7TSBpw5KsT56Q-TWLuKLRGk46SADBt1YaGqmJKY2xbNVuWua/530b6jocges4x4i/ReduceMemory.exe"},
+		"busybox": {"filename": "busybox.exe", "url": ""}
 	},
-
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
 		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/server/services/inbox"
@@ -230,6 +231,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "lambda" or cmd.split()[0] == "raise" or cmd.split()[0] == "assert": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
+			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
 					run = eval(cmd, self.globals, self.locals)
@@ -310,12 +312,10 @@ class OpenTTY:
 			elif cmd.split()[0] == "cl0": self.locals = {}
 			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd))
 			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
-			elif cmd.split()[0] == "rss": self.rss_review(self.replace(cmd))
 			elif cmd.split()[0] == "genip": print(self.gen_adress())
 			elif cmd.split()[0] == "netstat": print(self.netstat())
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
@@ -328,7 +328,8 @@ class OpenTTY:
 				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 								
-				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.py", self.replace(cmd), ispkg=True)
+				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
+				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
 				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}/{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
 					
 				elif cmd.split()[0] in library['resources']:
@@ -710,6 +711,7 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
+	
 	#
 	# [Root]
 	def runas(self, cmdline, root=False):
@@ -721,6 +723,19 @@ class OpenTTY:
 
 			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
 			else: raise PermissionError("wrong password.")
+	def chroot(self, path, root=False):
+		if path:
+			if not root: raise PermissionError("Unable to charge profile dir. Are you root?")
+
+			if os.path.isdir(path):
+				library['root-dir'] = path 
+				self.root = path
+
+				return path
+
+			raise FileNotFoundError("No such directory.")
+
+		raise IndexError("path") 
 	#
 	# [Asset Manager]
 	def asset(self): # Show installed assets 
@@ -920,27 +935,7 @@ class OpenTTY:
 
 			except Exception as error: traceback.print_exc()
 		else: print(library['hostname'])
-	def rss_review(self, url): # OpenTTY RSS Explorer 
-		if url:
-			try:
-				response = urllib.request.urlopen(url)
-				xml_data = response.read()
-
-				root = ET.fromstring(xml_data)
-
-				for item in root.iter('item'):
-					title = item.find('title').text
-					link = item.find('link').text
-					pub_date = item.find('pubDate').text
-
-				print(f"Title: {title}")
-				print(f"Link: {link}")
-				print(f"Published Date: {pub_date}\n")
-
-			except Exception as error: traceback.print_exc()
-
-		else: raise IndexError("url")
-	def netstat(self, test_url="https://www.google.com", truecode="Online.", falsecode="Offline."): # Verify network status
+	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status
 		try: urllib.request.urlopen(test_url)
 		except Exception as error: return falsecode
 
@@ -982,7 +977,6 @@ class OpenTTY:
 		group4 = f"{randint(1, 64)}"
 
 		return f"{group1}.{group2}.{group3}.{group4}"
-
 
 if __name__ == "__main__":
 	with OpenTTY() as app:

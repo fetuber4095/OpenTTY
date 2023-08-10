@@ -1,27 +1,6 @@
-OpenTTY 1.2rc "The Netman Upgrade"
+OpenTTY 1.2 "The Netman Upgrade"
 
-	In this release Mr. Lima test new network
-envirronment for OpenTTY, it add same methods
-to know app behavior.
+	In this upgrade Mr. Lima finish 
+NETMAN project and it charge the OpenTTY
+version family, IT'S OpenTTY 95!
 
-
-1. [NETMAN] Direct object for SOCKET 
-
-	Now users can acess a socket object with
-command nm, it is setup with AF_INET and method
-SOCK_STREAM for default. With this module is
-possible create connections and bind socket
-servers.
-
-2. [NETMAN] Added IP Generator
-
-	In this build Mr. Lima add GENIP, it
-generate random ip adress for test netman
-generic systems. IS IMPORTANT SAY THAT THIS
-TOOL IS ONLY FOR REVIEW NETMAN UTILITIES! THE
-DEVELOPMENT TEAM IS NOT RESPONSABLE BY BAD
-USE OF THIS APP.
-
-3. Added command RSS to avalue a RSS Feed
-4. Added support for python WITH extructure
-5. Added tool 'NETSTAT' to verify if you are connected
