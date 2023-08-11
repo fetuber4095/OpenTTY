@@ -41,7 +41,10 @@ library = {
     "subject": "The Netman Upgrade",
 	"patch": [
 		"OpenTTY 95",
-		"Added "
+		"NETMAN Stable release!",
+		"Finished official project NETMAN [The Misterius Boy]",
+		""
+		"Added environnment EVAL to test shell"
 	],
     
     "developer": "Mr. Lima",
@@ -68,7 +71,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh",
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir"  
 	},
 	
 	# Firewall and root settings
@@ -100,7 +103,7 @@ library = {
 	# Unix-Like commands support
 	"posix-commands": [
 		"free", "nano", "du", "tail", "sort", "wc", "grep", "find", "cut", "sed", 
-		"tee", "python", "pip", "tar", "sh", "git", "shutdown"
+		"tee", "python", "pip", "tar", "sh", "git", "shutdown", "busybox"
 	],
 
 	# Windows commands support
@@ -118,7 +121,7 @@ library = {
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
 		"lagg": {"filename": "lagg.exe", "url": "https://download2279.mediafire.com/b0k3fgqwlrig84VkX6IEkSq7VWmvzSMDw6nTUjA0JeYNRwtxbslkEDVYQjG8R_lrgSWVhieGmdnr4JtSh19gsGczwG-kGtxgPF2BwHupTU5aQOYm_bGSGwHso5fQXRRS7TSBpw5KsT56Q-TWLuKLRGk46SADBt1YaGqmJKY2xbNVuWua/530b6jocges4x4i/ReduceMemory.exe"},
-		"busybox": {"filename": "busybox.exe", "url": ""}
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/busybox.exe"}
 	},
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
@@ -181,7 +184,7 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd()} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
@@ -211,7 +214,30 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
-	
+	def execblock(self, startline=""):
+		if len(startline.split()) >= 2: 
+			block = []
+			block.append(startline)
+
+			while True:
+				try:
+					line = input(f"\033[31m\033[1m[{library['profile']}]\033[m ... ")
+
+					if not line: break
+
+
+					block.append(line)
+
+				except (KeyboardInterrupt, EOFError): break
+
+			try: exec('\n'.join(block), self.globals, self.locals)
+			except Exception as error: traceback.print_exc()
+
+			return block
+
+		try: exec(startline, self.globals, self.locals)
+		except Exception as error: traceback.print_exc()
+
 	# OpenTTY "Shell"
 	def shell(self, cmd, mkprocess=True, report="", root=False):
 		if mkprocess: self.mkprocess(cmd.split()[0])
@@ -229,6 +255,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
 			elif cmd.split()[0] == "del" or cmd.split()[0] == "global": self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.split()[0] == "lambda" or cmd.split()[0] == "raise" or cmd.split()[0] == "assert": self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.split()[0] == "if" or cmd.split()[0] == "with" or cmd.split()[0] == "def" or cmd.split()[0] == "class": self.execblock(cmd)
 			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
@@ -316,6 +343,12 @@ class OpenTTY:
 			elif cmd.split()[0] == "netstat": print(self.netstat())
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
+			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
+			elif cmd.split()[0] == "realpath": print(self.realpath(self.replace(cmd)))
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
@@ -335,7 +368,9 @@ class OpenTTY:
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
 					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
-			
+				
+				elif os.path.isfile(cmd): print(open(cmd))
+
 				else: return print(f"{report}{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])	
 				
 		except (KeyboardInterrupt, EOFError): return self.rmprocess(cmd.split()[0])	
@@ -450,7 +485,7 @@ class OpenTTY:
 
 			for _ in range(library['max-byte-len']):
 				try: text.append(input())
-				except (KeyboardInterrupt, EOFError): return print(f"\n0+{len(hashbytes(text))} record in\n0+{randint(0, 1)} record out")
+				except (KeyboardInterrupt, EOFError): return print(f"\n0+{len(hashbytes(text))} record in\n0+{len(hashbytes(text))} record out")
 				
 		lenbytes, lenfile = writeBytes(shlex.split(filenames)[0], shlex.split(filenames)[1])
 		print(f"0+{lenbytes} record in\n0+{lenfile} lines writed in") 
@@ -711,7 +746,16 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
-	
+	def realpath(self, path):
+		if path:
+			if path.startswith("~"):
+				home = os.path.expanduser("~")
+				
+				return os.path.join(home, path[1:])
+
+			return path
+
+		raise IndexError("path")
 	#
 	# [Root]
 	def runas(self, cmdline, root=False):
