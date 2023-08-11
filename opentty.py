@@ -121,7 +121,8 @@ library = {
 		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
 		"lagg": {"filename": "lagg.exe", "url": "https://download2279.mediafire.com/b0k3fgqwlrig84VkX6IEkSq7VWmvzSMDw6nTUjA0JeYNRwtxbslkEDVYQjG8R_lrgSWVhieGmdnr4JtSh19gsGczwG-kGtxgPF2BwHupTU5aQOYm_bGSGwHso5fQXRRS7TSBpw5KsT56Q-TWLuKLRGk46SADBt1YaGqmJKY2xbNVuWua/530b6jocges4x4i/ReduceMemory.exe"},
-		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/busybox.exe"}
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/busybox.exe"},
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/build/Applications/cowsay.py"}
 	},
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
@@ -345,7 +346,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
-			elif cmd.split()[0] == "realpath": print(self.realpath(self.replace(cmd)))
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
@@ -746,16 +746,7 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
-	def realpath(self, path):
-		if path:
-			if path.startswith("~"):
-				home = os.path.expanduser("~")
-				
-				return os.path.join(home, path[1:])
-
-			return path
-
-		raise IndexError("path")
+	
 	#
 	# [Root]
 	def runas(self, cmdline, root=False):

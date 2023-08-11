@@ -19,5 +19,5 @@ def cowsay(text):
     result = [border, *speech, border, cow]
     
     return "\n".join(result)
-
-print(cowsay(cmd if cmd else random.choice(["Hello, I'm a cow!", "Tell me what you want that I say.", "It's the Python COWSaY"])))
+    
+print(cowsay(cmd))
