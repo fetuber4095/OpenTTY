@@ -43,7 +43,7 @@ library = {
 		"OpenTTY 95",
 		"NETMAN Stable release!",
 		"Finished official project NETMAN [The Misterius Boy]",
-		""
+		"Added same network tools into OpenTTY"
 		"Added environnment EVAL to test shell"
 	],
     
