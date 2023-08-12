@@ -37,14 +37,10 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.2", "build": "08H6",
+    "version": "1.2.1", "build": "08H7",
     "subject": "The Netman Upgrade",
 	"patch": [
-		"OpenTTY 95",
-		"NETMAN Stable release!",
-		"Finished official project NETMAN [The Misterius Boy]",
-		"Added same network tools into OpenTTY"
-		"Added environnment EVAL to test shell"
+		""
 	],
     
     "developer": "Mr. Lima",
@@ -124,6 +120,7 @@ library = {
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/busybox.exe"},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/build/Applications/cowsay.py"}
 	},
+
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
 		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/server/services/inbox"
@@ -174,7 +171,7 @@ class OpenTTY:
 			self.ttyname = host
 			self.process[library['sh']] = str(port)
 
-		self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+			self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
 
 
 		while library['sh'] in self.process:
@@ -346,10 +343,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "su": self.login(root=root)
+			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
@@ -387,10 +382,10 @@ class OpenTTY:
 		return True, self.rmprocess(cmd)
 			
 	# OpenTTY "Text API"
-	def basename(self, path): return os.path.basename(path)
-	def replace(self, text): return ' '.join(text.split()[1:])
+	def basename(self, path): return os.path.basename(path) # Get basename
+	def replace(self, text): return ' '.join(text.split()[1:]) # Remove first keyword of a text
 	
-	def recognize(self, text):
+	def recognize(self, text): # Recognize Text values (Colors code; Envirronment keys; Local KEYS)
 		self.values = {
 			"&appname": self.appname, "&version": self.version, "&hostname": library['hostname'], 
 			"&ipadress": library['ipadress'], "&subject": library['subject'], "&developer": library['developer'],
@@ -564,7 +559,7 @@ class OpenTTY:
 			else: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
 		
 		raise IndexError("filename")
-	def search(self, target_name, show=True): # Search files in current directory tree
+	def search(self, target_name, show=True): # Search files in current directory tree 
 		if target_name:
 
 			found_files = []
@@ -577,6 +572,19 @@ class OpenTTY:
 			if show: print('\n'.join(found_files) if found_files else f"search: {target_name}: no files found.")
 
 			return found_files
+	def read(self, filename): # Open a file and show it content 
+		if filename:
+			with open(filename, "r") as file:
+				self.nl(filename)
+
+				filesize = os.path.getsize(filename)
+
+				print(f"\n==============================")
+				print(f"File name: \033[1m{filename}\033[m")
+				print(f"File size: \033[1m{filesize} bytes\033[m")
+
+		else: raise IndexError("filename")
+	
 	#
 	# [Text Utilities]
 	def catfile(self, filename): # Show file content 
@@ -771,6 +779,11 @@ class OpenTTY:
 			raise FileNotFoundError("No such directory.")
 
 		raise IndexError("path") 
+	def login(self, root=False):
+		if not root:
+			self.runas("true")
+
+			self.connect(self.ttyname, self.process[library['sh']], admin=True)
 	#
 	# [Asset Manager]
 	def asset(self): # Show installed assets 
@@ -785,7 +798,15 @@ class OpenTTY:
 		if assets:
 			print(f"{len(assets)} assets installed. listing:\n")
 
-			for asset in assets: print(f"    {asset}")
+			for asset in assets: 
+				for extensions in library['dircolors']:
+					if asset.endswith(extensions):
+						print(f"    \033[1m{library['dircolors'][extensions]}{asset}\033[m")
+						break
+
+				else: print(f"    {asset}")
+
+				
 
 		else: print("asset: no assets installed.")
 	def get_asset(self, asset, root=False): # Install assets

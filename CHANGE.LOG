@@ -4,30 +4,7 @@ OpenTTY 1.2 "The Netman Upgrade"
 NETMAN project and it charge the OpenTTY
 version family, IT'S OpenTTY 95!
 
-1. OpenTTY 95
-	
-	The 1.2 is the The NETMAN Upgrade, it
-turn OpenTTY release family from CE to 95 and
-charge a bit of app logic. For more read the 
-documentation in GITHUB, command 'HELP' not
-implemented yet!
 
-2. Added a lot of network tools
-
-	The NETMAN Upgrade add same network
-utilities into OpenTTY, see a list of this
-tools above:
-
-	- gaddr    ip adress with a hostname
-	- fw       get informations of a ip adress
-	- wget     download files from network
-	- server   start a localhost server
-	- ifconfig show ip adresses for a host and it interfaces
-	- netstat  show network status [Online/ Offline]
-	- curl     do a HTTP request with a website
-	- genip    generate random ip adresses
-	- hostname show hostname for a ip adress or local machine
-	- connect  connect with a server
 
 Contribuitors: Mr. Lima
 Github Repository: https://github.com/fetuber4095/OpenTTY

@@ -31,7 +31,6 @@ library['ipinfo-token'] = ""
 
 app = OpenTTY() 
 
-
 if __name__ == "__main__": 
 
     app.connect("/dev/forge.py") # Put 'admin=True' in command line if you want start PSH as root
