@@ -40,6 +40,9 @@ library = {
     "version": "1.2.1", "build": "08H7",
     "subject": "The Netman Upgrade",
 	"patch": [
+		"NETMAN Exprimental collection",
+		"Better IP Generator with 'GENIP'",
+		"Added Direct report for SU in psh",
 		""
 	],
     
@@ -67,7 +70,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir"  
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s"
 	},
 	
 	# Firewall and root settings
@@ -110,6 +113,18 @@ library = {
 		"shutdown"
 	],
 
+	# Experimental Resources
+	"experiments": {
+		"Are-ROOT": False, # Beahivor as computer admin
+		"ENABLE": False, # Add command enable and disable to control acessible commands
+		"Desktop": False, # Add support for Virtual Desktop emulation
+		"QT-SDK": False, # Add asset QT-SDK into mirrors
+		"Trust-Mirror": False, # Add ability to import mirrors from json files
+		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
+		"Dumpsys": False, # Enable dumpsys
+		"GAMERULES": False, # Enable gamerules and gamemode charge
+	},
+
 	# Resources Mirrors
 	"resources": {
 		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/favicon.ico"},
@@ -148,17 +163,20 @@ class OpenTTY:
 		self.functions = {}
 		
 		self.write32u(show=False)
-		
+		self.beta()
 		
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
-			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local
 		}
 		self.locals = {}
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
 
+	# OpenTTY - TTY Kernel
+	def beta(self): # Build experimental resources
+		if library['experiments']['RRAW-IS-CURL']: self.aliases['rraw'] = "curl"
 
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
@@ -171,7 +189,7 @@ class OpenTTY:
 			self.ttyname = host
 			self.process[library['sh']] = str(port)
 
-			self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
 
 
 		while library['sh'] in self.process:
@@ -187,7 +205,7 @@ class OpenTTY:
 				if cmd:
 					if cmd.split()[0] == "logout": break
 					
-					self.shell(cmd, mkprocess=True, root=admin)
+					self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
 
@@ -298,7 +316,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "clear": self.clear()
 			elif cmd.split()[0] == "stty": self.stty(self.replace(cmd))
 			elif cmd.split()[0] == "tty": print(self.ttyname if self.ttyname else "localhost")
-			elif cmd.split()[0] == "pushd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
 			elif cmd.split()[0] == "alias": self.alias(self.replace(cmd))
@@ -724,7 +741,7 @@ class OpenTTY:
 			if self.replace(cmdline) != "": self.aliases[cmdline.split()[0]] = self.replace(cmdline)
 			else: print(f"alias {cmdline}='{self.aliases[cmdline]}'" if cmdline in self.aliases else f"alias: {cmdline}: alias not found")
 
-		else: self.ThreadList(self.aliases)
+		else: self.ThreadList(self.aliases, prefix="alias ")
 	def unalias(self, alias=""): # Delete aliases 
 		if alias:
 			try: del self.aliases[alias]
@@ -754,7 +771,6 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
-	
 	#
 	# [Root]
 	def runas(self, cmdline, root=False):
@@ -971,7 +987,7 @@ class OpenTTY:
 			except Exception as error: traceback.print_exc()
 		
 		else: raise IndexError("ip.adress")
-	def ifconfig(self, target=hostname()): # Get informations about socket objects of a host
+	def ifconfig(self, target=hostname()): # Get informations about socket objects of a host 
 		if target:
 			print("Informations for Network Adapters: \n")
 
@@ -991,7 +1007,7 @@ class OpenTTY:
 
 			except Exception as error: traceback.print_exc()
 		else: print(library['hostname'])
-	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status
+	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status 
 		try: urllib.request.urlopen(test_url)
 		except Exception as error: return falsecode
 

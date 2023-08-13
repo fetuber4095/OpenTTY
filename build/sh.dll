@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#    
+
+
+
+
+global getpass, traceback
+global hostname, os
+
+import getpass, traceback
+import os
+
+from socket import gethostname as hostname
+
+class Shell(OpenTTY):
+	def __init__(self):
+		self.run = 0
+
+		while True:
+			command = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[m:\033[34m{os.getcwd()}\033[m$ ").strip()
+
+			if command.split()[0] == "exit": break
+			if not command: continue
+			
+			self.run_command(command)
+
+	def run_command(self, command, report="sh: "):
+		try:
+			if cmd.split()[0] == "echo": print(super().replace(cmd))
+			elif cmd.split()[0] == "prompt": input(super().replace(cmd))
+			elif cmd.split()[0] == "basename": print(super().basename(super().replace(cmd)))
+			elif cmd.split()[0] == "cmatrix": super().ThreadRandom()
+			elif cmd.split()[0] == "ps": super().pslist()
+			elif cmd.split()[0] == "kill": super().kill(super().replace(cmd))
+			elif cmd.split()[0] == "mkdir": super().makedir(super().replace(cmd))
+			elif cmd.split()[0] == "rmdir": super().removedir(super().replace(cmd))
+			elif cmd.split()[0] == "rm": super().remove(super().replace(cmd))
+			elif cmd.split()[0] == "ls": super().listdir(super().replace(cmd))
+			elif cmd.split()[0] == "dd": super().txt2bin(super().replace(cmd))
+			elif cmd.split()[0] == "zipinfo": super().zipinfo(super().replace(cmd))
+			elif cmd.split()[0] == "unzip": super().unzip(super().replace(cmd))
+			elif cmd.split()[0] == "touch": super().touch(super().replace(cmd))
+			elif cmd.split()[0] == "tree": super().tree(super().replace(cmd))
+			elif cmd.split()[0] == "mv": super().move(super().replace(cmd))
+			elif cmd.split()[0] == "cp": super().copy(super().replace(cmd))
+			elif cmd.split()[0] == "gzip": super().gunzip(super().replace(cmd))
+			elif cmd.split()[0] == "cat": super().catfile(super().replace(cmd))
+			elif cmd.split()[0] == "head": super().headfile(super().replace(cmd))
+			elif cmd.split()[0] == "json": super().json_explorer(super().replace(cmd))
+			elif cmd.split()[0] == "nl": super().nl(super().replace(cmd))
+			elif cmd.split()[0] == "tail": super().tail(super().replace(cmd))
+			elif cmd.split()[0] == "diff": super().diff(super().replace(cmd))
+			elif cmd.split()[0] == "env": super().environ(super().replace(cmd))
+			elif cmd.split()[0] == "export": super().export(super().replace(cmd))
+			elif cmd.split()[0] == "uname": super().uname(super().replace(cmd))
+			elif cmd.split()[0] == "chmod": super().chmod(super().replace(cmd))
+			elif cmd.split()[0] == "clear": super().clear()
+			elif cmd.split()[0] == "cd": super().pushdir(super().replace(cmd))
+			elif cmd.split()[0] == "alias": super().alias(super().replace(cmd))
+			elif cmd.split()[0] == "unalias": super().unalias(super().replace(cmd))
+			elif cmd.split()[0] == "df": super().diskfree(super().replace(cmd))
+			elif cmd.split()[0] == "gaddr": super().gaddr(super().replace(cmd))
+			elif cmd.split()[0] == "fw": super().fwadress(super().replace(cmd))
+			elif cmd.split()[0] == "wget": super().wget(super().replace(cmd))
+			elif cmd.split()[0] == "cal": super().calendar()
+			elif cmd.split()[0] == "github": print(library['github.com'])
+			elif cmd.split()[0] == "passwd": print(f"passwd: your password is {library['passwd']}")
+			elif cmd.split()[0] == "pwd": print(os.getcwd())
+			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
+			elif cmd.split()[0] == "curl": super().curl(super().replace(cmd), show=True)
+			elif cmd.split()[0] == "exec": local(super().replace(cmd))
+			elif cmd.split()[0] == "insmod": super().insmod(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "rem": super().write32u(super().replace(cmd))
+			elif cmd.split()[0] == "build": print(library['build'])
+			elif cmd.split()[0] == "ping": super().ping(super().replace(cmd))
+			elif cmd.split()[0] == "connect": super().dialup(super().replace(cmd))
+			elif cmd.split()[0] == "home": super().pushdir(os.path.expanduser("~"))
+			elif cmd.split()[0] == "genn": super().gen_numner(super().replace(cmd))
+			elif cmd.split()[0] == "sort": super().sort(super().replace(cmd))
+			elif cmd.split()[0] == "search": super().search(super().replace(cmd))
+			elif cmd.split()[0] == "sleep": super().sleep(super().replace(cmd))
+			elif cmd.split()[0] == "seq": super().sequence(super().replace(cmd))
+			elif cmd.split()[0] == "ifconfig": super().ifconfig(super().replace(cmd))
+			elif cmd.split()[0] == "hostname": super().hostname(super().replace(cmd))
+			elif cmd.split()[0] == "genip": print(super().gen_adress())
+			elif cmd.split()[0] == "netstat": print(super().netstat())
+			elif cmd.split()[0] == "read": super().read(super().replace(cmd))
+
+			
+			else: print(f"{report}{cmd.split()[0]}: {self.run}: command not found"), super().rmprocess(cmd.split()[0])	
+
+		except (KeyboardInterrupt, EOFError): return 
+		
+		except Exception as error: traceback.print_exc()
+
+
+		self.run = self.run + 1
+
+Shell()

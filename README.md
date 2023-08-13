@@ -1,5 +1,14 @@
-# OpenTTY - The Python Terminal Emulator
+# OpenTTY 1.2 "The Netman Upgrade"
 
-The *OpenTTY* is a Terminal Emulator tottaly writted in  
-Python 3, it's a small project of remake GNU Bourn-Again
-Shell. 
+> In this upgrade Mr. Lima finish 
+> NETMAN project and it charge the OpenTTY
+> version family, IT'S OpenTTY 95!
+
+## Release Notes
+
+1. 
+
+
+
+Contribuitors: Mr. Lima
+Github Repository: https://github.com/fetuber4095/OpenTTY
