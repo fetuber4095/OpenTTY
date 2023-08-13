@@ -72,6 +72,9 @@ library = {
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
 		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s"
 	},
+
+	# Disabled Commands list
+	"commands-blacklist": [],
 	
 	# Firewall and root settings
 	"whitelist": [],
@@ -177,6 +180,8 @@ class OpenTTY:
 	# OpenTTY - TTY Kernel
 	def beta(self): # Build experimental resources
 		if library['experiments']['RRAW-IS-CURL']: self.aliases['rraw'] = "curl"
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/qt.py"}
+		if library['experiments']['Are-ROOT']: print("\033[1m\033[32m[Experiments]\033[m \033[31mROOT\033[m is enabled.")
 
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
@@ -189,7 +194,7 @@ class OpenTTY:
 			self.ttyname = host
 			self.process[library['sh']] = str(port)
 
-			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 
 
 		while library['sh'] in self.process:
@@ -200,14 +205,16 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
+					elif cmd.split()[0] in library['commands-blacklist'] and library['experiments']['ENABLE'] == True: print(f"{cmd.split()[0]}: command disabled.")
 					
-					self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
+					else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
+
 
 		print("There are stopped jobs.\n")
 	def disconnect(self, code=""):
@@ -362,7 +369,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
+			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
@@ -771,6 +779,19 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
+	def pull(self, filename): # Save current status of library in a json file
+		if filename: json.dump(library, open(filename, "wt+"))
+		else: raise IndexError("filename")
+	def enable(self, command): # Enable and disable a command
+		if library['experiments']['ENABLE']:
+			if command.startswith("enable"): raise RuntimeError("[Errno 104] Cant unable the parent command")
+
+			if command:
+				if command in library['commands-blacklist']: library['commands-blacklist'].remove(command)
+				else: library['commands-blacklist'].append(command)
+
+			else: print('\n'.join([str(i) for i in library['commands-blacklist']]) if library['commands-blacklist'] else f"enable: blacklist is empty")
+		else: raise RuntimeError("Beta Resources not enabled.")
 	#
 	# [Root]
 	def runas(self, cmdline, root=False):
@@ -1049,6 +1070,8 @@ class OpenTTY:
 		group4 = f"{randint(1, 64)}"
 
 		return f"{group1}.{group2}.{group3}.{group4}"
+
+
 
 if __name__ == "__main__":
 	with OpenTTY() as app:

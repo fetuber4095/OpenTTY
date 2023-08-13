@@ -22,6 +22,20 @@ library['head-lines'] = 10
 library['max-byte-len'] = 2048 
 # ----------------------------
 
+# BETA Features
+library["experiments"] = {
+        "Are-ROOT": False,
+        "ENABLE": True,
+        "Desktop": True,
+        "QT-SDK": True,
+        "Trust-Mirror": True,
+        "RRAW-IS-CURL": True,
+        "Dumpsys": True,
+        "GAMERULES": True,
+    }
+    
+# ----------------------------
+
 # User settings
 library['passwd'] = "1234"
 library['ipinfo-token'] = ""

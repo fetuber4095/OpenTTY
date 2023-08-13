@@ -32,10 +32,21 @@ library['resources']['RESOURCE-NAME'] = { # Setup your assets
     "url": "URL-FOR-ASSET-DOWNLOAD"
 }
 
+library["experiments"] = {
+        "Are-ROOT": False, # Beahivor as computer admin
+        "ENABLE": False, # Add command enable and disable to control acessible commands
+        "Desktop": False, # Add support for Virtual Desktop emulation
+        "QT-SDK": False, # Add asset QT-SDK into mirrors
+        "Trust-Mirror": False, # Add ability to import mirrors from json files
+        "RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
+        "Dumpsys": False, # Enable dumpsys
+        "GAMERULES": False, # Enable gamerules and gamemode charge
+    }
+
 
 app = OpenTTY() # Start OpenTTY Method instance
 
 if __name__ == "__main__":
     
-    app.connect("NAME-OF-SESSION", port=8080) # Start PSH session [PORT is PID of psh at OpenTTY Envirronment]
+    app.connect("NAME-OF-SESSION", port=8080, admin=False) # Start PSH session [PORT is PID of psh at OpenTTY Envirronment]
 
