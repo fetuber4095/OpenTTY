@@ -30,6 +30,7 @@ library["experiments"] = {
         "QT-SDK": True,
         "Trust-Mirror": True,
         "RRAW-IS-CURL": True,
+        "Revolution-Line": False,
         "Dumpsys": True,
         "GAMERULES": True,
     }

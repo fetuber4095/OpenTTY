@@ -37,13 +37,12 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.2.1", "build": "08H7",
+    "version": "1.2.2", "build": "08H8",
     "subject": "The Netman Upgrade",
 	"patch": [
-		"NETMAN Exprimental collection",
-		"Better IP Generator with 'GENIP'",
-		"Added Direct report for SU in psh",
-		""
+		"Added new register method",
+		"Added "
+		"Added new experiment 'Revolution-Line'",
 	],
     
     "developer": "Mr. Lima",
@@ -70,7 +69,7 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s"
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod"
 	},
 
 	# Disabled Commands list
@@ -97,7 +96,7 @@ library = {
 
 	# Virtual disks info
 	"fstab": {
-
+	
 	},
 
 	# Systems commands
@@ -124,6 +123,7 @@ library = {
 		"QT-SDK": False, # Add asset QT-SDK into mirrors
 		"Trust-Mirror": False, # Add ability to import mirrors from json files
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
+		"Revolution-Line": False, # Active new command line
 		"Dumpsys": False, # Enable dumpsys
 		"GAMERULES": False, # Enable gamerules and gamemode charge
 	},
@@ -179,10 +179,14 @@ class OpenTTY:
 
 	# OpenTTY - TTY Kernel
 	def beta(self): # Build experimental resources
-		if library['experiments']['RRAW-IS-CURL']: self.aliases['rraw'] = "curl"
-		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/qt.py"}
-		if library['experiments']['Are-ROOT']: print("\033[1m\033[32m[Experiments]\033[m \033[31mROOT\033[m is enabled.")
+		for item in library['experiments']:
+			if library['experiments'][item]: 
+				print("\033[1m\033[32m[Experiments]\033[m Experiments is enable.")
+				break
 
+		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/qt.py"}
+		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
 
@@ -198,14 +202,13 @@ class OpenTTY:
 
 
 		while library['sh'] in self.process:
-			if not "python" in self.process: close()
 
 			for asset in os.listdir(self.root): 
 				if asset.endswith(".sh"): self.insmod(f"{self.root}/{asset}", root=True)
 				
 
 			try:
-				cmd = input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']} " if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
@@ -306,6 +309,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "touch": self.touch(self.replace(cmd))
 			elif cmd.split()[0] == "tree": self.tree(self.replace(cmd))
 			elif cmd.split()[0] == "mv": self.move(self.replace(cmd))
+			elif cmd.split()[0] == "rename": self.move(self.replace(cmd))
 			elif cmd.split()[0] == "cp": self.copy(self.replace(cmd))
 			elif cmd.split()[0] == "gzip": self.gunzip(self.replace(cmd))
 			elif cmd.split()[0] == "install": self.install(self.replace(cmd), root=root)
@@ -371,6 +375,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
+			#elif cmd.split()[0] == "":
+			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
@@ -456,6 +462,8 @@ class OpenTTY:
 	def kill(self, pid): # Kill a process by virtual PID 
 		for process in self.process:
 			if self.process[process] == str(pid): 
+				if process == 'python': close()
+
 				del self.process[process]
 
 				return True
@@ -766,7 +774,7 @@ class OpenTTY:
 			if not root: raise PermissionError("Unable to create profiles. Are you root?")
 
 			try: urllib.request.urlretrieve(library['venv'], f"{self.root}/{venvname}.py")
-			except Exception as error: print("venv: bad. download of template failed.\n"), traceback.print_exc()
+			except Exception as error: print("venv: bad. profile creation filed.\n"), traceback.print_exc()
 		
 		else: raise IndexError("profile.name")
 	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager 
@@ -818,9 +826,12 @@ class OpenTTY:
 		raise IndexError("path") 
 	def login(self, root=False):
 		if not root:
-			self.runas("true")
+			try:
+				self.runas("true")
 
-			self.connect(self.ttyname, self.process[library['sh']], admin=True)
+				self.connect(self.ttyname, self.process[library['sh']], admin=True)
+
+			except KeyError: print("login: psh not started.")
 	#
 	# [Asset Manager]
 	def asset(self): # Show installed assets 

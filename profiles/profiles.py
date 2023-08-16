@@ -39,6 +39,7 @@ library["experiments"] = {
         "QT-SDK": False, # Add asset QT-SDK into mirrors
         "Trust-Mirror": False, # Add ability to import mirrors from json files
         "RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
+        "Revolution-Line": False, # Active new command line
         "Dumpsys": False, # Enable dumpsys
         "GAMERULES": False, # Enable gamerules and gamemode charge
     }

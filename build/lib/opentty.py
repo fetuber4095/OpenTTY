@@ -37,14 +37,13 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.2", "build": "08H6",
+    "version": "1.2.1", "build": "08H7",
     "subject": "The Netman Upgrade",
 	"patch": [
-		"OpenTTY 95",
-		"NETMAN Stable release!",
-		"Finished official project NETMAN [The Misterius Boy]",
-		"Added same network tools into OpenTTY"
-		"Added environnment EVAL to test shell"
+		"NETMAN Exprimental collection",
+		"Better IP Generator with 'GENIP'",
+		"Added Direct report for SU in psh",
+		""
 	],
     
     "developer": "Mr. Lima",
@@ -71,8 +70,11 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir"  
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s"
 	},
+
+	# Disabled Commands list
+	"commands-blacklist": [],
 	
 	# Firewall and root settings
 	"whitelist": [],
@@ -114,6 +116,18 @@ library = {
 		"shutdown"
 	],
 
+	# Experimental Resources
+	"experiments": {
+		"Are-ROOT": False, # Beahivor as computer admin
+		"ENABLE": False, # Add command enable and disable to control acessible commands
+		"Desktop": False, # Add support for Virtual Desktop emulation
+		"QT-SDK": False, # Add asset QT-SDK into mirrors
+		"Trust-Mirror": False, # Add ability to import mirrors from json files
+		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
+		"Dumpsys": False, # Enable dumpsys
+		"GAMERULES": False, # Enable gamerules and gamemode charge
+	},
+
 	# Resources Mirrors
 	"resources": {
 		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/favicon.ico"},
@@ -124,6 +138,7 @@ library = {
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/busybox.exe"},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/build/Applications/cowsay.py"}
 	},
+
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
 		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/server/services/inbox"
@@ -151,17 +166,22 @@ class OpenTTY:
 		self.functions = {}
 		
 		self.write32u(show=False)
-		
+		self.beta()
 		
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
-			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local
 		}
 		self.locals = {}
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
 
+	# OpenTTY - TTY Kernel
+	def beta(self): # Build experimental resources
+		if library['experiments']['RRAW-IS-CURL']: self.aliases['rraw'] = "curl"
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/qt.py"}
+		if library['experiments']['Are-ROOT']: print("\033[1m\033[32m[Experiments]\033[m \033[31mROOT\033[m is enabled.")
 
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
@@ -174,7 +194,7 @@ class OpenTTY:
 			self.ttyname = host
 			self.process[library['sh']] = str(port)
 
-		self.clear(), print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.")
+			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 
 
 		while library['sh'] in self.process:
@@ -185,14 +205,16 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\n\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
+					elif cmd.split()[0] in library['commands-blacklist'] and library['experiments']['ENABLE'] == True: print(f"{cmd.split()[0]}: command disabled.")
 					
-					self.shell(cmd, mkprocess=True, root=admin)
+					else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
+
 
 		print("There are stopped jobs.\n")
 	def disconnect(self, code=""):
@@ -301,7 +323,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "clear": self.clear()
 			elif cmd.split()[0] == "stty": self.stty(self.replace(cmd))
 			elif cmd.split()[0] == "tty": print(self.ttyname if self.ttyname else "localhost")
-			elif cmd.split()[0] == "pushd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
 			elif cmd.split()[0] == "alias": self.alias(self.replace(cmd))
@@ -346,11 +367,10 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "su": self.login(root=root)
+			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
+			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
+			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
@@ -387,10 +407,10 @@ class OpenTTY:
 		return True, self.rmprocess(cmd)
 			
 	# OpenTTY "Text API"
-	def basename(self, path): return os.path.basename(path)
-	def replace(self, text): return ' '.join(text.split()[1:])
+	def basename(self, path): return os.path.basename(path) # Get basename
+	def replace(self, text): return ' '.join(text.split()[1:]) # Remove first keyword of a text
 	
-	def recognize(self, text):
+	def recognize(self, text): # Recognize Text values (Colors code; Envirronment keys; Local KEYS)
 		self.values = {
 			"&appname": self.appname, "&version": self.version, "&hostname": library['hostname'], 
 			"&ipadress": library['ipadress'], "&subject": library['subject'], "&developer": library['developer'],
@@ -564,7 +584,7 @@ class OpenTTY:
 			else: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
 		
 		raise IndexError("filename")
-	def search(self, target_name, show=True): # Search files in current directory tree
+	def search(self, target_name, show=True): # Search files in current directory tree 
 		if target_name:
 
 			found_files = []
@@ -577,6 +597,19 @@ class OpenTTY:
 			if show: print('\n'.join(found_files) if found_files else f"search: {target_name}: no files found.")
 
 			return found_files
+	def read(self, filename): # Open a file and show it content 
+		if filename:
+			with open(filename, "r") as file:
+				self.nl(filename)
+
+				filesize = os.path.getsize(filename)
+
+				print(f"\n==============================")
+				print(f"File name: \033[1m{filename}\033[m")
+				print(f"File size: \033[1m{filesize} bytes\033[m")
+
+		else: raise IndexError("filename")
+	
 	#
 	# [Text Utilities]
 	def catfile(self, filename): # Show file content 
@@ -716,7 +749,7 @@ class OpenTTY:
 			if self.replace(cmdline) != "": self.aliases[cmdline.split()[0]] = self.replace(cmdline)
 			else: print(f"alias {cmdline}='{self.aliases[cmdline]}'" if cmdline in self.aliases else f"alias: {cmdline}: alias not found")
 
-		else: self.ThreadList(self.aliases)
+		else: self.ThreadList(self.aliases, prefix="alias ")
 	def unalias(self, alias=""): # Delete aliases 
 		if alias:
 			try: del self.aliases[alias]
@@ -746,7 +779,19 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
-	
+	def pull(self, filename): # Save current status of library in a json file
+		if filename: json.dump(library, open(filename, "wt+"))
+		else: raise IndexError("filename")
+	def enable(self, command): # Enable and disable a command
+		if library['experiments']['ENABLE']:
+			if command.startswith("enable"): raise RuntimeError("[Errno 104] Cant unable the parent command")
+
+			if command:
+				if command in library['commands-blacklist']: library['commands-blacklist'].remove(command)
+				else: library['commands-blacklist'].append(command)
+
+			else: print('\n'.join([str(i) for i in library['commands-blacklist']]) if library['commands-blacklist'] else f"enable: blacklist is empty")
+		else: raise RuntimeError("Beta Resources not enabled.")
 	#
 	# [Root]
 	def runas(self, cmdline, root=False):
@@ -771,6 +816,11 @@ class OpenTTY:
 			raise FileNotFoundError("No such directory.")
 
 		raise IndexError("path") 
+	def login(self, root=False):
+		if not root:
+			self.runas("true")
+
+			self.connect(self.ttyname, self.process[library['sh']], admin=True)
 	#
 	# [Asset Manager]
 	def asset(self): # Show installed assets 
@@ -785,7 +835,15 @@ class OpenTTY:
 		if assets:
 			print(f"{len(assets)} assets installed. listing:\n")
 
-			for asset in assets: print(f"    {asset}")
+			for asset in assets: 
+				for extensions in library['dircolors']:
+					if asset.endswith(extensions):
+						print(f"    \033[1m{library['dircolors'][extensions]}{asset}\033[m")
+						break
+
+				else: print(f"    {asset}")
+
+				
 
 		else: print("asset: no assets installed.")
 	def get_asset(self, asset, root=False): # Install assets
@@ -821,7 +879,7 @@ class OpenTTY:
 			print()
 		
 		else: raise IndexError("method.name")
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+
 	def callmethod(self, function): # Call a function 
 		if function in self.functions:
 
@@ -950,7 +1008,7 @@ class OpenTTY:
 			except Exception as error: traceback.print_exc()
 		
 		else: raise IndexError("ip.adress")
-	def ifconfig(self, target=hostname()): # Get informations about socket objects of a host
+	def ifconfig(self, target=hostname()): # Get informations about socket objects of a host 
 		if target:
 			print("Informations for Network Adapters: \n")
 
@@ -970,7 +1028,7 @@ class OpenTTY:
 
 			except Exception as error: traceback.print_exc()
 		else: print(library['hostname'])
-	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status
+	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status 
 		try: urllib.request.urlopen(test_url)
 		except Exception as error: return falsecode
 
@@ -1012,6 +1070,8 @@ class OpenTTY:
 		group4 = f"{randint(1, 64)}"
 
 		return f"{group1}.{group2}.{group3}.{group4}"
+
+
 
 if __name__ == "__main__":
 	with OpenTTY() as app:
