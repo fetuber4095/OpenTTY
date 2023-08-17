@@ -41,7 +41,7 @@ library = {
     "subject": "The Netman Upgrade",
 	"patch": [
 		"Added new register method",
-		"Added "
+		"Added new commands 'FIND' and 'QUIT'",
 		"Added new experiment 'Revolution-Line'",
 	],
     
@@ -219,7 +219,7 @@ class OpenTTY:
 			except (KeyboardInterrupt, EOFError): self.clear()
 
 
-		print("There are stopped jobs.\n")
+		print("There are stopped jobs.\n"), self.quit()
 	def disconnect(self, code=""):
 		if not code: code = 0
 
@@ -375,8 +375,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
-			#elif cmd.split()[0] == "":
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
+			elif cmd.split()[0] == "quit": self.quit()
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": pass
@@ -408,6 +408,7 @@ class OpenTTY:
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
 		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]...")
 		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
+		except ValueError: traceback.print_exc()
 
 		
 		return True, self.rmprocess(cmd)
@@ -442,7 +443,7 @@ class OpenTTY:
 		for _ in range(library['max-byte-len']): print(input())
 	def ThreadOut(self, text): # Thread a loop for infinit printing a string at sys.stdout 
 		while True: print(text if text else f"y")
-	def ThreadList(self, text, prefix=""): print('\n'.join([f"{prefix}{key}='{text[key]}'" for key in text]))
+	def ThreadList(self, text, prefix=""): print('\n'.join([f"{prefix}{key}='{text[key]}'" for key in text])) 
 	def ThreadRandom(self): # Thread a loop for infinit printing random characters [Method for command 'CMATRIX'] 
 		while True: print(f"\033[32m{random.choice(['0', '1', '0', '1', '(', ')', '[', ']',	'!', '@', '#', '&', '/', '.', '0', '1', '▒', '▒', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])}", end="")
 	
@@ -469,10 +470,26 @@ class OpenTTY:
 				return True
 		
 		print(f"kill: ({pid}) - No such process" if pid else f"kill: missing operand [PID]...")
+	def quit(self, do_report=True): # Quit from all pending process
+		pending = []
+
+		for process in self.process:
+			if process not in ['python', 'psh', 'quit']:
+				pending.append(process)
+
+		if pending:
+			for process in pending: self.rmprocess(process)
+
+			if do_report:
+				print(f"quit: {len(pending)} pending killed.")
+
+			return 
+
+		if do_report:
+			print("quit: no pending process.")
 
 	# OpenTTY "Applications"
 	#
-	# [File Utilities]
 	def makedir(self, dirname): # Create directories 
 		if dirname: os.makedirs(dirname)
 		else: raise IndexError("dirname")
@@ -586,12 +603,6 @@ class OpenTTY:
 							zipf.write(file_path, os.path.relpath(file_path, source_path))
 
 		else: raise IndexError("filename << source")
-	def install(self, filename, root=False): # Install file and enable it as OpenTTY local asset 
-		if filename: 
-			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError("File not in Whitelist. Are you root?")
-			else: return shutil.copy(filename, f"{self.root}/{self.basename(filename)}")
-		
-		raise IndexError("filename")
 	def search(self, target_name, show=True): # Search files in current directory tree 
 		if target_name:
 
@@ -617,9 +628,6 @@ class OpenTTY:
 				print(f"File size: \033[1m{filesize} bytes\033[m")
 
 		else: raise IndexError("filename")
-	
-	#
-	# [Text Utilities]
 	def catfile(self, filename): # Show file content 
 		if filename: print(self.recognize(open(filename, "r").read()))
 		else: self.ThreadIn()
@@ -663,7 +671,7 @@ class OpenTTY:
 						print(f"Key mapper for JSON File: \033[1m[{self.basename(filename)}]\033[m\n")
 						explore_json(jsondata, indent)
 
-			except json.decoder.JSONDecodeError as traceback: print(f"json: file is malformed [{traceback}]")
+			except json.decoder.JSONDecodeError as error: traceback.print_exc()
 		
 		elif jsoniten: explore_json(jsoniten, indent)
 		else: raise IndexError("filename")
@@ -693,9 +701,6 @@ class OpenTTY:
 	def diff(self, filenames): # Compare files (line-per-line) 
 		if len(shlex.split(filenames)) < 2: raise IndexError("2filename" if filenames else "filename <> filename")
 			
-		print(shlex.split(filenames)[0])
-		print(shlex.split(filenames)[1])
-
 		lines1 = open(shlex.split(filenames)[0], "r").readlines()
 		lines2 = open(shlex.split(filenames)[1], "r").readlines()
 
@@ -704,6 +709,30 @@ class OpenTTY:
 				print(f"   {i} - {self.basename(shlex.split(filenames)[0])}: {line1.strip()}")
 				print(f"   {i} - {self.basename(shlex.split(filenames)[1])}: {line2.strip()}")
 				print()
+	def find(self, cmdline): # Search WORDS in file content
+		if len(shlex.split(cmdline)) < 2: raise IndexError("words" if cmdline else "filename > words")
+
+		filename = shlex.split(cmdline)[0]
+		search_word = shlex.split(cmdline)[1]
+
+		results = []
+
+		with open(filename, "r") as text:
+			text = text.readlines()
+
+			line_number = 1
+			
+			for line in text:
+				if search_word in line: results.append((line_number, line))
+
+				line_number += 1
+
+		if not results: return print("find: no matches.")
+
+		print(f"{len(results)} matches of '{search_word}' in \033[1m{filename}\033[m:\n")
+
+		for line_number, line in results: 
+			print(f"   {line_number}\t{line}")
 	def sort(self, words, show=True): # Avalue a phrase and choice a random word 
 		if words:
 			result = random.choice(words.split())
@@ -714,8 +743,6 @@ class OpenTTY:
 			return result
 
 		else: raise IndexError("words")
-	#
-	# [Envirronment Utilities]
 	def environ(self, key=""): # Show global registers at envirronment 
 		if key: print(os.environ[key] if key in os.environ else f"env: {key}: register not found")
 		else: self.ThreadList(os.environ)
@@ -787,10 +814,10 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
-	def pull(self, filename): # Save current status of library in a json file
+	def pull(self, filename): # Save current status of library in a json file 
 		if filename: json.dump(library, open(filename, "wt+"))
 		else: raise IndexError("filename")
-	def enable(self, command): # Enable and disable a command
+	def enable(self, command): # Enable and disable a command 
 		if library['experiments']['ENABLE']:
 			if command.startswith("enable"): raise RuntimeError("[Errno 104] Cant unable the parent command")
 
@@ -800,9 +827,7 @@ class OpenTTY:
 
 			else: print('\n'.join([str(i) for i in library['commands-blacklist']]) if library['commands-blacklist'] else f"enable: blacklist is empty")
 		else: raise RuntimeError("Beta Resources not enabled.")
-	#
-	# [Root]
-	def runas(self, cmdline, root=False):
+	def runas(self, cmdline, root=False): # Run command as [...] 
 		if cmdline:
 			if root: return self.shell(cmdline, mkprocess=True, root=True)
 
@@ -811,7 +836,7 @@ class OpenTTY:
 
 			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
 			else: raise PermissionError("wrong password.")
-	def chroot(self, path, root=False):
+	def chroot(self, path, root=False): # Charge root directory 
 		if path:
 			if not root: raise PermissionError("Unable to charge profile dir. Are you root?")
 
@@ -824,7 +849,7 @@ class OpenTTY:
 			raise FileNotFoundError("No such directory.")
 
 		raise IndexError("path") 
-	def login(self, root=False):
+	def login(self, root=False): # Modify current login (to: root) 
 		if not root:
 			try:
 				self.runas("true")
@@ -832,8 +857,6 @@ class OpenTTY:
 				self.connect(self.ttyname, self.process[library['sh']], admin=True)
 
 			except KeyError: print("login: psh not started.")
-	#
-	# [Asset Manager]
 	def asset(self): # Show installed assets 
 		root_files = os.listdir(self.root)
 
@@ -857,15 +880,24 @@ class OpenTTY:
 				
 
 		else: print("asset: no assets installed.")
-	def get_asset(self, asset, root=False): # Install assets
+	def get_asset(self, asset, root=False): # Download asset files
+		if asset:
+			for resource in asset.split():
+				if resource not in library['resources']: return print(f"get: {resource}: asset not found")
+
+				try: urllib.request.urlretrieve(library['resources'][resource]['url'], library['resources'][resource]['filename']), print(f"get: asset '{resource}' downloaded.")
+				except Exception as traceback: print(f"get: bad. asset download failed.")
+				
+		else: raise IndexError("asset")
+	def install(self, asset, root=False): # Install file and enable it as OpenTTY local asset 
 		if asset:
 			if not root: raise PermissionError("Unable write in profile dir. Are you root?")
 
 			for resource in asset.split():
-				if resource not in library['resources']: return print(f"get: {resource}: asset not found")
+				if resource not in library['resources']: shutil.copy(resource, f"{self.root}/{self.basename(resource)}")
 
 				try: urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), print(f"get: asset '{resource}' installed.")
-				except Exception as traceback: print(f"get: bad. asset installation failed.")
+				except Exception as error: print(f"get: bad. asset installation failed."), traceback.print_exc()
 				
 		else: raise IndexError("asset")
 	def insmod(self, filename, root=False): # Load PSH Scripts 
@@ -890,7 +922,6 @@ class OpenTTY:
 			print()
 		
 		else: raise IndexError("method.name")
-
 	def callmethod(self, function): # Call a function 
 		if function in self.functions:
 
@@ -904,8 +935,6 @@ class OpenTTY:
 			return
 
 		if function: raise NameError("[InternalError] Function not found")
-	#
-	# [Network Utilities]
 	def gaddr(self, hostname): # Get IP Adress of a machine with it name 
 		if hostname:
 			try: print(socket.gethostbyname(hostname))
@@ -1044,8 +1073,6 @@ class OpenTTY:
 		except Exception as error: return falsecode
 
 		return truecode	
-
-	# [Other Utilities]
 	def calendar(self): # Show calendar for this month 
 		now = datetime.datetime.now()
 
@@ -1060,8 +1087,6 @@ class OpenTTY:
 			else:
 				for i in range(cache):
 					if i != 0: print(i)
-	#
-	# [Mistical Utilities]
 	def gen_numner(self, limit, show=True): # Generate a random number from 0 until argument 'LIMIT' 
 		if limit:
 			try:
