@@ -138,7 +138,7 @@ library = {
 		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe"},
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe"},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py"},
-		"rundll": {"filename": "rundll.py", "url": ""}
+		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py"}
 	},
 
 	"docs": {
@@ -408,8 +408,6 @@ class OpenTTY:
 		except IsADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
 		except NotADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
-		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]...")
-		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 		except ValueError: traceback.print_exc()
 
 		
