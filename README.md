@@ -21,7 +21,15 @@ settings of library, indentified as `Revolution-Line`, it
 configure a new and immersive OpenTTY desktop with the
 classic command line and a new welcome message
 
-3. 
+3. The RunDLL Module
+
+Now users can run OpenTTY Python DLLs with asset RunDll, 
+it's not finished but already have a beta release in mirrors.
+The RunDll emulate OpenTTY run envirronment to scripts can
+be executed normally.
+To install RunDLL use `sudo get rundll`
+To run dlls use `python rundll.py <filename> [arguments]...`
+
 
 
 Contribuitors: Mr. Lima  

@@ -137,7 +137,8 @@ library = {
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe"},
 		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe"},
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe"},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py"}
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py"},
+		"rundll": {"filename": "rundll.py", "url": ""}
 	},
 
 	"docs": {
@@ -191,7 +192,7 @@ class OpenTTY:
 	def connect(self, host, port=8080, admin=False):
 
 		if library['goto-home']: os.chdir(os.path.expanduser("~"))
-		if library['do-auth']: self.runas("clear")
+		if library['do-auth']: self.runas("trues")
 
 
 		if library['sh'] not in self.process: 
@@ -350,6 +351,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
+			elif cmd.split()[0] == "se": raise SystemExit(self.replace(cmd)) 
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "build": print(library['build'])
 			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
@@ -451,7 +453,7 @@ class OpenTTY:
 	def mkprocess(self, pname): self.process[pname] = str(randint(1000, 9999)) # Create process
 	def rmprocess(self, pname): # Kill process by name
 		try: 
-			if pname in ['psh', 'python']: return 
+			if pname.startswith("python") or pname.startswith("psh"): return 
 
 			del self.process[pname.split()[0]]
 		except Exception as error: return
