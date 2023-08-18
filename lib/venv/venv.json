@@ -2,5 +2,6 @@
     "version": "1.0",
     "interface": "github.com",
 
-    "libexec": "/lib/venv/profiles.py"
+    "libexec": "/lib/venv/profiles.py",
+    "workspace": "OpenTTY &version"
 }

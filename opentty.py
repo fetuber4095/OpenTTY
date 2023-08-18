@@ -118,9 +118,10 @@ library = {
 	# Experimental Resources
 	"experiments": {
 		"Are-ROOT": False, # Beahivor as computer admin
+		"Disable-SU": False, # Disable charge user while running PSH
 		"ENABLE": False, # Add command enable and disable to control acessible commands
 		"Desktop": False, # Add support for Virtual Desktop emulation
-		"QT-SDK": False, # Add asset QT-SDK into mirrors
+		"QT-SDK": True, # Add asset QT-SDK into mirrors
 		"Trust-Mirror": False, # Add ability to import mirrors from json files
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
@@ -184,7 +185,7 @@ class OpenTTY:
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
-		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": ""}
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py"}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
@@ -218,7 +219,7 @@ class OpenTTY:
 			except (KeyboardInterrupt, EOFError): self.clear()
 
 
-		print("There are stopped jobs.\n"), self.quit()
+		print("There are stopped jobs.\n"), self.quit(do_report=False)
 	def disconnect(self, code=""):
 		if not code: code = 0
 
@@ -850,6 +851,8 @@ class OpenTTY:
 		raise IndexError("path") 
 	def login(self, root=False): # Modify current login (to: root) 
 		if not root:
+			if library['experiments']['Disable-SU']: raise RuntimeError("SU is disabled.")
+
 			try:
 				self.runas("true")
 

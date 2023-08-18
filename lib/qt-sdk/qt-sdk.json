@@ -1,0 +1,7 @@
+{
+    "version": "beta-0.0.1",
+    "interface": "github.com",
+
+    "libexec": "/lib/qt-sdk/qt-runner.dll",
+    "workspace": "OpenTTY &version"
+}

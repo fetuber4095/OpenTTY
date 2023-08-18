@@ -25,6 +25,7 @@ library['max-byte-len'] = 2048
 # BETA Features
 library["experiments"] = {
         "Are-ROOT": False,
+        "Disable-SU": False, 
         "ENABLE": True,
         "Desktop": True,
         "QT-SDK": True,
