@@ -185,7 +185,7 @@ class OpenTTY:
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
-		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py"}
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py"}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):

@@ -6,11 +6,13 @@ from PyQt5.uic import loadUi
 
 class OpenGUI(QFrame):
     def __init__(self):
-        super().__init__()
-        loadUi(' '.join(sys.argv[1:]), self)
-if __name__ == "__main__": 
-    if not ' '.join(sys.argv[1:]): print("qt: missing operand [ui.file]"), sys.exit()
+        if ' '.join(sys.argv[1:]):
+            super().__init__()
+            loadUi(' '.join(sys.argv[1:]), self)
 
+        else: print("qt: missing operand [ui.file]")
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = OpenGUI()
     window.show()
