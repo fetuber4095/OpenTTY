@@ -130,25 +130,24 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/favicon.ico"},
-		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/ram.py"},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/forge.py"},
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/nano.exe"},
-		"lagg": {"filename": "lagg.exe", "url": "https://download2279.mediafire.com/b0k3fgqwlrig84VkX6IEkSq7VWmvzSMDw6nTUjA0JeYNRwtxbslkEDVYQjG8R_lrgSWVhieGmdnr4JtSh19gsGczwG-kGtxgPF2BwHupTU5aQOYm_bGSGwHso5fQXRRS7TSBpw5KsT56Q-TWLuKLRGk46SADBt1YaGqmJKY2xbNVuWua/530b6jocges4x4i/ReduceMemory.exe"},
-		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/assets/Win32/busybox.exe"},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/build/Applications/cowsay.py"}
+		"favicon": {"filename": "favicon.ico", "url": ""},
+		"ram": {"filename": "ram.py", "url": ""},
+		"forge": {"filename": "forge.py", "url": ""},
+		"nano": {"filename": "nano.exe", "url": ""},
+		"lagg": {"filename": "lagg.exe", "url": ""},
+		"busybox": {"filename": "busybox.exe", "url": ""},
+		"cowsay": {"filename": "cowsay.dll", "url": ""}
 	},
 
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
-		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/server/services/inbox"
+		"inbox": ""
 	},
 
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
 	"opentty.py": "https://github.com/fetuber4095/OpenTTY/raw/main/opentty.py",
 
-	"sync": "https://github.com/fetuber4095/OpenTTY/raw/main/server/release.json",
-	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/profiles/profiles.py"
+	"venv": ""
 }
 
 class OpenTTY:
