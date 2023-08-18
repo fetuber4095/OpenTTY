@@ -1,4 +1,4 @@
-
+# This version of 'qt-runner.dll' is to native python 
 
 
 global sys

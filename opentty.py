@@ -130,13 +130,13 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": ""},
-		"ram": {"filename": "ram.py", "url": ""},
-		"forge": {"filename": "forge.py", "url": ""},
-		"nano": {"filename": "nano.exe", "url": ""},
-		"lagg": {"filename": "lagg.exe", "url": ""},
-		"busybox": {"filename": "busybox.exe", "url": ""},
-		"cowsay": {"filename": "cowsay.dll", "url": ""}
+		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico"},
+		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py"},
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py"},
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe"},
+		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe"},
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe"},
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py"}
 	},
 
 	"docs": {
@@ -147,7 +147,7 @@ library = {
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
 	"opentty.py": "https://github.com/fetuber4095/OpenTTY/raw/main/opentty.py",
 
-	"venv": ""
+	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/venv/profiles.py"
 }
 
 class OpenTTY:
@@ -184,7 +184,7 @@ class OpenTTY:
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
-		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/deploy/projects/qt.py"}
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.dll", "url": ""}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
