@@ -191,6 +191,7 @@ class OpenTTY:
 	def beta(self): # Build experimental resources
 		for item in library['experiments']:
 			if library['experiments'][item]: 
+				print("           Starting Experiments deamon. . ."), timeout(randint(0, 3))
 				print("\033[1m[   \033[32mOK\033[m\033[1m   ] Experiments is enable.")
 				break
 
@@ -402,7 +403,7 @@ class OpenTTY:
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
 				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
-				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}/{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
+				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
 					
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
