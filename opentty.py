@@ -43,6 +43,7 @@ library = {
 		"Added new register method",
 		"Added new commands 'FIND' and 'QUIT'",
 		"Added new experiment 'Revolution-Line'",
+		"END OF NETMAN UPGRADE"
 	],
     
     "developer": "Mr. Lima",
@@ -121,7 +122,7 @@ library = {
 		"Disable-SU": False, # Disable charge user while running PSH
 		"ENABLE": False, # Add command enable and disable to control acessible commands
 		"Desktop": False, # Add support for Virtual Desktop emulation
-		"QT-SDK": True, # Add asset QT-SDK into mirrors
+		"QT-SDK": False, # Add asset QT-SDK into mirrors
 		"Trust-Mirror": False, # Add ability to import mirrors from json files
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
@@ -143,7 +144,7 @@ library = {
 
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
-		"inbox": ""
+		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/var/mail/inbox"
 	},
 
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
@@ -297,6 +298,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
 			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"basename: missing operand [path]...")
+			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
 			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
 			elif cmd.split()[0] == "ps": self.pslist()
 			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd))
@@ -408,6 +410,7 @@ class OpenTTY:
 		except IsADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: is a directory")
 		except NotADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
+		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 		except ValueError: traceback.print_exc()
 
 		
@@ -457,9 +460,8 @@ class OpenTTY:
 		except Exception as error: return
 	
 	def pslist(self): # List runnning process at PSH 
-		print(f"     PID  CMD")
-		for process in self.process:
-			print(f"    {self.process[process]}  {process}")
+		print("     PID  CMD")
+		print('\n'.join([f"    {self.process[process]}  {process}" for process in self.process]))
 	def kill(self, pid): # Kill a process by virtual PID 
 		for process in self.process:
 			if self.process[process] == str(pid): 

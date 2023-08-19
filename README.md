@@ -31,6 +31,5 @@ To install RunDLL use `sudo get rundll`
 To run dlls use `python rundll.py <filename> [arguments]...`
 
 
-
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY
