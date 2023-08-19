@@ -1,0 +1,20 @@
+{
+    "workspace": "opentty.root.virtualdisk",
+
+    "drivers": {
+        "A": {"type": "stream", "id": "floopy"}, "B": {"type": "stream", "id": "device"},
+        "C": {"type": "main", "id": "disk"}, "D": {"type": "stream", "id": "usb-device"},
+        "E": {"type": "read", "id": "disk"}, "F": {"type": "read", "id": "backup-device"}, 
+        "G": {"type": "stream", "id": "device"}, "H": {"type": "read-bytes", "id": "flash"}, 
+        "I": {"type": "stream", "id": "usb-device"}, "J": {"type": "stream", "id": "usb-device"}, 
+        "K": {"type": "stream", "id": "usb-device"}, "L": {"type": "stream", "id": "usb-device"}, 
+        "M": {"type": "stream", "id": "usb-device"}, "N": {"type": "stream", "id": "usb-device"}, 
+        "O": {"type": "stream", "id": "usb-device"}, "P": {"type": "stream", "id": "usb-device"},
+        "Q": {"type": "stream", "id": "usb-device"}, "R": {"type": "stream", "id": "usb-device"}, 
+        "S": {"type": "stream", "id": "usb-device"}, "T": {"type": "stream", "id": "usb-device"}, 
+        "U": {"type": "stream", "id": "usb-device"}, "V": {"type": "stream", "id": "usb-device"}, 
+        "W": {"type": "stream", "id": "usb-device"}, "X": {"type": "stream", "id": "usb-device"}, 
+        "Y": {"type": "stream", "id": "usb-device"}, "Z": {"type": "main", "id": "disk"},
+    }
+
+}
