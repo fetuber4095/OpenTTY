@@ -37,13 +37,10 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.2.2", "build": "08H8",
-    "subject": "The Netman Upgrade",
+    "version": "1.3", "build": "09H1",
+    "subject": "The Virtual Update",
 	"patch": [
-		"Added new register method",
-		"Added new commands 'FIND' and 'QUIT'",
-		"Added new experiment 'Revolution-Line'",
-		"END OF NETMAN UPGRADE"
+	
 	],
     
     "developer": "Mr. Lima",
@@ -96,9 +93,10 @@ library = {
 	},
 
 	# Virtual disks info
-	"fstab": {
-	
-	},
+	"fstab": [],
+
+
+	"letters": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
 
 	# Systems commands
 	#
@@ -122,7 +120,7 @@ library = {
 		"Disable-SU": False, # Disable charge user while running PSH
 		"ENABLE": False, # Add command enable and disable to control acessible commands
 		"Desktop": False, # Add support for Virtual Desktop emulation
-		"QT-SDK": False, # Add asset QT-SDK into mirrors
+		"QT-SDK": True, # Add asset QT-SDK into mirrors
 		"Trust-Mirror": False, # Add ability to import mirrors from json files
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
@@ -132,14 +130,14 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico"},
-		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py"},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py"},
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe"},
-		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe"},
-		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe"},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py"},
-		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py"}
+		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": []},
+		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": []},
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": []},
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": []},
+		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []},
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
+		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']}
 	},
 
 	"docs": {
@@ -169,7 +167,17 @@ class OpenTTY:
 		
 		self.write32u(show=False)
 		self.beta()
+
+		# Setup Virtual Disk Envirronment 
+		try: os.makedirs(f"{self.root}/mnt") # Create Virtual Mount Point (if doesn't exists)
+		except FileExistsError: True # Do anything if Already exists
+
+		for dir in os.listdir(f"{self.root}/mnt"):
+			if os.path.isdir(f"{self.root}/mnt/{dir}"):
+				for letter in library['letters']:
+					if dir == letter: print(f"\033[1m[   \033[32mOK\033[m\033[1m   ] mounted {dir} in '{os.path.join(self.root, 'mnt', dir)}'"), library['fstab'].append(dir)
 		
+		# Setup of OpenTTY Runtime 
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local
@@ -183,11 +191,11 @@ class OpenTTY:
 	def beta(self): # Build experimental resources
 		for item in library['experiments']:
 			if library['experiments'][item]: 
-				print("\033[1m\033[32m[Experiments]\033[m Experiments is enable.")
+				print("\033[1m[   \033[32mOK\033[m\033[1m   ] Experiments is enable.")
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
-		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py"}
+		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['pyqt5', 'pyqt5-tools']}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host, port=8080, admin=False):
@@ -280,13 +288,11 @@ class OpenTTY:
 				except Exception as error: traceback.print_exc()
 			
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
-			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif cmd.split()[0] == "del" or cmd.split()[0] == "global": self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.split()[0] == "lambda" or cmd.split()[0] == "raise" or cmd.split()[0] == "assert": self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.split()[0] == "if" or cmd.split()[0] == "with" or cmd.split()[0] == "def" or cmd.split()[0] == "class": self.execblock(cmd)
-			elif cmd.split()[0] == "from" or cmd.split()[0] == "import" or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}", mkprocess=False)
-			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
+			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
+			elif cmd.split()[0] in ["if", "with", "def", "class"]: self.execblock(cmd)
+			elif cmd.split()[0] in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]: self.shell(f": {cmd}", mkprocess=False)
+			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
 					run = eval(cmd, self.globals, self.locals)
@@ -345,7 +351,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "server": self.server(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "cal": self.calendar()
 			elif cmd.split()[0] == "github": print(library['github.com'])
-			elif cmd.split()[0] == "passwd": print(f"passwd: your password is {library['passwd']}")
+			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {library['passwd']}")
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
@@ -375,6 +381,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
+			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"")
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
@@ -385,6 +392,8 @@ class OpenTTY:
 
 			elif cmd.split()[0] == "true": pass
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
+
+			elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd)
 
 			else:
 				if cmd.split()[0] in self.aliases: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
@@ -411,7 +420,8 @@ class OpenTTY:
 		except NotADirectoryError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: not a directory")
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
 		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
-		except ValueError: traceback.print_exc()
+		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]...")
+		except (ValueError, NameError, OSError): return traceback.print_exc()
 
 		
 		return True, self.rmprocess(cmd)
@@ -900,7 +910,11 @@ class OpenTTY:
 			for resource in asset.split():
 				if resource not in library['resources']: shutil.copy(resource, f"{self.root}/{self.basename(resource)}")
 
-				try: urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), print(f"get: asset '{resource}' installed.")
+				try: 
+					urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), local(f"pip install {' '.join(library['resources'][resource]['py-libs'])}")
+
+
+					print(f"install: asset '{resource}' installed.")
 				except Exception as error: print(f"get: bad. asset installation failed."), traceback.print_exc()
 				
 		else: raise IndexError("asset")
@@ -1111,7 +1125,64 @@ class OpenTTY:
 
 		return f"{group1}.{group2}.{group3}.{group4}"
 
+class VirtualDisk(OpenTTY): # Virtual Compact Disk System
+	def __init__(self, cmd):
+		if not cmd: return
+	
+		if cmd.split()[0] == "mount": # Wizard for command "mount"
+			cmd = super().replace(cmd)
 
+			if len(cmd.split()) < 2: raise IndexError("filename" if cmd else "drive << filename")
+
+			drive_letter = cmd.split()[0].upper()
+			filename = super().replace(cmd)
+
+			for letter in library['letters']:
+				if drive_letter == letter:
+					if drive_letter in library['fstab']: raise OSError("Already have a drive mounted here.")
+					self.mount(drive_letter, filename), library['fstab'].append(drive_letter)
+
+					break
+
+			else: raise OSError("Invalid Drive letter. Try again.")
+		elif cmd.split()[0] == "unmount": # Wizard for command "unmount"
+			cmd = super().replace(cmd)
+
+			if not cmd: raise IndexError("drive")
+
+			drive_letter = cmd.split()[0].upper()
+
+			if drive_letter in library['fstab']: 
+				if f"{library['root-dir']}/mnt/{drive_letter.upper()}" in os.getcwd(): raise OSError("Unable to unmount drive. You are working here.")
+				
+				self.unmount(drive_letter)
+			else: raise NameError("Drive not found.")
+		elif cmd.split()[0] == "eject": # Wizard for command "eject"
+			cmd = super().replace(cmd)
+
+			if not cmd: raise IndexError("drive")
+
+			drive_letter = cmd.split()[0].upper()
+
+			if drive_letter in library['fstab']: 
+				if f"{library['root-dir']}/mnt/{drive_letter.upper()}" in os.getcwd(): raise OSError("Unable to unmount drive. You are working here.")
+				
+				self.eject(drive_letter)
+			else: raise NameError("Drive not found.")
+		elif cmd.split()[0] == "warp": # Wizard for command "warp"
+			cmd = super().replace(cmd)
+
+			if cmd:
+				for letter in library['fstab']:
+					if cmd.upper() == letter: return self.warpto(cmd)
+
+				raise NameError("Drive not found.")
+
+	def warpto(self, drive_letter): super().pushdir(f"{library['root-dir']}/mnt/{drive_letter.upper()}") # Warp to a virtual compact disk
+
+	def mount(self, drive_letter, filename): super().unzip(f"{filename} {library['root-dir']}/mnt/{drive_letter}") # Mount a virtual disk	
+	def unmount(self, drive_letter): super().gunzip(f"{drive_letter}.zip {library['root-dir']}/mnt/{drive_letter}/"), super().removedir(f"{library['root-dir']}/mnt/{drive_letter}"), library['fstab'].remove(drive_letter) # Dismount and save disk in a zip archive
+	def eject(self, drive_letter): super().removedir(f"{library['root-dir']}/mnt/{drive_letter}"), library['fstab'].remove(drive_letter) # Dismount a compact disk without save into a zip archive
 
 if __name__ == "__main__":
 	with OpenTTY() as app:

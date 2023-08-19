@@ -28,8 +28,9 @@ library['hidden-files-prefix'] = "." # Setup prefix of hidden Files
 library['dircolors']['extension'] = "\033[COLORCODEm" # Add and modify files colors
 
 library['resources']['RESOURCE-NAME'] = { # Setup your assets
-    "filename": "NAME-OF-ASSET",
-    "url": "URL-FOR-ASSET-DOWNLOAD"
+    "filename": "NAME-OF-ASSET", # Name of asset
+    "url": "URL-FOR-ASSET-DOWNLOAD", # URL For asset file
+    "py-libs": [], # Dependences, put here python modules to be installed with pip during asset installation
 }
 
 library["experiments"] = {
