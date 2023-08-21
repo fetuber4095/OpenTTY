@@ -37,12 +37,10 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.3", "build": "09H1",
-    "subject": "The Virtual Update",
+    "version": "1.4", "build": "09H2",
+    "subject": "The Midnight Update",
 	"patch": [
-		"Added Virtual Compact FileSystem",
-		"Added the new commands 'SE', 'ADD-REPO' and 'TRY'",
-		"Added new configurate system, '*.conf' file loader"
+		
 	],
     
     "developer": "Mr. Lima",
@@ -225,7 +223,7 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']} " if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
@@ -388,8 +386,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
-			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"")
-			elif cmd.split()[0] == "psh": self.connect(self.ttyname, self.process[library['sh']], admin=True)
+			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"fstab: no drives detected.")
+			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, admin=root)
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
@@ -398,6 +396,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
 			elif cmd.split()[0] == "quit": self.quit()
+			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": return True
@@ -1160,6 +1159,8 @@ class OpenTTY:
 
 		return f"{group1}.{group2}.{group3}.{group4}"
 
+
+
 class VirtualDisk(OpenTTY): # Virtual Compact Disk System
 	def __init__(self, cmd):
 		if not cmd: return
@@ -1222,4 +1223,4 @@ class VirtualDisk(OpenTTY): # Virtual Compact Disk System
 if __name__ == "__main__":
 	with OpenTTY() as app:
 
-		app.connect("localhost", admin=False)
+		app.connect("localhost", admin=False if not "--admin" in sys.argv else True)

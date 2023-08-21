@@ -31,7 +31,8 @@ class RunDll(OpenTTY):
 
 		self.globals = {
 			"app": app, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
-			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local
+			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
+			"config": super().loadconfig
 		}
 		self.locals = {}
 
