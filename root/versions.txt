@@ -1,0 +1,16 @@
+-	06H6	1.0 	CE	The OpenTTY Upgrade
+-	08H1	1.0.1 		The Sunset Update
+-	08H2	1.1 		The ROOT Update
+-	08H3	?			Unknown
+-	08H4	1.1.1 		
+-	08H5	1.2rc		
+-	08H6	1.2 	95	The NETMAN Upgrade
+-	08H7	1.2.1
+-	08H8	1.2.2
+-	09H1	1.3 		The Virtual Update
+	09H2	1.4 		The 
+	09H3	1.5
+	09H4	1.6rc1
+	09H5	1.6rc2
+	10H1	1.6
+	10H2	1.6.1
