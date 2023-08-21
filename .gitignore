@@ -3,5 +3,6 @@ __pycache__/
 dist/
 build/
 home/
+mnt/
 
 CONFIG.SYS

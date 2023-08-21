@@ -1,12 +1,15 @@
 &appname v&version [Mail Inbox]
 
-Title: The NETMAN? Who is this man?
-Subject: This release is NETMAN!
+Title: Update? Again?
+Subject: I return to post a update
 
-From: (Owner) Mr. Lima [Thu Aug 6 0:32 2023]
+From: (Owner) Mr. Lima [Sun Aug 20 15:24 2023]
 -----------------------------------------------
     
-    The NETMAN Upgrade charges release family
-of CE for 95, this upgrade
+    This is the 1.3 update, it add some tools
+into OpenTTY (see more informations in README at
+github). The 1.2.1 and older versions lost asset 
+installation support 'cause the repository had 
+the extructure charged.s
     
 > FeTuber4095

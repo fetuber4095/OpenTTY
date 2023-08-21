@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #    
 #  Copyright (C) 2023 "Mr. Lima"
@@ -32,7 +32,7 @@ from sys import stdin, stdout
 
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
-import shutil, getpass, zipfile, datetime, shlex, traceback, code, re
+import shutil, getpass, zipfile, datetime, shlex, traceback, code
 
 library = {
 	# Informations for current installation
@@ -40,7 +40,9 @@ library = {
     "version": "1.3", "build": "09H1",
     "subject": "The Virtual Update",
 	"patch": [
-	
+		"Added Virtual Compact FileSystem",
+		"Added the new commands 'SE', 'ADD-REPO' and 'TRY'",
+		"Added new configurate system, '*.conf' file loader"
 	],
     
     "developer": "Mr. Lima",
@@ -120,8 +122,7 @@ library = {
 		"Disable-SU": False, # Disable charge user while running PSH
 		"ENABLE": False, # Add command enable and disable to control acessible commands
 		"Desktop": False, # Add support for Virtual Desktop emulation
-		"QT-SDK": True, # Add asset QT-SDK into mirrors
-		"Trust-Mirror": False, # Add ability to import mirrors from json files
+		"QT-SDK": False, # Add asset QT-SDK into mirrors=
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
 		"Dumpsys": False, # Enable dumpsys
@@ -139,6 +140,10 @@ library = {
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
 		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']}
 	},
+
+	"scripts": {
+		"": {"url": "", "env": ""}
+	}, 
 
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
@@ -180,7 +185,8 @@ class OpenTTY:
 		# Setup of OpenTTY Runtime 
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
-			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local
+			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
+			"config": self.loadconfig
 		}
 		self.locals = {}
 		
@@ -219,7 +225,7 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']} " if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd() if os.getcwd() != os.path.expanduser('~') else '~'} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']} " if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": break
@@ -231,7 +237,7 @@ class OpenTTY:
 
 
 		print("There are stopped jobs.\n"), self.quit(do_report=False)
-	def disconnect(self, code=""):
+	def disconnect(self, code=""): # Disconnect from python client
 		if not code: code = 0
 
 		try:
@@ -240,7 +246,7 @@ class OpenTTY:
 			print(f"Press return to continue"), input(), close()
 		except (KeyboardInterrupt, EOFError): print(), close()
 	
-	def execfile(self, filename, cmd="", ispkg=False, root=False):
+	def execfile(self, filename, cmd="", ispkg=False, root=False): # Execute a dll python script
 		if self.basename(filename).split()[0] not in library['whitelist'] and not ispkg and not root: raise PermissionError("Script not in Whitelist. Are you root?")
 
 		if filename.startswith("/"): filename = f"{self.root}{filename}"
@@ -251,7 +257,7 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
-	def execblock(self, startline=""):
+	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def)
 		if len(startline.split()) >= 2: 
 			block = []
 			block.append(startline)
@@ -291,8 +297,9 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif cmd.split()[0] in ["if", "with", "def", "class"]: self.execblock(cmd)
+			elif cmd.split()[0] in ["if", "with", "def", "class", "try"]: self.execblock(cmd)
 			elif cmd.split()[0] in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]: self.shell(f": {cmd}", mkprocess=False)
+			#elif any(cmd.startswith(keyword) for keyword in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
@@ -300,7 +307,7 @@ class OpenTTY:
 
 					if run: print(run)
 				except Exception as error: traceback.print_exc()
-		
+			
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
@@ -359,7 +366,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "curl": self.curl(self.replace(cmd), show=True)
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "inbox": self.rraw(library['docs']['inbox'], show=True, report="inbox", tbmsg="bad. failed to connect with inbox.")
+			elif cmd.split()[0] == "inbox": self.curl(library['docs']['inbox'], show=True)
 			elif cmd.split()[0] == "se": raise SystemExit(self.replace(cmd)) 
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "build": print(library['build'])
@@ -381,25 +388,28 @@ class OpenTTY:
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
-			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"")
+			elif cmd.split()[0] == "psh": self.connect(self.ttyname, self.process[library['sh']], admin=True)
+			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
+			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
 			elif cmd.split()[0] == "quit": self.quit()
 			#elif cmd.split()[0] == "":
 
-			elif cmd.split()[0] == "true": pass
+			elif cmd.split()[0] == "true": return True
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
 
-			elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd)
 
 			else:
 				if cmd.split()[0] in self.aliases: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
+
+				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
 				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
@@ -697,6 +707,20 @@ class OpenTTY:
 					line_number += 1
 
 		else: self.ThreadIn() 
+	def loadconfig(self, filename): # Load a configuration from a file
+		config_dict = {}
+
+		with open(filename, "r") as file:
+			for line in file:
+				line = line.strip()
+				if line.startswith("[") and line.endswith("]"):
+					current_section = line[1:-1]
+					config_dict[current_section] = {}
+				elif "=" in line and current_section is not None:
+					key, value = line.split("=", 1)
+					config_dict[current_section][key.strip()] = value.strip()
+
+		return config_dict
 	def tail(self, filename): # Show last lines of a file 
 		if filename:
 			def tailrepliant(filename):
@@ -826,7 +850,7 @@ class OpenTTY:
 				
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
-			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n\n\nOperand Synchronize Database\n=================================")
+			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n")
 	def pull(self, filename): # Save current status of library in a json file 
 		if filename: json.dump(library, open(filename, "wt+"))
 		else: raise IndexError("filename")
@@ -901,7 +925,7 @@ class OpenTTY:
 				if resource not in library['resources']: return print(f"get: {resource}: asset not found")
 
 				try: urllib.request.urlretrieve(library['resources'][resource]['url'], library['resources'][resource]['filename']), print(f"get: asset '{resource}' downloaded.")
-				except Exception as traceback: print(f"get: bad. asset download failed.")
+				except Exception as error: print(f"get: bad. asset download failed."), traceback.print_exc()
 				
 		else: raise IndexError("asset")
 	def install(self, asset, root=False): # Install file and enable it as OpenTTY local asset 
@@ -911,14 +935,24 @@ class OpenTTY:
 			for resource in asset.split():
 				if resource not in library['resources']: shutil.copy(resource, f"{self.root}/{self.basename(resource)}")
 
-				try: 
-					urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}"), local(f"pip install {' '.join(library['resources'][resource]['py-libs'])}")
+				else:
+					try: 
+						urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}")
+						local(f"pip install {' '.join(library['resources'][resource]['py-libs'])}") if library['resources'][resource]['py-libs'] else local("")
 
-
-					print(f"install: asset '{resource}' installed.")
-				except Exception as error: print(f"get: bad. asset installation failed."), traceback.print_exc()
-				
+						print(f"install: asset '{resource}' installed.")
+					except Exception as error: print(f"get: bad. asset installation failed."), traceback.print_exc()
+					
 		else: raise IndexError("asset")
+	def trustin(self, filename, root=False): # Import mirrors from a file
+		if filename:
+			if not root: raise PermissionError("Unable to index mirror file. Are you root?")
+
+			with open(filename, "r") as file:
+				try: library['resources'].update(json.load(file))
+				except json.decoder.JSONDecodeError as error: traceback.print_exc()
+
+		else: raise IndexError("filename")
 	def insmod(self, filename, root=False): # Load PSH Scripts 
 		if filename: 
 			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError("Script not in Whitelist. Are you root?")

@@ -8,6 +8,7 @@ class OpenGUI(QFrame):
     def __init__(self):
         super().__init__()
         loadUi(' '.join(sys.argv[1:]), self)
+        
 if __name__ == "__main__": 
     if not ' '.join(sys.argv[1:]): print("qt: missing operand [ui.file]"), sys.exit()
 
