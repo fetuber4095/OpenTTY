@@ -393,7 +393,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"fstab: no drives detected.")
-			elif cmd.split()[0] == "builtin": self.shell(cmd, mkprocess=True, report=report, root=root)
+			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), mkprocess=True, builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print("builtin: missing operand [command]...")
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "su": self.login(root=root)
@@ -415,14 +415,14 @@ class OpenTTY:
 
 				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd)
 								
-				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
-				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
-				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
-				elif f"{cmd.split()[0]}.zip" in os.listdir(self.root): 
+				elif f"{cmd.split()[0]}.py" in os.listdir(self.root) and not builtin: local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
+				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root) and not builtin: local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
+				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root) and not builtin: self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
+				elif f"{cmd.split()[0]}.zip" in os.listdir(self.root) and not builtin: 
 					for letter in library['letters']:
 						if letter not in library['fstab']: return VirtualDisk(f"mount {letter} {self.root}/{cmd.split()[0]}.zip"), True, self.rmprocess(cmd)	
 				
-				elif cmd.split()[0] in library['resources']:
+				elif cmd.split()[0] in library['resources'] and not builtin:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
 					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
 				
