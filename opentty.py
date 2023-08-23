@@ -69,7 +69,7 @@ library = {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
 		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
-		"floppy": "warp a"
+		"floppy": "warp a", "ll": "busybox ls"
 	},
 
 	# Disabled Commands list
@@ -139,7 +139,7 @@ library = {
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
 		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
-		"midnight": {"filename": "midnight.zip", "url": ""}
+		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []}
 	},
 
 	"scripts": {
@@ -189,9 +189,7 @@ class OpenTTY:
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
 			"config": self.loadconfig
 		}
-		self.locals = {
-			"app": self
-		}
+		self.locals = {"app": self}
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
@@ -208,7 +206,7 @@ class OpenTTY:
 		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['pyqt5', 'pyqt5-tools']}
 		
 	# OpenTTY - Client Interface [Module API]
-	def connect(self, host="localhost", port=8080, admin=False):
+	def connect(self, host="localhost", port=8080, warpin=True, admin=False):
 
 		if library['goto-home']: os.chdir(os.path.expanduser("~"))
 		if library['do-auth']: self.runas("true")
@@ -239,8 +237,9 @@ class OpenTTY:
 					else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
+			except (IndexError): traceback.print_exc()
 
-		if __name__ == "__main__":
+		if __name__ == "__main__" and warpin:
 			with PythonConsole(self.locals) as psh: psh.run(show=False)
 	def disconnect(self, code=""): # Disconnect from python client
 		if not code: code = 0
@@ -385,7 +384,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "search": self.search(self.replace(cmd))
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
-			elif cmd.split()[0] == "cl0": self.locals = {}
+			elif cmd.split()[0] == "cl0": self.locals = {"app": self}
 			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd))
 			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
 			elif cmd.split()[0] == "genip": print(self.gen_adress())
@@ -395,7 +394,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"fstab: no drives detected.")
 			elif cmd.split()[0] == "builtin": self.shell(cmd, mkprocess=True, report=report, root=root)
-			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, admin=root)
+			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
@@ -408,9 +407,6 @@ class OpenTTY:
 
 			elif cmd.split()[0] == "true": return True
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
-
-			elif cmd.split()[0] == "py": 
-				with PythonConsole(self.locals) as psh: psh.run()
 
 			else:
 				if cmd.split()[0] in self.aliases and not builtin: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
@@ -886,7 +882,7 @@ class OpenTTY:
 			try:
 				self.runas("true")
 
-				self.connect(self.ttyname, self.process[library['sh']], admin=True)
+				self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
 
 			except KeyError: print("login: no such psh session.")
 	def asset(self): # Show installed assets 

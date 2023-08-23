@@ -34,7 +34,7 @@ class RunDll(OpenTTY):
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
 			"config": super().loadconfig
 		}
-		self.locals = {}
+		self.locals = {"app": app}
 
 
 	def __enter__(self): return self

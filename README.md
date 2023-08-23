@@ -19,8 +19,8 @@ repository
 
 Now command QUIT cant be executed on psh, it is a interactive   
 caller for python shell, it finish PSH session and go to python  
-console if you're not in py m.mode its start a interative console
-with only the value `app` that is a session of `opentty.OpenTTY`.
+console if you're not in py m.mode its start a interative console  
+with only the value `app` that is a session of `opentty.OpenTTY`.  
 
 
 
