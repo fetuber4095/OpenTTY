@@ -37,11 +37,10 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.4", "build": "09H2",
-    "subject": "The Midnight Update",
+    "version": "1.5", "build": "09H3",
+    "subject": "The OpenQT Update",
 	"patch": [
-		"Midnight Resources",
-		"Removed command QUIT",
+		"Finished experiments QT-SDK"
 	],
     
     "developer": "Mr. Lima",
@@ -139,7 +138,12 @@ library = {
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
 		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
-		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []}
+		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['pyqt5', 'pyqt5-tools']},
+		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
+		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []}
+		"browser": {"filename": "qt-browser", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []}
+		"": {"filename": "", "url": "", "py-libs": []}
+		#"": {"filename": "", "url": "", "py-libs": []}
 	},
 
 	"scripts": {
@@ -203,7 +207,6 @@ class OpenTTY:
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
-		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['pyqt5', 'pyqt5-tools']}
 		
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host="localhost", port=8080, warpin=True, admin=False):
@@ -416,6 +419,7 @@ class OpenTTY:
 				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root) and not builtin: local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
+				elif f"{cmd.split()[0]}.ui" in os.listdir(self.root) and not builtin: self.shell(f"qt {self.root}/{cmd.split()[0]}.ui {self.replace(cmd)}", mkprocess=True, builtin=False, root=root)
 				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root) and not builtin: local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
 				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root) and not builtin: self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
 				elif f"{cmd.split()[0]}.zip" in os.listdir(self.root) and not builtin: 
