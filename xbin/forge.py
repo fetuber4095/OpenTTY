@@ -29,6 +29,7 @@ library["experiments"] = {
         "ENABLE": True,
         "Desktop": True,
         "QT-SDK": True,
+        "Trust-Mirror": True,
         "RRAW-IS-CURL": True,
         "Revolution-Line": False,
         "Dumpsys": True,

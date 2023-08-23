@@ -45,6 +45,7 @@ library['ipinfo-token'] = ""
 # ----------------------------
 
 app = OpenTTY() 
+admin = True
 
 beahvior = app.loadconfig("conf.d/beahvior.conf")
 services = app.loadconfig("conf.d/services.conf")
@@ -54,10 +55,12 @@ def RunCommand(command):
     command = command.split("|")
 
     for cmd in command:
-        app.shell(cmd, mkprocess=True, root=True)
+        app.shell(cmd, mkprocess=True, root=admin)
 
 def RunMenu():
     if menu['Loader']['menu'] != "False":
+        print()
+
         for item in menu['Menu']:
             print(f"{item}. {menu['Menu'][item]}")
 

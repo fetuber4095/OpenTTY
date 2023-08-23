@@ -40,7 +40,8 @@ library = {
     "version": "1.4", "build": "09H2",
     "subject": "The Midnight Update",
 	"patch": [
-		
+		"Midnight Resources",
+		"Removed command QUIT",
 	],
     
     "developer": "Mr. Lima",
@@ -67,7 +68,8 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod"
+		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
+		"floppy": "warp a"
 	},
 
 	# Disabled Commands list
@@ -136,7 +138,8 @@ library = {
 		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []},
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
-		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']}
+		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
+		"midnight": {"filename": "midnight.zip", "url": ""}
 	},
 
 	"scripts": {
@@ -186,7 +189,9 @@ class OpenTTY:
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
 			"config": self.loadconfig
 		}
-		self.locals = {}
+		self.locals = {
+			"app": self
+		}
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
@@ -203,10 +208,10 @@ class OpenTTY:
 		if library['experiments']['QT-SDK']: library['resources']['qt-sdk'] = {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['pyqt5', 'pyqt5-tools']}
 		
 	# OpenTTY - Client Interface [Module API]
-	def connect(self, host, port=8080, admin=False):
+	def connect(self, host="localhost", port=8080, admin=False):
 
 		if library['goto-home']: os.chdir(os.path.expanduser("~"))
-		if library['do-auth']: self.runas("trues")
+		if library['do-auth']: self.runas("true")
 
 
 		if library['sh'] not in self.process: 
@@ -217,6 +222,7 @@ class OpenTTY:
 
 
 		while library['sh'] in self.process:
+			if not "python" in self.process: raise SystemExit("\033[1m[\033[32mPython killed\033[m\033[1m]\033[m There are stopped jobs.")
 
 			for asset in os.listdir(self.root): 
 				if asset.endswith(".sh"): self.insmod(f"{self.root}/{asset}", root=True)
@@ -226,15 +232,16 @@ class OpenTTY:
 				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
-					if cmd.split()[0] == "logout": break
+					if cmd.split()[0] == "logout": return 
+					elif cmd.split()[0] == "quit": break
 					elif cmd.split()[0] in library['commands-blacklist'] and library['experiments']['ENABLE'] == True: print(f"{cmd.split()[0]}: command disabled.")
 					
 					else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
 
-
-		print("There are stopped jobs.\n"), self.quit(do_report=False)
+		if __name__ == "__main__":
+			with PythonConsole(self.locals) as psh: psh.run(show=False)
 	def disconnect(self, code=""): # Disconnect from python client
 		if not code: code = 0
 
@@ -256,7 +263,7 @@ class OpenTTY:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
 	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def)
-		if len(startline.split()) >= 2: 
+		if len(startline.split()) >= 2 and startline.endswith(":"): 
 			block = []
 			block.append(startline)
 
@@ -280,7 +287,7 @@ class OpenTTY:
 		except Exception as error: traceback.print_exc()
 
 	# OpenTTY "Shell"
-	def shell(self, cmd, mkprocess=True, report="", root=False):
+	def shell(self, cmd, mkprocess=True, report="", builtin=False, root=False):
 		if mkprocess: self.mkprocess(cmd.split()[0])
 		
 		try:
@@ -295,9 +302,8 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif cmd.split()[0] in ["if", "with", "def", "class", "try"]: self.execblock(cmd)
-			elif cmd.split()[0] in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]: self.shell(f": {cmd}", mkprocess=False)
-			#elif any(cmd.startswith(keyword) for keyword in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]): self.shell(f": {cmd}", mkprocess=False)
+			elif any(cmd.startswith(keyword) for keyword in ["if", "with", "def", "class", "try"]): self.execblock(cmd)
+			elif any(cmd.startswith(keyword) for keyword in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
 				try:
@@ -311,9 +317,10 @@ class OpenTTY:
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
 			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"basename: missing operand [path]...")
 			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
+			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
 			elif cmd.split()[0] == "ps": self.pslist()
-			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd))
+			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "mkdir": self.makedir(self.replace(cmd))
 			elif cmd.split()[0] == "rmdir": self.removedir(self.replace(cmd))
 			elif cmd.split()[0] == "rm": self.remove(self.replace(cmd))
@@ -387,6 +394,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"fstab: no drives detected.")
+			elif cmd.split()[0] == "builtin": self.shell(cmd, mkprocess=True, report=report, root=root)
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, admin=root)
 			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
 			elif cmd.split()[0] == "su": self.login(root=root)
@@ -395,16 +403,17 @@ class OpenTTY:
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
 			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
-			elif cmd.split()[0] == "quit": self.quit()
-			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
+			#elif cmd.split()[0] == "":
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": return True
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
 
+			elif cmd.split()[0] == "py": 
+				with PythonConsole(self.locals) as psh: psh.run()
 
 			else:
-				if cmd.split()[0] in self.aliases: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
+				if cmd.split()[0] in self.aliases and not builtin: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 
@@ -413,7 +422,10 @@ class OpenTTY:
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root): local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
 				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root): self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
 				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root): local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
-					
+				elif f"{cmd.split()[0]}.zip" in os.listdir(self.root): 
+					for letter in library['letters']:
+						if letter not in library['fstab']: return VirtualDisk(f"mount {letter} {self.root}/{cmd.split()[0]}.zip"), True, self.rmprocess(cmd)	
+				
 				elif cmd.split()[0] in library['resources']:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
 					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
@@ -460,8 +472,7 @@ class OpenTTY:
 		for key in self.locals: text = text.replace(f"${key}", str(self.locals[key]))
 
 		return text
-	
-	# OpenTTY "Thread Methods"
+
 	def ThreadIn(self): # Thread a loop until 'MAX-BYTE-LEN' listenning sys.stdin 
 		for _ in range(library['max-byte-len']): print(input())
 	def ThreadOut(self, text): # Thread a loop for infinit printing a string at sys.stdout 
@@ -482,7 +493,7 @@ class OpenTTY:
 	def pslist(self): # List runnning process at PSH 
 		print("     PID  CMD")
 		print('\n'.join([f"    {self.process[process]}  {process}" for process in self.process]))
-	def kill(self, pid): # Kill a process by virtual PID 
+	def kill(self, pid, report=""): # Kill a process by virtual PID 
 		for process in self.process:
 			if self.process[process] == str(pid): 
 				if process == 'python': close()
@@ -491,24 +502,7 @@ class OpenTTY:
 
 				return True
 		
-		print(f"kill: ({pid}) - No such process" if pid else f"kill: missing operand [PID]...")
-	def quit(self, do_report=True): # Quit from all pending process
-		pending = []
-
-		for process in self.process:
-			if process not in ['python', 'psh', 'quit']:
-				pending.append(process)
-
-		if pending:
-			for process in pending: self.rmprocess(process)
-
-			if do_report:
-				print(f"quit: {len(pending)} pending killed.")
-
-			return 
-
-		if do_report:
-			print("quit: no pending process.")
+		print(f"{report}kill: ({pid}) - No such process" if pid else f"{report}kill: missing operand [PID]...")
 
 	# OpenTTY "Applications"
 	#
@@ -807,7 +801,7 @@ class OpenTTY:
 	def clear(self): # Clear console [Linux and Windows] 
 		if os.name == "nt": local("cls")
 		else: local("clear")
-	def stty(self, cmdline): # Charge console name 
+	def stty(self, cmdline=""): # Charge console name 
 		if cmdline: self.ttyname = cmdline
 		else: print(self.ttyname)
 	def pushdir(self, path): # Charge working directory 
@@ -894,7 +888,7 @@ class OpenTTY:
 
 				self.connect(self.ttyname, self.process[library['sh']], admin=True)
 
-			except KeyError: print("login: psh not started.")
+			except KeyError: print("login: no such psh session.")
 	def asset(self): # Show installed assets 
 		root_files = os.listdir(self.root)
 
@@ -1219,6 +1213,16 @@ class VirtualDisk(OpenTTY): # Virtual Compact Disk System
 	def mount(self, drive_letter, filename): super().unzip(f"{filename} {library['root-dir']}/mnt/{drive_letter}") # Mount a virtual disk	
 	def unmount(self, drive_letter): super().gunzip(f"{drive_letter}.zip {library['root-dir']}/mnt/{drive_letter}/"), super().removedir(f"{library['root-dir']}/mnt/{drive_letter}"), library['fstab'].remove(drive_letter) # Dismount and save disk in a zip archive
 	def eject(self, drive_letter): super().removedir(f"{library['root-dir']}/mnt/{drive_letter}"), library['fstab'].remove(drive_letter) # Dismount a compact disk without save into a zip archive
+class PythonConsole(code.InteractiveConsole, OpenTTY): # Call a python interactive shell
+
+	def __enter__(self): return self
+	def __exit__(self, exc_type, exc_value, traceback): 
+		try: self.locals['__builtins__']
+		except KeyError: return 
+
+		return
+
+	def run(self, show=True): self.interact(f'\033[mPython {platform.python_version()} ({platform.python_build()[0]} {platform.python_build()[1]}) [{platform.python_compiler()}] on {platform.system().lower()}\nType "help", "copyright", "credits" or "license" for more information.' if show else '')
 
 if __name__ == "__main__":
 	with OpenTTY() as app:
