@@ -7,8 +7,15 @@
 
 ## Release Notes  
 
-1. OpenQT SDK
+1. OpenQT SDK  
 
+The OpenQT is a SDK to load and run PyQt5 xml ui files,  
+it is developed for in future the developers can create assets  
+with graphical resources. With this runtime, users get ability  
+to run directly Qt projects without convert it into python  
+scripts.  
+
+2.
 
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY  

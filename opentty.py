@@ -40,7 +40,8 @@ library = {
     "version": "1.5", "build": "09H3",
     "subject": "The OpenQT Update",
 	"patch": [
-		"Finished experiments QT-SDK"
+		"Finished experiments QT-SDK",
+		"Added new interface applications"
 	],
     
     "developer": "Mr. Lima",
@@ -138,11 +139,11 @@ library = {
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
 		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
-		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['pyqt5', 'pyqt5-tools']},
+		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools']},
 		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
-		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []}
-		"browser": {"filename": "qt-browser", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []}
-		"": {"filename": "", "url": "", "py-libs": []}
+		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []},
+		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
+		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']},
 		#"": {"filename": "", "url": "", "py-libs": []}
 	},
 
@@ -193,7 +194,7 @@ class OpenTTY:
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
 			"config": self.loadconfig
 		}
-		self.locals = {"app": self}
+		self.locals = {}
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
@@ -243,7 +244,7 @@ class OpenTTY:
 			except (IndexError): traceback.print_exc()
 
 		if __name__ == "__main__" and warpin:
-			with PythonConsole(self.locals) as psh: psh.run(show=False)
+			with PythonConsole(self.globals) as psh: psh.run(show=False)
 	def disconnect(self, code=""): # Disconnect from python client
 		if not code: code = 0
 
@@ -304,7 +305,7 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif any(cmd.startswith(keyword) for keyword in ["if", "with", "def", "class", "try"]): self.execblock(cmd)
+			elif any(cmd.startswith(keyword) for keyword in ["if", "with", "def", "class", "try", "for", "while"]): self.execblock(cmd)
 			elif any(cmd.startswith(keyword) for keyword in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
@@ -338,6 +339,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "gzip": self.gunzip(self.replace(cmd))
 			elif cmd.split()[0] == "install": self.install(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "cat": self.catfile(self.replace(cmd))
+			elif cmd.split()[0] == "tac": self.tacfile(self.replace(cmd))
 			elif cmd.split()[0] == "head": self.headfile(self.replace(cmd))
 			elif cmd.split()[0] == "json": self.json_explorer(self.replace(cmd))
 			elif cmd.split()[0] == "nl": self.nl(self.replace(cmd))
@@ -387,25 +389,25 @@ class OpenTTY:
 			elif cmd.split()[0] == "search": self.search(self.replace(cmd))
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
-			elif cmd.split()[0] == "cl0": self.locals = {"app": self}
+			elif cmd.split()[0] == "cl0": self.locals = {}
 			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd))
 			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
 			elif cmd.split()[0] == "genip": print(self.gen_adress())
 			elif cmd.split()[0] == "netstat": print(self.netstat())
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root))
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"fstab: no drives detected.")
+			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root) if self.replace(cmd) else "eval: missing operand [command]...")
 			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), mkprocess=True, builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print("builtin: missing operand [command]...")
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
-			elif cmd.split()[0] == "mirror": self.json_explorer(jsoniten=library['resources'])
+			elif cmd.split()[0] == "mirror": print('\n'.join(f"- {item} \033[1m[{library['resources'][item]['filename']}]\033[m" for item in library['resources']))
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
 			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
-			#elif cmd.split()[0] == "":
+			elif cmd.split()[0] == "wc": self.wc(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": return True
@@ -644,6 +646,13 @@ class OpenTTY:
 				print(f"File size: \033[1m{filesize} bytes\033[m")
 
 		else: raise IndexError("filename")
+	def tacfile(self, filename): # Show file content (Reversed mode)
+		if filename:
+			with open(filename, 'r') as file:
+				lines = file.readlines()
+
+				for line in reversed(lines): print(line.rstrip())
+		else: self.ThreadIn()
 	def catfile(self, filename): # Show file content 
 		if filename: print(self.recognize(open(filename, "r").read()))
 		else: self.ThreadIn()
@@ -700,6 +709,15 @@ class OpenTTY:
 					line_number += 1
 
 		else: self.ThreadIn() 
+	def wc(self, filename): # Show file lines and words
+		if filename:
+
+			with open(filename, "r") as file:
+				file = file.read()
+
+				print(f"     {len(file.splitlines())}      {len(file.split())}    {len(file)} {filename}")
+
+		else: raise IndexError("filename")
 	def loadconfig(self, filename): # Load a configuration from a file
 		config_dict = {}
 
