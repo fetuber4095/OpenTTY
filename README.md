@@ -15,7 +15,7 @@ with graphical resources. With this runtime, users get ability
 to run directly Qt projects without convert it into python  
 scripts.  
 
-2.
+2. Added new shell utilities
 
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY  

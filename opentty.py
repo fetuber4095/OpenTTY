@@ -41,7 +41,8 @@ library = {
     "subject": "The OpenQT Update",
 	"patch": [
 		"Finished experiments QT-SDK",
-		"Added new interface applications"
+		"Added new interface applications",
+		"Added commands 'TAC',  "
 	],
     
     "developer": "Mr. Lima",
@@ -144,6 +145,7 @@ library = {
 		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []},
 		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
 		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']},
+		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']}
 		#"": {"filename": "", "url": "", "py-libs": []}
 	},
 
@@ -222,6 +224,7 @@ class OpenTTY:
 
 			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 
+		else: warpin = False
 
 		while library['sh'] in self.process:
 			if not "python" in self.process: raise SystemExit("\033[1m[\033[32mPython killed\033[m\033[1m]\033[m There are stopped jobs.")
@@ -509,7 +512,7 @@ class OpenTTY:
 	# OpenTTY "Applications"
 	#
 	def makedir(self, dirname): # Create directories 
-		if dirname: os.makedirs(dirname)
+		if dirname: os.makedirs(dirname), self.touch(f"{dirname}/.nomedia")
 		else: raise IndexError("dirname")
 	def removedir(self, dirname): # Remove diretories 
 		if dirname: shutil.rmtree(dirname)
