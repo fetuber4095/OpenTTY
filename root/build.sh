@@ -1,3 +1,4 @@
+#!/opentty.py sh
 # Script to compile and upload OpenTTY to PyPi Server
 
 python setup.py sdist bdist_wheel

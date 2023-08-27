@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opentty.py rundll
 # -*- coding: utf-8 -*-
 #
 #  ram

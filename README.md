@@ -1,32 +1,40 @@
-# OpenTTY 1.5 "The OpenQT Update"
+# OpenTTY 1.5 "The Resources Upgrade"
 
 > This is OpenTTY, a terminal emulator  
 > tottaly created in python that run a minimalish  
 > version of shell into your system (Windows and Linux)  
 > is supported by app.  
 
+## OpenTTY 98
+
+This is OpenTTY 98!  
+In this release family the focus is implement some  
+functions into OpenTTY and turn the users experience more  
+cool and funny. If you found an issue, please report and  
+help development team to turn the OpenTTY better.  
+ 
 ## Release Notes  
 
-1. OpenQT SDK  
+1. Remote Plugin
 
-The OpenQT is a SDK to load and run PyQt5 xml ui files,  
-it is developed for in future the developers can create assets  
-with graphical resources. With this runtime, users get ability  
-to run directly Qt projects without convert it into python  
-scripts.  
+*The Remote Plugin* is a big utility, it add only a command  
+but it can charge totally the experience with OpenTTY. This plugin  
+add the ability of connect OpenTTY sessions, but what it do?  
 
-2. Added new shell utilities  
+Think... This tool can be used for connect devices with OpenTTY  
+it works with a simple type, in a device, type `bind <port>` and in  
+another run `connect <ip> <port>` charge ip by host of machine that you  
+run the first command and ports need be equal.  
 
-In this release, Mr. Lima added some utilities for category  
-FILE and TEXT.  
+After connect the devices it will stream `sys.stdout` of OpenTTY for socket  
+object, command that requires futher input as `function`, `if`, `def` and others  
+doesnt works in this mode, 'cause is not possible yet read the `stdin` perfectly  
+from the connect.
 
-Was added commands `TAC` that show file content in reverse  
-mode, it mean that was be displayed from last line, to first 
-line of the file. The second command is `CATBIN`, it show file  
-content without decode it, if file is binary-type will show the  
-bytes table, else, will show the text but tabs and lines not   
-formatted.
+Notes: If you try connect with the bind PSH with other applications as *PuTTY* use  
+`telnet` connect mode.
 
+2. 
 
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY  

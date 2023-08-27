@@ -1,3 +1,5 @@
+#!/opentty.py rundll
+
 import random
 
 def cowsay(text):

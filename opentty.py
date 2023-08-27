@@ -33,17 +33,16 @@ from sys import stdin, stdout
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
 import shutil, getpass, zipfile, datetime, shlex, traceback, code, io
+import threading
 
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
     "version": "1.5", "build": "09H3",
-    "subject": "The OpenQT Update",
+    "subject": "The Resources Upgrade",
 	"patch": [
-		"Finished experiments QT-SDK",
-		"Added commands 'TAC', 'CATBIN'",
-		"Added new interface applications",
-		"Experiments for REMOTE Plugin",
+		"OpenTTY 98",
+		"Added Remote Plugin"		
 	],
     
     "developer": "Mr. Lima",
@@ -276,6 +275,24 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
+	def execonline(self, url, cmd="", root=False): # Execute scripts from internet "without ddownload file"
+		if not url: raise IndexError("url")
+
+		try: code = urllib.request.urlopen(url).read().decode()
+		except Exception as error: return traceback.print_exc()
+
+		self.globals['cmd'] = cmd
+
+		if code.splitlines()[0] == "#!/opentty.py rundll": 
+			try: exec(self.recognize(code), self.globals, self.locals)
+			except Exception as error: traceback.print_exc()
+		elif code.splitlines()[0] == "#!/opentty.py sh":
+			for cmd in code.splitlines():
+				if cmd:
+					if cmd.startswith("#"): run = (True, True)
+					else: run = self.shell(cmd, mkprocess=True, report=f"{self.basename(url)}: ", root=root)
+
+					if not run or not True in run: return 
 	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def, for, while) 
 		if len(startline.split()) >= 2 and startline.endswith(":"): 
 			block = []
@@ -308,7 +325,7 @@ class OpenTTY:
 			cmd = str(self.recognize(cmd)).strip()
 
 			if cmd.split()[0] == ".": 
-				if self.replace(cmd): self.execfile(self.replace(cmd), self.replace(self.replace(cmd)), root=root)
+				if self.replace(cmd): self.execfile(shlex.split(self.replace(cmd))[0], self.replace(self.replace(cmd)), root=root)
 			elif cmd.split()[0] == ":": 
 				try: exec(self.replace(cmd), self.globals, self.locals)
 				except Exception as error: traceback.print_exc()
@@ -423,6 +440,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "wc": self.wc(self.replace(cmd))
 			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else 4095)
+			elif cmd.split()[0] == "run": self.execonline(shlex.split(self.replace(cmd))[0], self.replace(self.replace(cmd)))
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": return True
