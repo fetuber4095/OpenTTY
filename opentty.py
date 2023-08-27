@@ -32,7 +32,7 @@ from sys import stdin, stdout
 
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
-import shutil, getpass, zipfile, datetime, shlex, traceback, code
+import shutil, getpass, zipfile, datetime, shlex, traceback, code, io
 
 library = {
 	# Informations for current installation
@@ -41,8 +41,9 @@ library = {
     "subject": "The OpenQT Update",
 	"patch": [
 		"Finished experiments QT-SDK",
+		"Added commands 'TAC', 'CATBIN'",
 		"Added new interface applications",
-		"Added commands 'TAC',  "
+		"Experiments for REMOTE Plugin",
 	],
     
     "developer": "Mr. Lima",
@@ -70,7 +71,7 @@ library = {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
 		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
-		"floppy": "warp a", "ll": "busybox ls"
+		"floppy": "warp a", "ll": "busybox ls --color=auto", "opentty": "python -m opentty"
 	},
 
 	# Disabled Commands list
@@ -85,6 +86,8 @@ library = {
 	"head-lines": 10,
 	"max-byte-len": 32, 
 	"ipinfo-token": "",
+
+	"chunk-size": 5,
 	
 	"timeout": 5,
 
@@ -100,6 +103,7 @@ library = {
 
 
 	"letters": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
+	"numbers": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
 
 	# Systems commands
 	#
@@ -165,7 +169,7 @@ library = {
 }
 
 class OpenTTY:
-	def __init__(self):
+	def __init__(self): 
 		# Application data
 		self.appname = library['appname'] # Saving application name
 		self.version = library['version'] # Saving application version
@@ -202,7 +206,11 @@ class OpenTTY:
 	def __exit__(self, exc_type, exc_value, traceback): return 
 
 	# OpenTTY - TTY Kernel
-	def beta(self): # Build experimental resources
+	def beta(self): # Build experimental resources 
+		if "-b" in sys.argv:
+			for experiment in library['experiments']:
+				library['experiments'][experiment] = True
+
 		for item in library['experiments']:
 			if library['experiments'][item]: 
 				print("           Starting Experiments deamon. . ."), timeout(randint(0, 3))
@@ -210,7 +218,7 @@ class OpenTTY:
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
-		
+
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host="localhost", port=8080, warpin=True, admin=False):
 
@@ -234,12 +242,12 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[38m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
 				if cmd:
 					if cmd.split()[0] == "logout": return 
 					elif cmd.split()[0] == "quit": break
-					elif cmd.split()[0] in library['commands-blacklist'] and library['experiments']['ENABLE'] == True: print(f"{cmd.split()[0]}: command disabled.")
+					elif cmd.split()[0] in library['commands-blacklist'] and library['experiments']['ENABLE']: print(f"{cmd.split()[0]}: command disabled.")
 					
 					else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
@@ -248,7 +256,7 @@ class OpenTTY:
 
 		if __name__ == "__main__" and warpin:
 			with PythonConsole(self.globals) as psh: psh.run(show=False)
-	def disconnect(self, code=""): # Disconnect from python client
+	def disconnect(self, code=""): # Disconnect from python client 
 		if not code: code = 0
 
 		try:
@@ -257,7 +265,7 @@ class OpenTTY:
 			print(f"Press return to continue"), input(), close()
 		except (KeyboardInterrupt, EOFError): print(), close()
 	
-	def execfile(self, filename, cmd="", ispkg=False, root=False): # Execute a dll python script
+	def execfile(self, filename, cmd="", ispkg=False, root=False): # Execute a dll python script 
 		if self.basename(filename).split()[0] not in library['whitelist'] and not ispkg and not root: raise PermissionError("Script not in Whitelist. Are you root?")
 
 		if filename.startswith("/"): filename = f"{self.root}{filename}"
@@ -268,7 +276,7 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
-	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def)
+	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def, for, while) 
 		if len(startline.split()) >= 2 and startline.endswith(":"): 
 			block = []
 			block.append(startline)
@@ -299,19 +307,19 @@ class OpenTTY:
 		try:
 			cmd = str(self.recognize(cmd)).strip()
 
-			if cmd.split()[0] == ".":
+			if cmd.split()[0] == ".": 
 				if self.replace(cmd): self.execfile(self.replace(cmd), self.replace(self.replace(cmd)), root=root)
-			elif cmd.split()[0] == ":":
+			elif cmd.split()[0] == ":": 
 				try: exec(self.replace(cmd), self.globals, self.locals)
 				except Exception as error: traceback.print_exc()
 			
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif any(cmd.startswith(keyword) for keyword in ["if", "with", "def", "class", "try", "for", "while"]): self.execblock(cmd)
+			elif cmd.split()[0] in ["if", "with", "def", "class", "try", "for", "while"]: self.execblock(cmd)
 			elif any(cmd.startswith(keyword) for keyword in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
-			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'):
+			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'): 
 				try:
 					run = eval(cmd, self.globals, self.locals)
 
@@ -321,7 +329,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
-			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"basename: missing operand [path]...")
+			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"{report}basename: missing operand [path]...")
 			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
 			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
@@ -399,9 +407,9 @@ class OpenTTY:
 			elif cmd.split()[0] == "netstat": print(self.netstat())
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"fstab: no drives detected.")
-			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root) if self.replace(cmd) else "eval: missing operand [command]...")
-			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), mkprocess=True, builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print("builtin: missing operand [command]...")
+			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"{report}fstab: no drives detected.")
+			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root) if self.replace(cmd) else f"{report}eval: missing operand [command]...")
+			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), mkprocess=True, builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print(f"{report}builtin: missing operand [command]...")
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "mirror": print('\n'.join(f"- {item} \033[1m[{library['resources'][item]['filename']}]\033[m" for item in library['resources']))
 			elif cmd.split()[0] == "su": self.login(root=root)
@@ -409,8 +417,12 @@ class OpenTTY:
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
 			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "catbin": print(self.catbin(self.replace(cmd)))
+			elif cmd.split()[0] == "crash": print(self.crash(self.replace(cmd)))
 			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
 			elif cmd.split()[0] == "wc": self.wc(self.replace(cmd))
+			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else 4095)
 			#elif cmd.split()[0] == "":
 
 			elif cmd.split()[0] == "true": return True
@@ -425,14 +437,14 @@ class OpenTTY:
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root) and not builtin: local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
 				elif f"{cmd.split()[0]}.ui" in os.listdir(self.root) and not builtin: self.shell(f"qt {self.root}/{cmd.split()[0]}.ui {self.replace(cmd)}", mkprocess=True, builtin=False, root=root)
-				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root) and not builtin: local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {cmd.split()[0]}: asset installed. [POSIX Without Support]") 
+				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root) and not builtin: local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {report}{cmd.split()[0]}: asset installed. [POSIX Without Support]") 
 				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root) and not builtin: self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
 				elif f"{cmd.split()[0]}.zip" in os.listdir(self.root) and not builtin: 
 					for letter in library['letters']:
 						if letter not in library['fstab']: return VirtualDisk(f"mount {letter} {self.root}/{cmd.split()[0]}.zip"), True, self.rmprocess(cmd)	
 				
 				elif cmd.split()[0] in library['resources'] and not builtin:
-					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{cmd.split()[0]}: asset is actived.")
+					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{report}{cmd.split()[0]}: asset is actived.")
 					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
 				
 				elif os.path.isfile(cmd): print(open(cmd))
@@ -649,6 +661,13 @@ class OpenTTY:
 				print(f"File size: \033[1m{filesize} bytes\033[m")
 
 		else: raise IndexError("filename")
+	def catbin(self, filename): # (Read, Show and return) a byte file content
+		if filename:
+			with open(filename, 'rb') as file:
+				decoded_bytes = file.read()
+
+			return decoded_bytes
+		else: raise IndexError("filename")
 	def tacfile(self, filename): # Show file content (Reversed mode)
 		if filename:
 			with open(filename, 'r') as file:
@@ -794,6 +813,22 @@ class OpenTTY:
 			return result
 
 		else: raise IndexError("words")
+	def reload(self, cmdline="", root=True): # Reload OpenTTY Program 
+		if not "--confirm" in cmdline: return print(f"reload: it can charge normal {self.appname} beahvior. Cache will be cleaned.\nIf are you sure, run 'sudo reload --confirm'")
+
+		if root:
+			library['fstab'] = []
+			library['aliases'] = {}
+			library['whitelist'] = []
+			library['commands-blacklist'] = []
+
+			self.clear()
+			self.pushdir(self.root), self.__init__()
+			self.shell("initd")
+
+			self.process[library['sh']] = 8080
+
+		else: raise PermissionError("Unable to reload. Are you root?")
 	def environ(self, key=""): # Show global registers at envirronment 
 		if key: print(os.environ[key] if key in os.environ else f"env: {key}: register not found")
 		else: self.ThreadList(os.environ)
@@ -844,7 +879,7 @@ class OpenTTY:
 	def diskfree(self, cmdline=""): # Show disk usage 
 		if os.name == "posix": os.system(f"df {cmdline}")
 		elif os.name == "nt": os.system("wmic logicaldisk get deviceid,size,freespace")
-	def updater(self, root=False): # Update OpenTTY
+	def updater(self, root=False): # Update OpenTTY 
 		if root: local("pip install opentty --upgrade")
 		else: raise PermissionError(f"Unable to update {self.appname}. Are you root?")
 	def venv(self, venvname, root=False): # Create profiles from network template 
@@ -865,6 +900,25 @@ class OpenTTY:
 		else: 
 			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
 			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n")
+	def crash(self, filename, chunk_size=library['chunk-size']): # Decode a file in chucks (Can crash your computer)
+		if filename:
+			with open(filename, 'rb') as data:
+				data = data.read()
+
+				decoded_chunks = []
+				start = 0
+
+				while start < len(data):
+					chunk = data[start:start + chunk_size]
+					try:
+						decoded_chunk = chunk.decode('utf-8')
+						decoded_chunks.append(decoded_chunk)
+					except UnicodeDecodeError:
+						decoded_chunks.append(None)
+						start += chunk_size
+
+				return decoded_chunks
+		else: raise IndexError("chuck.file")
 	def pull(self, filename): # Save current status of library in a json file 
 		if filename: json.dump(library, open(filename, "wt+"))
 		else: raise IndexError("filename")
@@ -904,11 +958,7 @@ class OpenTTY:
 		if not root:
 			if library['experiments']['Disable-SU']: raise RuntimeError("SU is disabled.")
 
-			try:
-				self.runas("true")
-
-				self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
-
+			try: self.runas("true"), self.rmprocess("su"), self.rmprocess("true"), self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
 			except KeyError: print("login: no such psh session.")
 	def asset(self): # Show installed assets 
 		root_files = os.listdir(self.root)
@@ -1091,23 +1141,23 @@ class OpenTTY:
 				
 				while True:
 					try:
-						command = self.recognize(input(f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m $\033[m ")).strip()
+						command = input(f"\033[32m\033[1m{getpass.getuser()}@{host}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m $\033[m ").strip()
 						
-						if command == "/exit": raise KeyboardInterrupt
-						elif command == "/clear": self.clear()
-						elif command == "/ping": self.ping(host)
-						
-						else: net_item.send(f"{command}\n".encode())
-						
-						try: 
-							spack = net_item.recv(9600).decode()
+						if command:
+							if command == "/exit": raise KeyboardInterrupt
+							elif command.startswith("/"): self.shell(command.replace('/', ''), mkprocess=True)
 							
-							if not spack: raise ConnectionResetError("[Errno 56] Server dont answer your request")
+							else: net_item.send(f"{command}\n".encode())
 							
+							try: 
+								spack = net_item.recv(9600).decode()
+								
+								if not spack: raise ConnectionResetError("[Errno 56] Server disconnected from this call.")
+								
+								
+								print(spack)
 							
-							print(spack)
-							
-						except (KeyboardInterrupt, EOFError): print()
+							except (KeyboardInterrupt, EOFError): print()
 						
 					
 					except (KeyboardInterrupt, EOFError): return net_item.close()
@@ -1173,8 +1223,51 @@ class OpenTTY:
 		group4 = f"{randint(1, 64)}"
 
 		return f"{group1}.{group2}.{group3}.{group4}"
+	# Remote Plugin
+	#
+	def bind(self, port=4095):
+		server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		server.bind(('0.0.0.0', port))
+		server.listen()
 
+		print(f"\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Started PSH Stream in port {port}. . .")
 
+		while True:
+			try:
+				client_socket, client_address = server.accept()
+				print(f"\033[1m[ \033[32mSERVER\033[m\033[1m ]\033[m New client connected '{client_address[0]}'")
+
+				default_stdout = sys.stdout
+				default_stdin = sys.stdin
+
+				while True:
+					try: 
+						sys.stdin = SocketStdin(client_socket)
+
+						sys.stdout = SocketStdout(client_socket)
+						sys.stdout.reset()
+
+						command = input()		
+
+						if command: self.shell(command, mkprocess=False, report="remote: ")
+						
+						print(end="")
+
+						sys.stdout.send()
+
+					except (KeyboardInterrupt, EOFError, ValueError, BrokenPipeError, NameError): break
+					except (IndexError): continue
+					except Exception as error: traceback.print_exc(), print(end="")
+
+			except (KeyboardInterrupt, EOFError):
+				sys.stdout = default_stdout
+				sys.stdin = default_stdin
+
+				client_socket.close()
+
+				print(f"\n\n\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Finished stream.")
+
+				return 
 
 class VirtualDisk(OpenTTY): # Virtual Compact Disk System
 	def __init__(self, cmd):
@@ -1244,6 +1337,25 @@ class PythonConsole(code.InteractiveConsole, OpenTTY): # Call a python interacti
 		return
 
 	def run(self, show=True): self.interact(f'\033[mPython {platform.python_version()} ({platform.python_build()[0]} {platform.python_build()[1]}) [{platform.python_compiler()}] on {platform.system().lower()}\nType "help", "copyright", "credits" or "license" for more information.' if show else '')
+
+
+class SocketStdout(io.TextIOBase): # Class for REMOTE Plugin (Stdout method)
+	def __init__(self, sock): self.sock = sock
+
+	def write(self, s): self.result.append(s)
+	def flush(self): pass
+	def send(self): self.sock.sendall(''.join(self.result).encode())
+	def reset(self): self.result = []
+class SocketStdin(io.TextIOBase): # Class for REMOTE Plugin (Stdin method)
+	def __init__(self, sock): self.sock = sock
+
+	def read(self, size=2048):
+		data = self.sock.recv(size)
+		return data.decode()
+
+	def readable(self): return True
+	def readline(self): return self.read()
+	def readlines(self): return self.read()
 
 if __name__ == "__main__":
 	with OpenTTY() as app:
