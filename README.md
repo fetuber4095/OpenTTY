@@ -34,7 +34,10 @@ from the connect.
 Notes: If you try connect with the bind PSH with other applications as *PuTTY* use  
 `telnet` connect mode.
 
-2. 
+2. Background Process
+
+Now is possible execute commands in background, it's add the possiblity of  
+execute more of one process twice. 
 
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY  

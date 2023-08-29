@@ -38,11 +38,12 @@ import threading
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.5", "build": "09H3",
+    "version": "1.6", "build": "09H3",
     "subject": "The Resources Upgrade",
 	"patch": [
 		"OpenTTY 98",
-		"Added Remote Plugin"		
+		"Added Remote Plugin",
+		"Finished experiments ENABLE "	
 	],
     
     "developer": "Mr. Lima",
@@ -124,9 +125,7 @@ library = {
 	"experiments": {
 		"Are-ROOT": False, # Beahivor as computer admin
 		"Disable-SU": False, # Disable charge user while running PSH
-		"ENABLE": False, # Add command enable and disable to control acessible commands
 		"Desktop": False, # Add support for Virtual Desktop emulation
-		"QT-SDK": False, # Add asset QT-SDK into mirrors=
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
 		"Dumpsys": False, # Enable dumpsys
@@ -153,7 +152,12 @@ library = {
 	},
 
 	"scripts": {
-		"": {"url": "", "env": ""}
+		"setup.py": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/build.sh"},
+		#"": {"url": ""},
+		#"": {"url": ""},
+		#"": {"url": ""},
+		#"": {"url": ""},
+		#"": {"url": ""},
 	}, 
 
 	"docs": {
@@ -227,7 +231,7 @@ class OpenTTY:
 
 		if library['sh'] not in self.process: 
 			self.ttyname = host
-			self.process[library['sh']] = str(port)
+			self.process[library['sh']] = (str(port))
 
 			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 
@@ -241,14 +245,15 @@ class OpenTTY:
 				
 
 			try:
-				cmd = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
+				command = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
 				
-				if cmd:
-					if cmd.split()[0] == "logout": return 
-					elif cmd.split()[0] == "quit": break
-					elif cmd.split()[0] in library['commands-blacklist'] and library['experiments']['ENABLE']: print(f"{cmd.split()[0]}: command disabled.")
-					
-					else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
+				for cmd in command.split('|'):
+					if cmd:
+						if cmd.split()[0] == "logout": return 
+						elif cmd.split()[0] == "quit": break
+						elif cmd.split()[0] in library['commands-blacklist']: print(f"{cmd.split()[0]}: command disabled.")
+						
+						else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
 			except (IndexError): traceback.print_exc()
@@ -276,8 +281,6 @@ class OpenTTY:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
 	def execonline(self, url, cmd="", root=False): # Execute scripts from internet "without ddownload file"
-		if not url: raise IndexError("url")
-
 		try: code = urllib.request.urlopen(url).read().decode()
 		except Exception as error: return traceback.print_exc()
 
@@ -293,6 +296,9 @@ class OpenTTY:
 					else: run = self.shell(cmd, mkprocess=True, report=f"{self.basename(url)}: ", root=root)
 
 					if not run or not True in run: return 
+		else:
+			try: exec(self.recognize(code), self.globals, self.locals)
+			except Exception as error: traceback.print_exc()
 	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def, for, while) 
 		if len(startline.split()) >= 2 and startline.endswith(":"): 
 			block = []
@@ -324,8 +330,12 @@ class OpenTTY:
 		try:
 			cmd = str(self.recognize(cmd)).strip()
 
-			if cmd.split()[0] == ".": 
+			if cmd.split()[0] in self.aliases and not builtin: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
+			
+			elif cmd.split()[0] == ".": 
 				if self.replace(cmd): self.execfile(shlex.split(self.replace(cmd))[0], self.replace(self.replace(cmd)), root=root)
+			elif cmd.split()[0] == ";": 
+				if self.replace(cmd): self.execonline(shlex.split(self.replace(cmd))[0], self.replace(self.replace(cmd)))
 			elif cmd.split()[0] == ":": 
 				try: exec(self.replace(cmd), self.globals, self.locals)
 				except Exception as error: traceback.print_exc()
@@ -343,115 +353,146 @@ class OpenTTY:
 					if run: print(run)
 				except Exception as error: traceback.print_exc()
 			
-			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
-			elif cmd.split()[0] == "echo": print(self.replace(cmd))
-			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
-			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"{report}basename: missing operand [path]...")
-			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
-			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
-			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
-			elif cmd.split()[0] == "ps": self.pslist()
-			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd), report=report)
+			elif cmd.split()[0] == "cl0": self.locals = {}
+			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			
+			# Permission Plugin
+			elif cmd.split()[0] == "chmod": self.chmod(self.replace(cmd))
+			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {library['passwd']}")
+			elif cmd.split()[0] == "sudo": self.runas(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "su": self.login(root=root)
+			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
+			
+			# Netman 
+			elif cmd.split()[0] == "gaddr": self.gaddr(self.replace(cmd))
+			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
+			elif cmd.split()[0] == "fw": self.fwadress(self.replace(cmd))
+			elif cmd.split()[0] == "wget": self.wget(self.replace(cmd))
+			elif cmd.split()[0] == "curl": self.curl(self.replace(cmd), show=True)
+			elif cmd.split()[0] == "server": self.server(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "genip": print(self.gen_adress())
+			elif cmd.split()[0] == "connect": self.dialup(self.replace(cmd))
+			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
+			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd) if self.replace(cmd) else hostname())
+			elif cmd.split()[0] == "netstat": print(self.netstat())
+
+			# The boy of files
+			#
+			# "File Utilities"
 			elif cmd.split()[0] == "mkdir": self.makedir(self.replace(cmd))
 			elif cmd.split()[0] == "rmdir": self.removedir(self.replace(cmd))
 			elif cmd.split()[0] == "rm": self.remove(self.replace(cmd))
-			elif cmd.split()[0] == "ls": self.listdir(self.replace(cmd))
-			elif cmd.split()[0] == "dd": self.txt2bin(self.replace(cmd))
-			elif cmd.split()[0] == "zipinfo": self.zipinfo(self.replace(cmd))
-			elif cmd.split()[0] == "unzip": self.unzip(self.replace(cmd))
 			elif cmd.split()[0] == "touch": self.touch(self.replace(cmd))
 			elif cmd.split()[0] == "tree": self.tree(self.replace(cmd))
-			elif cmd.split()[0] == "mv": self.move(self.replace(cmd))
-			elif cmd.split()[0] == "rename": self.move(self.replace(cmd))
+			elif cmd.split()[0] == "ls": self.listdir(self.replace(cmd))
+			elif cmd.split()[0] == "dd": self.txt2bin(self.replace(cmd))
+			elif cmd.split()[0] == "search": self.search(self.replace(cmd))
+			elif cmd.split()[0] == "basename": print(self.basename(self.replace(cmd)) if self.replace(cmd) else f"{report}basename: missing operand [path]...")
+			elif cmd.split()[0] == "mv" or cmd.split()[0] == "rename": self.move(self.replace(cmd))
 			elif cmd.split()[0] == "cp": self.copy(self.replace(cmd))
-			elif cmd.split()[0] == "gzip": self.gunzip(self.replace(cmd))
-			elif cmd.split()[0] == "install": self.install(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "diff": self.diff(self.replace(cmd))
+			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
+			elif cmd.split()[0] == "wc": self.wc(self.replace(cmd))
+			# 
+			# "Text Utilities"
 			elif cmd.split()[0] == "cat": self.catfile(self.replace(cmd))
 			elif cmd.split()[0] == "tac": self.tacfile(self.replace(cmd))
 			elif cmd.split()[0] == "head": self.headfile(self.replace(cmd))
-			elif cmd.split()[0] == "json": self.json_explorer(self.replace(cmd))
-			elif cmd.split()[0] == "nl": self.nl(self.replace(cmd))
 			elif cmd.split()[0] == "tail": self.tail(self.replace(cmd))
-			elif cmd.split()[0] == "diff": self.diff(self.replace(cmd))
-			elif cmd.split()[0] == "env": self.environ(self.replace(cmd))
-			elif cmd.split()[0] == "export": self.export(self.replace(cmd))
-			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
+			elif cmd.split()[0] == "nl": self.nl(self.replace(cmd))
+			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
+			elif cmd.split()[0] == "catbin": print(self.catbin(self.replace(cmd)))
+			elif cmd.split()[0] == "sort": self.sort(self.replace(cmd))
+
+			# The PIPES Plugin
+			elif cmd.split()[0] == "json": self.json_explorer(self.replace(cmd))
+			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
+
+			# The Box Plugin
+			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"{report}fstab: no drives detected.")
+			#
+			# "Archive Utilities"
+			elif cmd.split()[0] == "zipinfo": self.zipinfo(self.replace(cmd))
+			elif cmd.split()[0] == "unzip": self.unzip(self.replace(cmd))
+			elif cmd.split()[0] == "gzip": self.gunzip(self.replace(cmd))
+
+			# The PSH
 			elif cmd.split()[0] == "uname": self.uname(self.replace(cmd))
-			elif cmd.split()[0] == "chmod": self.chmod(self.replace(cmd))
+			elif cmd.split()[0] == "export": self.export(self.replace(cmd))
+			elif cmd.split()[0] == "env": self.environ(self.replace(cmd))
+			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
+			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
+			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
+			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
+			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
+			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), mkprocess=True, builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print(f"{report}builtin: missing operand [command]...")
+			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root) if self.replace(cmd) else f"{report}eval: missing operand [command]...")
 			elif cmd.split()[0] == "clear": self.clear()
+			elif cmd.split()[0] == "echo": print(self.replace(cmd))
+			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
 			elif cmd.split()[0] == "stty": self.stty(self.replace(cmd))
 			elif cmd.split()[0] == "tty": print(self.ttyname if self.ttyname else "localhost")
+			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
+			elif cmd.split()[0] == "se": raise SystemExit(self.replace(cmd))
+			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
+			elif cmd.split()[0] == "pwd": print(os.getcwd())
+			#
+			# "OpenTTY Version Utilities"
+			elif cmd.split()[0] == "build": print(library['build'])
+			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
+			elif cmd.split()[0] == "sync": self.updater(root=root)
+			#
+			# "Asset Manager"
+			elif cmd.split()[0] == "asset": self.asset()
+			elif cmd.split()[0] == "mirror": print('\n'.join(f"- {item} \033[1m[{library['resources'][item]['filename']}]\033[m" for item in library['resources']))
+			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "install": self.install(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
+			#
+			# "Alias Manager"
 			elif cmd.split()[0] == "alias": self.alias(self.replace(cmd))
 			elif cmd.split()[0] == "unalias": self.unalias(self.replace(cmd))
-			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
-			elif cmd.split()[0] == "sync": self.updater(root=root)
-			elif cmd.split()[0] == "asset": self.asset()
-			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
-			elif cmd.split()[0] == "gaddr": self.gaddr(self.replace(cmd))
-			elif cmd.split()[0] == "fw": self.fwadress(self.replace(cmd))
-			elif cmd.split()[0] == "wget": self.wget(self.replace(cmd))
-			elif cmd.split()[0] == "server": self.server(self.replace(cmd), root=root)
+			#
+			# "OpenTTY Process Manager"
+			elif cmd.split()[0] == "ps": self.pslist()
+			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd), report=report)
+			elif cmd.split()[0] == "bg": self.bg(self.shell, (self.replace(cmd), mkprocess, "bg: ", root)) if self.replace(cmd) else print(f"{report}bg: missing operand [command]...")
+			
+			# The Remote Plugin
+			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else 4095)
+
+			# Miscellania
+			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
+			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
+			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
+
 			elif cmd.split()[0] == "cal": self.calendar()
 			elif cmd.split()[0] == "github": print(library['github.com'])
-			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {library['passwd']}")
-			elif cmd.split()[0] == "pwd": print(os.getcwd())
-			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "patch": print('\n'.join(f"- {note}" for note in library['patch']))
-			elif cmd.split()[0] == "curl": self.curl(self.replace(cmd), show=True)
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
-			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "inbox": self.curl(library['docs']['inbox'], show=True)
-			elif cmd.split()[0] == "se": raise SystemExit(self.replace(cmd)) 
-			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
-			elif cmd.split()[0] == "build": print(library['build'])
-			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
-			elif cmd.split()[0] == "connect": self.dialup(self.replace(cmd))
 			elif cmd.split()[0] == "root": self.pushdir(self.root)
 			elif cmd.split()[0] == "home": self.pushdir(os.path.expanduser("~"))
 			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd))
-			elif cmd.split()[0] == "sort": self.sort(self.replace(cmd))
-			elif cmd.split()[0] == "sudo": self.runas(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "search": self.search(self.replace(cmd))
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd))
-			elif cmd.split()[0] == "cl0": self.locals = {}
-			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd))
-			elif cmd.split()[0] == "hostname": self.hostname(self.replace(cmd))
-			elif cmd.split()[0] == "genip": print(self.gen_adress())
-			elif cmd.split()[0] == "netstat": print(self.netstat())
-			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"{report}fstab: no drives detected.")
-			elif cmd.split()[0] == "eval": print(self.shell(self.replace(cmd), mkprocess=mkprocess, report="eval: ", root=root) if self.replace(cmd) else f"{report}eval: missing operand [command]...")
-			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), mkprocess=True, builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print(f"{report}builtin: missing operand [command]...")
-			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
-			elif cmd.split()[0] == "mirror": print('\n'.join(f"- {item} \033[1m[{library['resources'][item]['filename']}]\033[m" for item in library['resources']))
-			elif cmd.split()[0] == "su": self.login(root=root)
-			elif cmd.split()[0] == "read": self.read(self.replace(cmd))
-			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
-			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd))
-			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "catbin": print(self.catbin(self.replace(cmd)))
 			elif cmd.split()[0] == "crash": print(self.crash(self.replace(cmd)))
-			elif cmd.split()[0] == "find": self.find(self.replace(cmd))
-			elif cmd.split()[0] == "wc": self.wc(self.replace(cmd))
 			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else 4095)
-			elif cmd.split()[0] == "run": self.execonline(shlex.split(self.replace(cmd))[0], self.replace(self.replace(cmd)))
 			#elif cmd.split()[0] == "":
 
+			# Return codes
 			elif cmd.split()[0] == "true": return True
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
 
 			else:
-				if cmd.split()[0] in self.aliases and not builtin: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
-				elif cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
+				if cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 
-				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd)
+				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd) # The BOX Plugin -> Virtual Disk Utilities
+				elif cmd.split()[0] in library['scripts']: self.shell(f"; {library['scripts'][cmd.split()[0]]['url']} {self.replace(cmd)}", mkprocess=False, root=root)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root) and not builtin: local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
 				elif f"{cmd.split()[0]}.ui" in os.listdir(self.root) and not builtin: self.shell(f"qt {self.root}/{cmd.split()[0]}.ui {self.replace(cmd)}", mkprocess=True, builtin=False, root=root)
@@ -478,7 +519,7 @@ class OpenTTY:
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
 		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]...")
-		except (ValueError, NameError, OSError): return traceback.print_exc()
+		except (ValueError, NameError, OSError, RuntimeError, UnboundLocalError): return traceback.print_exc()
 
 		
 		return True, self.rmprocess(cmd)
@@ -517,7 +558,7 @@ class OpenTTY:
 		while True: print(f"\033[32m{random.choice(['0', '1', '0', '1', '(', ')', '[', ']',	'!', '@', '#', '&', '/', '.', '0', '1', '▒', '▒', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])}", end="")
 	
 	# OpenTTY "Process Methods"
-	def mkprocess(self, pname): self.process[pname] = str(randint(1000, 9999)) # Create process
+	def mkprocess(self, pname): self.process[pname] = (str(randint(1000, 9999))) # Create process
 	def rmprocess(self, pname): # Kill process by name
 		try: 
 			if pname.startswith("python") or pname.startswith("psh"): return 
@@ -539,8 +580,200 @@ class OpenTTY:
 		
 		print(f"{report}kill: ({pid}) - No such process" if pid else f"{report}kill: missing operand [PID]...")
 
+	def bg(self, method, args): # Run tasks in background
+		thread = threading.Thread(target=method, args=args)
+		thread.start()
+
+		return thread
+
 	# OpenTTY "Applications"
 	#
+	# Permission Plugin
+	def chmod(self, filename): # Add and remove files from whitelist 
+		if filename:
+			if filename in library['whitelist']: library['whitelist'].remove(self.basename(filename))
+			else: library['whitelist'].append(self.basename(filename))
+
+		else: print('\n'.join([str(i) for i in library['whitelist']]) if library['whitelist'] else f"chmod: whitelist is empty")
+	def runas(self, cmdline, root=False): # Run command as [...] 
+		if cmdline:
+			if root: return self.shell(cmdline, mkprocess=True, root=True)
+
+
+			passwd = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
+
+			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
+			else: raise PermissionError("wrong password.")
+	def login(self, root=False): # Modify current login (to: root) 
+		if not root:
+			if library['experiments']['Disable-SU']: raise RuntimeError("SU is disabled.")
+
+			try: self.runas("true"), self.rmprocess("su"), self.rmprocess("true"), self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
+			except KeyError: print("login: no such psh session.")
+	def chroot(self, path, root=False): # Charge root directory 
+		if path:
+			if not root: raise PermissionError("Unable to charge profile dir. Are you root?")
+
+			if os.path.isdir(path):
+				library['root-dir'] = path 
+				self.root = path
+
+				return path
+
+			raise FileNotFoundError("No such directory.")
+
+		raise IndexError("path") 
+	
+	# Netman
+	def gaddr(self, hostname): # Get IP Adress of a machine with it name 
+		if hostname:
+			try: print(socket.gethostbyname(hostname))
+			except Exception as error: traceback.print_exc()
+
+		else: print(library['ipadress'])
+	def hostname(self, adress=""): # Get hostname by IP Adress of a host 
+		if adress:
+			try:
+				hostname, _, _ = socket.gethostbyaddr(adress)
+				print(hostname)
+
+			except Exception as error: traceback.print_exc()
+		else: print(library['hostname'])
+	def fwadress(self, ipadress): # Get informations about IP Adress (like hostname, time zone, country and others) 
+		def get_ip_info(ip):
+			try:
+				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
+			except Exception as e: return print(f"fw: failed to dialog with {ipadress}.\n"), traceback.print_exc()
+
+		if ipadress != "":
+			try:
+				socket.inet_aton(ipadress)
+				ip_info = get_ip_info(ipadress)
+
+				if ip_info:
+					for key, value in ip_info.items(): print(f"{key}: {value}")
+			except socket.error: print(f"fw: {ipadress}: ip adress is invalid.")
+
+		else: raise IndexError("ip.adress")
+	def wget(self, cmdline): # Download files from Internet 
+		if len(cmdline.split()) < 2:
+			if cmdline: return self.wget(f"{cmdline} {self.basename(cmdline)}")
+			else: raise IndexError("url")
+
+		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.basename(self.replace(cmdline))}: download complete.")
+		except Exception as error: traceback.print_exc()
+	def curl(self, url, show=False): # See a website html 
+		if url:
+			try: html = urllib.request.urlopen(url).read().decode()
+			except Exception as error: return traceback.print_exc()
+
+			if show: print(self.recognize(html))
+			
+			return html
+		
+		else: raise IndexError("url")
+	def server(self, port, root=False): # Open a localhost server in current working directory 
+		if port:
+			if not root: raise PermissionError("Unable to start server. Are you root?")
+
+			try:
+				with socketserver.TCPServer(("", int(port)), http.server.SimpleHTTPRequestHandler) as httpd:
+					print(f"Server openned at http://localhost:{port}...\n")
+					httpd.serve_forever()
+			
+			except (KeyboardInterrupt, EOFError): return print("\nServer stopped.")
+			except ValueError: return print(f"server: invalid port '{port}'")
+
+		else: self.server(randint(2048, 4096), root=root)
+	def gen_adress(self): # Generate random IP Adress 
+		group1 = f"1{randint(4, 9)}{randint(2, 5)}"
+		group2 = f"{randint(1, 2)}{randint(2, 9)}{randint(1, 9)}"
+		group3 = random.choice(['1', '15', '132', '181'])
+		group4 = f"{randint(1, 64)}"
+
+		return f"{group1}.{group2}.{group3}.{group4}"
+	def dialup(self, target, timeout=library['timeout']): # Connect into a server 
+		if target:
+			if len(target.split()) < 2: target = f"{target} 80"
+			
+			try:
+				host = target.split()[0]
+				port = int(target.split()[1])
+				
+				net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				net_item.settimeout(timeout * timeout)
+				
+				net_item.connect((host, port))
+				
+				while True:
+					try:
+						command = input(f"\033[32m\033[1m{getpass.getuser()}@{host}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m $\033[m ").strip()
+						
+						if command:
+							if command == "/exit": raise KeyboardInterrupt
+							elif command.startswith("/"): self.shell(command.replace('/', ''), mkprocess=True)
+							
+							else: net_item.send(f"{command}\n".encode())
+							
+							try: 
+								spack = net_item.recv(9600).decode()
+								
+								if not spack: raise ConnectionResetError("[Errno 56] Server disconnected from this call.")
+								
+								
+								print(spack)
+							
+							except (KeyboardInterrupt, EOFError): print()
+						
+					
+					except (KeyboardInterrupt, EOFError): return net_item.close()
+				
+			except Exception as error: traceback.print_exc()
+		
+		else: raise IndexError("ip.adress")
+	def ping(self, host, timeout=library['timeout']): # Test connection for a host 
+		if host:
+			try:
+				net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+				net_item.settimeout(timeout)
+				
+				start_time = time.time()
+				
+				net_item.connect((host, 80))
+
+				end_time = time.time()
+
+				ping_time_ms = (end_time - start_time) * 1000
+
+				print(f"{host}: ping is {ping_time_ms:.0f} ms")
+
+			except (socket.timeout, ConnectionRefusedError): print(f"{host}: bad. connection failed.")
+			except socket.gaierror: traceback.print_exc()
+			finally: net_item.close()
+			
+		else: raise IndexError("adress")
+	def ifconfig(self, target): # Get informations about socket objects of a host 
+		if target:
+			print("Informations for Network Adapters: \n")
+
+			for conn in socket.getaddrinfo(target, 80, family=0, type=0, proto=0, flags=0):
+				_, proto, _, _, info = conn
+
+				print(info[0])
+				print(proto)
+				print('-' * 22, end="\n\n")
+
+		else: self.ifconfig(hostname())
+	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status 
+		try: urllib.request.urlopen(test_url)
+		except Exception as error: return falsecode
+
+		return truecode	
+	
+	# The boy of files
+	#
+	# "File Utilities"
 	def makedir(self, dirname): # Create directories 
 		if dirname: os.makedirs(dirname), self.touch(f"{dirname}/.nomedia")
 		else: raise IndexError("dirname")
@@ -548,8 +781,24 @@ class OpenTTY:
 		if dirname: shutil.rmtree(dirname)
 		else: raise IndexError("dirname")
 	def remove(self, filename): # Remove files 
-		if filename != "": os.remove(filename)
+		if filename: os.remove(filename)
 		else: raise IndexError("filename")
+	def touch(self, filename): # Touch a file reseting it modify date and the content 
+		if filename: open(filename, "wt+").close()
+		else: raise IndexError("filename")
+	def tree(self, directory, indent=""): # Show directory tree [Folder, subfolders and files] 
+		if directory:
+			print(indent + f"\033[34m\033[1m{os.path.basename(directory)}\033[m" if os.path.isdir(directory) else indent + os.path.basename(directory)) 
+			
+			if os.path.isdir(directory):
+				indent += "│   "
+				files = os.listdir(directory)
+				for file in sorted(files):
+					path = os.path.join(directory, file)
+
+					self.tree(path, indent)
+
+		else: self.tree(".")
 	def listdir(self, path=""): # List files at directory 
 		if path:
 			files = os.listdir(path)
@@ -585,43 +834,19 @@ class OpenTTY:
 				
 		lenbytes, lenfile = writeBytes(shlex.split(filenames)[0], shlex.split(filenames)[1])
 		print(f"0+{lenbytes} record in\n0+{lenfile} lines writed in") 
-	def zipinfo(self, zip_path): # Show informations for a zip archive 
-		if zip_path: 
-			try:
-				with zipfile.ZipFile(zip_path, 'r') as zip_file:
-					print(f"ZIP File: \033[1m[{zip_path}]\033[m\n\nNumber of Files: {len(zip_file.filelist)}")
-					print(f"Total Size: {sum(file.file_size for file in zip_file.filelist)} bytes\n")
+	def search(self, target_name, show=True): # Search files in current directory tree 
+		if target_name:
 
-					print("File List:")
-					print("--------------------------------------------\n")
-					for file in zip_file.filelist:
-						print(f"- {file.filename}")
+			found_files = []
 
-			except zipfile.BadZipFile: print(f"zipinfo: {zip_path}: zip file is invalid or corromped")
-			except zipfile.LargeZipFile: print(f"zipinfo: {zip_path}: zip file is too Large")
-		else: raise IndexError("filename")
-	def unzip(self, cmdline): # Unzip a zip archive file 
-		if len(shlex.split(cmdline)) < 2: raise IndexError("extract path" if cmdline != "" else "archive >> path")
-		
-		with zipfile.ZipFile(shlex.split(cmdline)[0], 'r') as zf:
-			try: zf.extractall(shlex.split(cmdline)[1])
-			except Exception as error: traceback.print_exc()
-	def touch(self, filename): # Touch a file reseting it modify date and the content 
-		if filename: open(filename, "wt+").close()
-		else: raise IndexError("filename")
-	def tree(self, directory, indent=""): # Show directory tree [Folder, subfolders and files] 
-		if directory:
-			print(indent + f"\033[34m\033[1m{os.path.basename(directory)}\033[m" if os.path.isdir(directory) else indent + os.path.basename(directory)) 
-			
-			if os.path.isdir(directory):
-				indent += "│   "
-				files = os.listdir(directory)
-				for file in sorted(files):
-					path = os.path.join(directory, file)
+			for root, _, files in os.walk(os.getcwd()):
+				for filename in files:
+					if target_name in filename:
+						found_files.append(os.path.join(root, filename))
 
-					self.tree(path, indent)
+			if show: print('\n'.join(found_files) if found_files else f"search: {target_name}: no files found.")
 
-		else: self.tree(".")
+			return found_files
 	def move(self, cmdline=""): # Move files and directories 
 		if cmdline:
 			if len(shlex.split(cmdline)) < 2: raise IndexError("new.path")
@@ -636,37 +861,17 @@ class OpenTTY:
 			shutil.copy(shlex.split(cmdline)[0], shlex.split(cmdline)[1])
 
 		else: raise IndexError("source >> copy")
-	def gunzip(self, cmdline): # Compress files and directories to a zip archive 
-		if cmdline:
-			if len(shlex.split(cmdline)) < 2: raise IndexError("source: folder | file")
-				
-			zip_filename = shlex.split(cmdline)[0]
-			source_path = shlex.split(cmdline)[1]
+	def diff(self, filenames): # Compare files (line-per-line) 
+		if len(shlex.split(filenames)) < 2: raise IndexError("2filename" if filenames else "filename <> filename")
 			
-			if os.path.isfile(source_path):
-				with zipfile.ZipFile(zip_filename, 'w') as zipf:
-					zipf.write(source_path, os.path.basename(source_path))
-			elif os.path.isdir(source_path):
-				with zipfile.ZipFile(zip_filename, 'w') as zipf:
-					for foldername, subfolders, filenames in os.walk(source_path):
-						for filename in filenames:
-							file_path = os.path.join(foldername, filename)
-							zipf.write(file_path, os.path.relpath(file_path, source_path))
+		lines1 = open(shlex.split(filenames)[0], "r").readlines()
+		lines2 = open(shlex.split(filenames)[1], "r").readlines()
 
-		else: raise IndexError("filename << source")
-	def search(self, target_name, show=True): # Search files in current directory tree 
-		if target_name:
-
-			found_files = []
-
-			for root, _, files in os.walk(os.getcwd()):
-				for filename in files:
-					if target_name in filename:
-						found_files.append(os.path.join(root, filename))
-
-			if show: print('\n'.join(found_files) if found_files else f"search: {target_name}: no files found.")
-
-			return found_files
+		for i, (line1, line2) in enumerate(zip(lines1, lines2), start=1):
+			if line1 != line2:
+				print(f"   {i} - {self.basename(shlex.split(filenames)[0])}: {line1.strip()}")
+				print(f"   {i} - {self.basename(shlex.split(filenames)[1])}: {line2.strip()}")
+				print()
 	def read(self, filename): # Open a file and show it content 
 		if filename:
 			with open(filename, "r") as file:
@@ -679,22 +884,26 @@ class OpenTTY:
 				print(f"File size: \033[1m{filesize} bytes\033[m")
 
 		else: raise IndexError("filename")
-	def catbin(self, filename): # (Read, Show and return) a byte file content
+	def wc(self, filename): # Show file lines and words
 		if filename:
-			with open(filename, 'rb') as file:
-				decoded_bytes = file.read()
 
-			return decoded_bytes
+			with open(filename, "r") as file:
+				file = file.read()
+
+				print(f"     {len(file.splitlines())}      {len(file.split())}    {len(file)} {filename}")
+
 		else: raise IndexError("filename")
+	#
+	# "Text Utilities"
+	def catfile(self, filename): # Show file content 
+		if filename: print(self.recognize(open(filename, "r").read()))
+		else: self.ThreadIn()
 	def tacfile(self, filename): # Show file content (Reversed mode)
 		if filename:
 			with open(filename, 'r') as file:
 				lines = file.readlines()
 
 				for line in reversed(lines): print(line.rstrip())
-		else: self.ThreadIn()
-	def catfile(self, filename): # Show file content 
-		if filename: print(self.recognize(open(filename, "r").read()))
 		else: self.ThreadIn()
 	def headfile(self, filename): # Show first lines of a file 
 		if filename != "":
@@ -706,6 +915,73 @@ class OpenTTY:
 				except IndexError: return text
 
 		else: self.ThreadIn()
+	def tail(self, filename): # Show last lines of a file 
+		if filename:
+			def tailrepliant(filename):
+				with open(filename, 'r') as file:
+					lines = file.readlines()
+
+					if len(lines) <= library['head-lines']:
+						return ''.join(lines)
+					else:
+						return ''.join(lines[-library['head-lines']:])
+
+			print(tailrepliant(filename))
+
+		else: self.ThreadIn()
+	def nl(self, filename): # Show file content with line number 
+		if filename:
+			with open(filename, "r") as file:
+				line_number = 1
+				for line in file:
+					print(f"   {line_number}\t{line}", end="")
+					line_number += 1
+
+		else: self.ThreadIn() 
+	def find(self, cmdline): # Search WORDS in file content
+		if len(shlex.split(cmdline)) < 2: raise IndexError("words" if cmdline else "filename > words")
+
+		filename = shlex.split(cmdline)[0]
+		search_word = shlex.split(cmdline)[1]
+
+		results = []
+
+		with open(filename, "r") as text:
+			text = text.readlines()
+
+			line_number = 1
+			
+			for line in text:
+				if search_word in line: results.append((line_number, line))
+
+				line_number += 1
+
+		if not results: return print("find: no matches.")
+
+		print(f"{len(results)} matches of '{search_word}' in \033[1m{filename}\033[m:\n")
+
+		for line_number, line in results: 
+			print(f"   {line_number}\t{line}")
+	def catbin(self, filename): # (Read, Show and return) a byte file content
+		if filename:
+			with open(filename, 'rb') as file:
+				decoded_bytes = file.read()
+
+			return decoded_bytes
+		else: raise IndexError("filename")
+	
+	def sort(self, words, show=True): # Avalue a phrase and choice a random word 
+		if words:
+			result = random.choice(words.split())
+
+
+			if show: print(result)
+
+			return result
+
+		else: raise IndexError("words")
+	
+	# The PIPES Plugin
 	def json_explorer(self, filename="", jsoniten="", indent=0): # Explorer a json extructure 
 		def print_with_indent(text, indent):
 			print("  " * indent + text)
@@ -740,24 +1016,6 @@ class OpenTTY:
 		
 		elif jsoniten: explore_json(jsoniten, indent)
 		else: raise IndexError("filename")
-	def nl(self, filename): # Show file content with line number 
-		if filename:
-			with open(filename, "r") as file:
-				line_number = 1
-				for line in file:
-					print(f"   {line_number}\t{line}", end="")
-					line_number += 1
-
-		else: self.ThreadIn() 
-	def wc(self, filename): # Show file lines and words
-		if filename:
-
-			with open(filename, "r") as file:
-				file = file.read()
-
-				print(f"     {len(file.splitlines())}      {len(file.split())}    {len(file)} {filename}")
-
-		else: raise IndexError("filename")
 	def loadconfig(self, filename): # Load a configuration from a file
 		config_dict = {}
 
@@ -772,65 +1030,137 @@ class OpenTTY:
 					config_dict[current_section][key.strip()] = value.strip()
 
 		return config_dict
-	def tail(self, filename): # Show last lines of a file 
-		if filename:
-			def tailrepliant(filename):
-				with open(filename, 'r') as file:
-					lines = file.readlines()
+	def insmod(self, filename, root=False): # Load PSH Scripts 
+		if filename: 
+			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError("Script not in Whitelist. Are you root?")
 
-					if len(lines) <= library['head-lines']:
-						return ''.join(lines)
-					else:
-						return ''.join(lines[-library['head-lines']:])
+			with open(filename, "r") as script:
+				script = script.read().splitlines()
 
-			print(tailrepliant(filename))
+				self.functions[self.basename(filename).split(".")[0].replace(" ", ".")] = script
 
-		else: self.ThreadIn()
-	def diff(self, filenames): # Compare files (line-per-line) 
-		if len(shlex.split(filenames)) < 2: raise IndexError("2filename" if filenames else "filename <> filename")
+		else: raise IndexError("script")
+	def function(self, function): # Create functions
+		if function:
+			commands = []
+
+			while True:
+				try: commands.append(input(f"\033[1m\033[31m[{library['profile']}]\033[m >>> ").strip())
+				except (KeyboardInterrupt, EOFError): break
+
+			self.functions[function.replace(" ", ".")] = commands
+			print()
+		
+		else: raise IndexError("method.name")
+	def callmethod(self, function): # Call a function 
+		if function in self.functions:
+
+			for cmd in self.functions[function]:
+				if cmd:
+					if cmd.startswith("#"): run = (True, True)
+					else: run = self.shell(cmd, mkprocess=True, report=f"{function}: ")
+
+					if not run or not True in run: return 
+
+			return
+
+		if function: raise NameError("[InternalError] Function not found")
+	
+	# The box Plugin
+	#
+	# "Archive Utilities"
+	def zipinfo(self, zip_path): # Show informations for a zip archive 
+		if zip_path: 
+			try:
+				with zipfile.ZipFile(zip_path, 'r') as zip_file:
+					print(f"ZIP File: \033[1m[{zip_path}]\033[m\n\nNumber of Files: {len(zip_file.filelist)}")
+					print(f"Total Size: {sum(file.file_size for file in zip_file.filelist)} bytes\n")
+
+					print("File List:")
+					print("--------------------------------------------\n")
+					for file in zip_file.filelist:
+						print(f"- {file.filename}")
+
+			except zipfile.BadZipFile: print(f"zipinfo: {zip_path}: zip file is invalid or corromped")
+			except zipfile.LargeZipFile: print(f"zipinfo: {zip_path}: zip file is too Large")
+		else: raise IndexError("filename")
+	def unzip(self, cmdline): # Unzip a zip archive file 
+		if len(shlex.split(cmdline)) < 2: raise IndexError("extract path" if cmdline != "" else "archive >> path")
+		
+		with zipfile.ZipFile(shlex.split(cmdline)[0], 'r') as zf:
+			try: zf.extractall(shlex.split(cmdline)[1])
+			except Exception as error: traceback.print_exc()
+	def gunzip(self, cmdline): # Compress files and directories to a zip archive 
+		if cmdline:
+			if len(shlex.split(cmdline)) < 2: raise IndexError("source: folder | file")
+				
+			zip_filename = shlex.split(cmdline)[0]
+			source_path = shlex.split(cmdline)[1]
 			
-		lines1 = open(shlex.split(filenames)[0], "r").readlines()
-		lines2 = open(shlex.split(filenames)[1], "r").readlines()
+			if os.path.isfile(source_path):
+				with zipfile.ZipFile(zip_filename, 'w') as zipf:
+					zipf.write(source_path, os.path.basename(source_path))
+			elif os.path.isdir(source_path):
+				with zipfile.ZipFile(zip_filename, 'w') as zipf:
+					for foldername, subfolders, filenames in os.walk(source_path):
+						for filename in filenames:
+							file_path = os.path.join(foldername, filename)
+							zipf.write(file_path, os.path.relpath(file_path, source_path))
 
-		for i, (line1, line2) in enumerate(zip(lines1, lines2), start=1):
-			if line1 != line2:
-				print(f"   {i} - {self.basename(shlex.split(filenames)[0])}: {line1.strip()}")
-				print(f"   {i} - {self.basename(shlex.split(filenames)[1])}: {line2.strip()}")
-				print()
-	def find(self, cmdline): # Search WORDS in file content
-		if len(shlex.split(cmdline)) < 2: raise IndexError("words" if cmdline else "filename > words")
+		else: raise IndexError("filename << source")
+	
+	# The PSH
+	def uname(self, argv=""): # Show informations about system and machine 
+		if argv:
+			if "-a" in argv: print(f"{platform.system()} {platform.node()} {platform.release()} {platform.version()} {platform.machine()}")
 
-		filename = shlex.split(cmdline)[0]
-		search_word = shlex.split(cmdline)[1]
+			elif "-s" in argv: print(platform.system()) 
+			elif "-n" in argv: print(platform.node()) 
+			elif "-r" in argv: print(platform.release()) 
+			elif "-v" in argv: print(platform.version()) 
+			elif "-m" in argv: print(platform.machine())
 
-		results = []
+			else: print(f"uname: {argv}: invalid option")
 
-		with open(filename, "r") as text:
-			text = text.readlines()
-
-			line_number = 1
+		else: print(platform.system(), platform.release())
+	def export(self, cmdline=""): # Create global registers
+		if cmdline: os.environ[cmdline.split()[0]] = self.replace(cmdline)
+		else: print('from opentty import *\n\n\nif __name__ == "__main__":\n\tapp = OpenTTY()\n\n\tapp.connect("localhost")\n\tapp.disconnect(0)')
+	def environ(self, key=""): # Show global registers at envirronment 
+		if key: print(os.environ[key] if key in os.environ else f"env: {key}: register not found")
+		else: self.ThreadList(os.environ)
+	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager 
+		if setting:
+			if setting == ".": setting = ""
 			
-			for line in text:
-				if search_word in line: results.append((line_number, line))
+			with open(f"{self.root}/CONFIG.SYS", "a") as configsys:
+				configsys.write(f"{setting}\n")
+				
+		else: 
+			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
+			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n")
+	def diskfree(self, cmdline=""): # Show disk usage 
+		if os.name == "posix": os.system(f"df {cmdline}")
+		elif os.name == "nt": os.system("wmic logicaldisk get deviceid,size,freespace")
+	def enable(self, command): # Enable and disable a command 
+		if command.startswith("enable"): raise RuntimeError("[Errno 104] Cant unable the parent command")
 
-				line_number += 1
+		if command:
+			if command in library['commands-blacklist']: library['commands-blacklist'].remove(command)
+			else: library['commands-blacklist'].append(command)
 
-		if not results: return print("find: no matches.")
+		else: print('\n'.join([str(i) for i in library['commands-blacklist']]) if library['commands-blacklist'] else f"enable: blacklist is empty")
+	def clear(self): # Clear console [Linux and Windows] 
+		if os.name == "nt": local("cls")
+		else: local("clear")
+	def stty(self, cmdline=""): # Charge console name 
+		if cmdline: self.ttyname = cmdline
+		else: print(self.ttyname)
+	def pushdir(self, path): # Charge working directory 
+		if path:
+			self.puppydir = os.getcwd()
 
-		print(f"{len(results)} matches of '{search_word}' in \033[1m{filename}\033[m:\n")
-
-		for line_number, line in results: 
-			print(f"   {line_number}\t{line}")
-	def sort(self, words, show=True): # Avalue a phrase and choice a random word 
-		if words:
-			result = random.choice(words.split())
-
-
-			if show: print(result)
-
-			return result
-
-		else: raise IndexError("words")
+			return os.chdir(path)
 	def reload(self, cmdline="", root=True): # Reload OpenTTY Program 
 		if not "--confirm" in cmdline: return print(f"reload: it can charge normal {self.appname} beahvior. Cache will be cleaned.\nIf are you sure, run 'sudo reload --confirm'")
 
@@ -847,59 +1177,6 @@ class OpenTTY:
 			self.process[library['sh']] = 8080
 
 		else: raise PermissionError("Unable to reload. Are you root?")
-	def environ(self, key=""): # Show global registers at envirronment 
-		if key: print(os.environ[key] if key in os.environ else f"env: {key}: register not found")
-		else: self.ThreadList(os.environ)
-	def export(self, cmdline=""): # Create global registers
-		if cmdline: os.environ[cmdline.split()[0]] = self.replace(cmdline)
-		else: print('from opentty import *\n\n\nif __name__ == "__main__":\n\tapp = OpenTTY()\n\n\tapp.connect("localhost")\n\tapp.disconnect(0)')
-	def uname(self, argv=""): # Show informations about system and machine 
-		if argv:
-			if "-a" in argv: print(f"{platform.system()} {platform.node()} {platform.release()} {platform.version()} {platform.machine()}")
-
-			elif "-s" in argv: print(platform.system()) 
-			elif "-n" in argv: print(platform.node()) 
-			elif "-r" in argv: print(platform.release()) 
-			elif "-v" in argv: print(platform.version()) 
-			elif "-m" in argv: print(platform.machine())
-
-			else: print(f"uname: {argv}: invalid option")
-
-		else: print(platform.system(), platform.release())
-	def chmod(self, filename): # Add and remove files from whitelist 
-		if filename:
-			if filename in library['whitelist']: library['whitelist'].remove(self.basename(filename))
-			else: library['whitelist'].append(self.basename(filename))
-
-		else: print('\n'.join([str(i) for i in library['whitelist']]) if library['whitelist'] else f"chmod: whitelist is empty")
-	def clear(self): # Clear console [Linux and Windows] 
-		if os.name == "nt": local("cls")
-		else: local("clear")
-	def stty(self, cmdline=""): # Charge console name 
-		if cmdline: self.ttyname = cmdline
-		else: print(self.ttyname)
-	def pushdir(self, path): # Charge working directory 
-		if path:
-			self.puppydir = os.getcwd()
-
-			return os.chdir(path)
-	def alias(self, cmdline=""): # Create and show aliases 
-		if cmdline:
-			if self.replace(cmdline) != "": self.aliases[cmdline.split()[0]] = self.replace(cmdline)
-			else: print(f"alias {cmdline}='{self.aliases[cmdline]}'" if cmdline in self.aliases else f"alias: {cmdline}: alias not found")
-
-		else: self.ThreadList(self.aliases, prefix="alias ")
-	def unalias(self, alias=""): # Delete aliases 
-		if alias:
-			try: del self.aliases[alias]
-			except KeyError: print(f"unalias: {alias}: alias not found")
-		else: print("unalias: usage: unalias [-a] name [name ...]")	
-	def diskfree(self, cmdline=""): # Show disk usage 
-		if os.name == "posix": os.system(f"df {cmdline}")
-		elif os.name == "nt": os.system("wmic logicaldisk get deviceid,size,freespace")
-	def updater(self, root=False): # Update OpenTTY 
-		if root: local("pip install opentty --upgrade")
-		else: raise PermissionError(f"Unable to update {self.appname}. Are you root?")
 	def venv(self, venvname, root=False): # Create profiles from network template 
 		if venvname:
 			if not root: raise PermissionError("Unable to create profiles. Are you root?")
@@ -908,16 +1185,6 @@ class OpenTTY:
 			except Exception as error: print("venv: bad. profile creation filed.\n"), traceback.print_exc()
 		
 		else: raise IndexError("profile.name")
-	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager 
-		if setting:
-			if setting == ".": setting = ""
-			
-			with open(f"{self.root}/CONFIG.SYS", "a") as configsys:
-				configsys.write(f"{setting}\n")
-				
-		else: 
-			try: print(open(f"{self.root}/CONFIG.SYS", "r").read() if show else "", end="")
-			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n")
 	def crash(self, filename, chunk_size=library['chunk-size']): # Decode a file in chucks (Can crash your computer)
 		if filename:
 			with open(filename, 'rb') as data:
@@ -937,47 +1204,16 @@ class OpenTTY:
 
 				return decoded_chunks
 		else: raise IndexError("chuck.file")
-	def pull(self, filename): # Save current status of library in a json file 
-		if filename: json.dump(library, open(filename, "wt+"))
-		else: raise IndexError("filename")
-	def enable(self, command): # Enable and disable a command 
-		if library['experiments']['ENABLE']:
-			if command.startswith("enable"): raise RuntimeError("[Errno 104] Cant unable the parent command")
-
-			if command:
-				if command in library['commands-blacklist']: library['commands-blacklist'].remove(command)
-				else: library['commands-blacklist'].append(command)
-
-			else: print('\n'.join([str(i) for i in library['commands-blacklist']]) if library['commands-blacklist'] else f"enable: blacklist is empty")
-		else: raise RuntimeError("Beta Resources not enabled.")
-	def runas(self, cmdline, root=False): # Run command as [...] 
-		if cmdline:
-			if root: return self.shell(cmdline, mkprocess=True, root=True)
-
-
-			passwd = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
-
-			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
-			else: raise PermissionError("wrong password.")
-	def chroot(self, path, root=False): # Charge root directory 
-		if path:
-			if not root: raise PermissionError("Unable to charge profile dir. Are you root?")
-
-			if os.path.isdir(path):
-				library['root-dir'] = path 
-				self.root = path
-
-				return path
-
-			raise FileNotFoundError("No such directory.")
-
-		raise IndexError("path") 
-	def login(self, root=False): # Modify current login (to: root) 
-		if not root:
-			if library['experiments']['Disable-SU']: raise RuntimeError("SU is disabled.")
-
-			try: self.runas("true"), self.rmprocess("su"), self.rmprocess("true"), self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
-			except KeyError: print("login: no such psh session.")
+	def sleep(self, time): # Delay any seconds 
+		try: timeout(int(time))
+		except ValueError: print(f"sleep: invalid time interval '{time}'\n" if time else f"sleep: missing operand [delay]...\n"), traceback.print_exc()
+	#
+	# "OpenTTY Version Utilities"
+	def updater(self, root=False): # Update OpenTTY 
+		if root: local("pip install opentty --upgrade")
+		else: raise PermissionError(f"Unable to update {self.appname}. Are you root?")
+	#
+	# "Asset Manager"
 	def asset(self): # Show installed assets 
 		root_files = os.listdir(self.root)
 
@@ -1035,186 +1271,28 @@ class OpenTTY:
 				except json.decoder.JSONDecodeError as error: traceback.print_exc()
 
 		else: raise IndexError("filename")
-	def insmod(self, filename, root=False): # Load PSH Scripts 
-		if filename: 
-			if self.basename(filename) not in library['whitelist'] and not root: raise PermissionError("Script not in Whitelist. Are you root?")
+	def pull(self, filename): # Save current status of library in a json file 
+		if filename: json.dump(library, open(filename, "wt+"))
+		else: raise IndexError("filename")
+	#
+	# "Alias Manager"
+	def alias(self, cmdline=""): # Create and show aliases 
+		if cmdline:
+			if self.replace(cmdline) != "": self.aliases[cmdline.split()[0]] = self.replace(cmdline)
+			else: print(f"alias {cmdline}='{self.aliases[cmdline]}'" if cmdline in self.aliases else f"alias: {cmdline}: alias not found")
 
-			with open(filename, "r") as script:
-				script = script.read().splitlines()
-
-				self.functions[self.basename(filename).split(".")[0].replace(" ", ".")] = script
-
-		else: raise IndexError("script")
-	def function(self, function): # Create functions
-		if function:
-			commands = []
-
-			while True:
-				try: commands.append(input(f"\033[1m\033[31m[{library['profile']}]\033[m >>> ").strip())
-				except (KeyboardInterrupt, EOFError): break
-
-			self.functions[function.replace(" ", ".")] = commands
-			print()
-		
-		else: raise IndexError("method.name")
-	def callmethod(self, function): # Call a function 
-		if function in self.functions:
-
-			for cmd in self.functions[function]:
-				if cmd:
-					if cmd.startswith("#"): run = (True, True)
-					else: run = self.shell(cmd, mkprocess=True, report=f"{function}: ")
-
-					if not run or not True in run: return 
-
-			return
-
-		if function: raise NameError("[InternalError] Function not found")
-	def gaddr(self, hostname): # Get IP Adress of a machine with it name 
-		if hostname:
-			try: print(socket.gethostbyname(hostname))
-			except Exception as error: traceback.print_exc()
-
-		else: print(library['ipadress'])
-	def fwadress(self, ipadress): # Get informations about IP Adress (like hostname, time zone, country and others) 
-		def get_ip_info(ip):
-			try:
-				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
-			except Exception as e: return print(f"fw: failed to dialog with {ipadress}.\n"), traceback.print_exc()
-
-		if ipadress != "":
-			try:
-				socket.inet_aton(ipadress)
-				ip_info = get_ip_info(ipadress)
-
-				if ip_info:
-					for key, value in ip_info.items(): print(f"{key}: {value}")
-			except socket.error: print(f"fw: {ipadress}: ip adress is invalid.")
-
-		else: raise IndexError("ip.adress")
-	def wget(self, cmdline): # Download files from Internet 
-		if len(cmdline.split()) < 2:
-			if cmdline: return self.wget(f"{cmdline} {self.basename(cmdline)}")
-			else: raise IndexError("url")
-
-		try: urllib.request.urlretrieve(cmdline.split()[0], self.replace(cmdline)), print(f"wget: {self.basename(self.replace(cmdline))}: download complete.")
-		except Exception as error: traceback.print_exc()
-	def server(self, port, root=False): # Open a localhost server in current working directory 
-		if port:
-			if not root: raise PermissionError("Unable to start server. Are you root?")
-
-			try:
-				with socketserver.TCPServer(("", int(port)), http.server.SimpleHTTPRequestHandler) as httpd:
-					print(f"Server openned at http://localhost:{port}...\n")
-					httpd.serve_forever()
-			
-			except (KeyboardInterrupt, EOFError): return print("\nServer stopped.")
-			except ValueError: return print(f"server: invalid port '{port}'")
-
-		else: self.server(randint(2048, 4096), root=root)
-	def curl(self, url, show=False): # See a website html 
-		if url:
-			try: html = urllib.request.urlopen(url).read().decode()
-			except Exception as error: return traceback.print_exc()
-
-			if show: print(self.recognize(html))
-			
-			return html
-		
-		else: raise IndexError("url")
-	def ping(self, host, timeout=library['timeout']): # Test connection for a host 
-		if host:
-			try:
-				net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-				net_item.settimeout(timeout)
-				
-				start_time = time.time()
-				
-				net_item.connect((host, 80))
-
-				end_time = time.time()
-
-				ping_time_ms = (end_time - start_time) * 1000
-
-				print(f"{host}: ping is {ping_time_ms:.0f} ms")
-
-			except (socket.timeout, ConnectionRefusedError): print(f"{host}: bad. connection failed.")
-			except socket.gaierror: traceback.print_exc()
-			finally: net_item.close()
-			
-		else: raise IndexError("adress")
-	def dialup(self, target, timeout=library['timeout']): # Connect into a server 
-		if target:
-			if len(target.split()) < 2: target = f"{target} 80"
-			
-			try:
-				host = target.split()[0]
-				port = int(target.split()[1])
-				
-				net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				net_item.settimeout(timeout * timeout)
-				
-				net_item.connect((host, port))
-				
-				while True:
-					try:
-						command = input(f"\033[32m\033[1m{getpass.getuser()}@{host}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{host}\033[32m $\033[m ").strip()
-						
-						if command:
-							if command == "/exit": raise KeyboardInterrupt
-							elif command.startswith("/"): self.shell(command.replace('/', ''), mkprocess=True)
-							
-							else: net_item.send(f"{command}\n".encode())
-							
-							try: 
-								spack = net_item.recv(9600).decode()
-								
-								if not spack: raise ConnectionResetError("[Errno 56] Server disconnected from this call.")
-								
-								
-								print(spack)
-							
-							except (KeyboardInterrupt, EOFError): print()
-						
-					
-					except (KeyboardInterrupt, EOFError): return net_item.close()
-				
-			except Exception as error: traceback.print_exc()
-		
-		else: raise IndexError("ip.adress")
-	def ifconfig(self, target=hostname()): # Get informations about socket objects of a host 
-		if target:
-			print("Informations for Network Adapters: \n")
-
-			for conn in socket.getaddrinfo(target, 80, family=0, type=0, proto=0, flags=0):
-				_, proto, _, _, info = conn
-
-				print(info[0])
-				print(proto)
-				print('-' * 22, end="\n\n")
-
-		else: self.ifconfig(hostname())
-	def hostname(self, adress=""): # Get hostname by IP Adress of a host 
-		if adress:
-			try:
-				hostname, _, _ = socket.gethostbyaddr(adress)
-				print(hostname)
-
-			except Exception as error: traceback.print_exc()
-		else: print(library['hostname'])
-	def netstat(self, test_url="https://www.google.com", truecode="Online", falsecode="Offline"): # Verify network status 
-		try: urllib.request.urlopen(test_url)
-		except Exception as error: return falsecode
-
-		return truecode	
+		else: self.ThreadList(self.aliases, prefix="alias ")
+	def unalias(self, alias=""): # Delete aliases 
+		if alias:
+			try: del self.aliases[alias]
+			except KeyError: print(f"unalias: {alias}: alias not found")
+		else: print("unalias: usage: unalias [-a] name [name ...]")	
+	#
+	# "Others"
 	def calendar(self): # Show calendar for this month 
 		now = datetime.datetime.now()
 
 		calendar.setfirstweekday(calendar.SUNDAY), print(calendar.month(now.year, now.month), end="")
-	def sleep(self, time): # Delay any seconds 
-		try: timeout(int(time))
-		except ValueError: print(f"sleep: invalid time interval '{time}'\n" if time else f"sleep: missing operand [delay]...\n"), traceback.print_exc()
 	def sequence(self, limit): # Show numbers from 1 to argument 'LIMIT'
 		if limit:
 			try: cache = int(limit) + 1
@@ -1234,15 +1312,8 @@ class OpenTTY:
 			except ValueError: print(f"genn: invalid range '{limit}'\n"), traceback.print_exc()
 
 		else: raise IndexError("max.number")
-	def gen_adress(self): # Generate random IP Adress 
-		group1 = f"1{randint(4, 9)}{randint(2, 5)}"
-		group2 = f"{randint(1, 2)}{randint(2, 9)}{randint(1, 9)}"
-		group3 = random.choice(['1', '15', '132', '181'])
-		group4 = f"{randint(1, 64)}"
-
-		return f"{group1}.{group2}.{group3}.{group4}"
-	# Remote Plugin
-	#
+	
+	# The Remote Plugin
 	def bind(self, port=4095):
 		server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		server.bind(('0.0.0.0', port))
@@ -1250,13 +1321,14 @@ class OpenTTY:
 
 		print(f"\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Started PSH Stream in port {port}. . .")
 
+		default_stdout = sys.stdout
+		default_stdin = sys.stdin
+		
 		while True:
 			try:
 				client_socket, client_address = server.accept()
 				print(f"\033[1m[ \033[32mSERVER\033[m\033[1m ]\033[m New client connected '{client_address[0]}'")
 
-				default_stdout = sys.stdout
-				default_stdin = sys.stdin
 
 				while True:
 					try: 
@@ -1281,7 +1353,8 @@ class OpenTTY:
 				sys.stdout = default_stdout
 				sys.stdin = default_stdin
 
-				client_socket.close()
+				try: client_socket.close()
+				except UnboundLocalError: pass
 
 				print(f"\n\n\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Finished stream.")
 

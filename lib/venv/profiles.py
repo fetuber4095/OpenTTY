@@ -35,9 +35,7 @@ library['resources']['RESOURCE-NAME'] = { # Setup your assets
 
 library["experiments"] = {
         "Are-ROOT": False, # Beahivor as computer admin
-        "ENABLE": False, # Add command enable and disable to control acessible commands
         "Desktop": False, # Add support for Virtual Desktop emulation
-        "QT-SDK": False, # Add asset QT-SDK into mirrors
         "RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
         "Revolution-Line": False, # Active new command line
         "Dumpsys": False, # Enable dumpsys

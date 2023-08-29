@@ -1,0 +1,36 @@
+#!/opentty.py rundll
+
+
+global sys, setup
+global json
+
+import sys, json
+from setuptools import setup
+
+
+if not cmd: raise IndexError("Missing setup file (Use 'gen -t [filename]...')")
+
+if '-t' in cmd:
+    if not app.replace(cmd): raise IndexError("Missing operand [filename]...")
+
+    with open(app.replace(cmd), "wt+") as file:
+        file.write('{\n    "name": "",\n    "version": "",\n\n    "author": "",\n    "author_email": "",\n\n    "description": "",\n    "long_description_filename": "",\n    "long_description_content_type": "text/markdown",\n\n    "url": "",\n    "packages": ["."],\n    "classifiers": [],\n\n    "keywords": "",\n    "install_requires": [\n\n\n    ],\n\n\n\n    "script-args": ["sdist", "bdist_wheel"]}')
+
+
+else:
+    settings = json.load(open(cmd, "r"))
+   
+    setup(
+        name=settings['name'],
+        version=settings['version'],
+        author=settings['author'],
+        author_email=settings['author_email'],
+        description=settings['description'],
+        long_description=open(settings['long_description_filename'], "r").read(),
+        long_description_content_type=settings['long_description_content_type'],
+        url=settings['url'],
+        packages=settings['packages'],
+        classifiers=settings['classifiers'],
+        keywords=settings['keywords'], script_args=settings['script-args'],
+        install_requires=settings['install_requires']
+    )

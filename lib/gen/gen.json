@@ -1,0 +1,7 @@
+{
+    "version": "1.0.1",
+    "interface": "github.com",
+
+    "libexec": "/lib/gen/gen.dll",
+    "workspace": "opentty.runtime.generators"
+}
