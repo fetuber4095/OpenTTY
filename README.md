@@ -1,4 +1,4 @@
-# OpenTTY 1.5 "The Resources Upgrade"
+# OpenTTY 1.6 "The Resources Upgrade"
 
 > This is OpenTTY, a terminal emulator  
 > tottaly created in python that run a minimalish  

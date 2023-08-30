@@ -26,6 +26,7 @@ from os import system as local
 from socket import gethostname as hostname
 from random import randint, choice
 from time import sleep as timeout
+from contextlib import redirect_stdout
 from sys import exit as close
 
 from sys import stdin, stdout
@@ -101,9 +102,7 @@ library = {
 	# Virtual disks info
 	"fstab": [],
 
-
-	"letters": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
-	"numbers": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+ 
 
 	# Systems commands
 	#
@@ -134,27 +133,23 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": []},
-		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": []},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": []},
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": []},
-		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []},
-		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []},
-		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
-		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools']},
-		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
-		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []},
-		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
-		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']},
-		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']}
+		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": []}, "ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": []},
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": []}, "nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": []},
+		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []}, "busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []}, "rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
+		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools']}, "midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
+		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []}, "browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
+		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']}, "qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']},
+		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": []}
+		#"": {"filename": "", "url": "", "py-libs": []}
+		#"": {"filename": "", "url": "", "py-libs": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
 	},
 
 	"scripts": {
-		"setup.py": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/build.sh"},
-		#"": {"url": ""},
-		#"": {"url": ""},
+		"pypi": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/build.sh"},
+		"ngen": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll"},
+		"news": {"url": "https://github.com/fetuber4095/ResidentFlash/raw/main/packages/news"},
 		#"": {"url": ""},
 		#"": {"url": ""},
 		#"": {"url": ""},
@@ -288,6 +283,7 @@ class OpenTTY:
 
 		if code.splitlines()[0] == "#!/opentty.py rundll": 
 			try: exec(self.recognize(code), self.globals, self.locals)
+			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...")
 			except Exception as error: traceback.print_exc()
 		elif code.splitlines()[0] == "#!/opentty.py sh":
 			for cmd in code.splitlines():
@@ -373,6 +369,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "genip": print(self.gen_adress())
 			elif cmd.split()[0] == "connect": self.dialup(self.replace(cmd))
 			elif cmd.split()[0] == "ping": self.ping(self.replace(cmd))
+			elif cmd.split()[0] == "gping": self.gping()
 			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd) if self.replace(cmd) else hostname())
 			elif cmd.split()[0] == "netstat": print(self.netstat())
 
@@ -422,6 +419,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "export": self.export(self.replace(cmd))
 			elif cmd.split()[0] == "env": self.environ(self.replace(cmd))
 			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
+			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
@@ -472,7 +470,6 @@ class OpenTTY:
 
 			elif cmd.split()[0] == "cal": self.calendar()
 			elif cmd.split()[0] == "github": print(library['github.com'])
-			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "inbox": self.curl(library['docs']['inbox'], show=True)
 			elif cmd.split()[0] == "root": self.pushdir(self.root)
 			elif cmd.split()[0] == "home": self.pushdir(os.path.expanduser("~"))
@@ -581,10 +578,12 @@ class OpenTTY:
 		print(f"{report}kill: ({pid}) - No such process" if pid else f"{report}kill: missing operand [PID]...")
 
 	def bg(self, method, args): # Run tasks in background
-		thread = threading.Thread(target=method, args=args)
-		thread.start()
+		with io.StringIO() as fake_stdout:
+			with redirect_stdout(fake_stdout):
+				thread = threading.Thread(target=method, args=args)
+				thread.start()
 
-		return thread
+				return thread
 
 	# OpenTTY "Applications"
 	#
@@ -753,6 +752,22 @@ class OpenTTY:
 			finally: net_item.close()
 			
 		else: raise IndexError("adress")
+	def gping(self, timeout=library['timeout']): # Test connection for a host 
+		try:
+			net_item = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+			net_item.settimeout(timeout)
+			
+			start_time = time.time()
+			
+			urllib.request.urlopen("https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll")
+
+			end_time = time.time()
+			ping_time_ms = (end_time - start_time) * 1000
+
+			print(f"github.com: ping is {ping_time_ms:.0f} ms")
+
+		except Exception as error: traceback.print_exc()
 	def ifconfig(self, target): # Get informations about socket objects of a host 
 		if target:
 			print("Informations for Network Adapters: \n")

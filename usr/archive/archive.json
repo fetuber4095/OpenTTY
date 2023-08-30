@@ -1,5 +1,5 @@
 {
-	"09H3": {"version": "1.5", "patch": "The OpenQT Update", "url": ""},
+	"09H3": {"version": "1.5", "patch": "The OpenQT Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.5/opentty.py"},
 	"09H2": {"version": "1.4", "patch": "The Midnight Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.4/opentty.py"},
 	"09H1": {"version": "1.3", "patch": "The Virtual Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.3/opentty.py"},
 	"08H8": {"version": "1.2.2", "patch": "The Netman Upgrade", "url": ""},
