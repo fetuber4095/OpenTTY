@@ -16,7 +16,7 @@ if library['openai-api']:
 	    response = openai.Completion.create(
 	        engine="davinci",
 	        prompt=prompt,
-	        max_tokens=150
+	        max_tokens=100
 	    )
 	    return response.choices[0].text.strip()
 

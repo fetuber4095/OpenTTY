@@ -88,7 +88,7 @@ library = {
 	"max-byte-len": 32, 
 
 	"ipinfo-token": "",
-	"openai-api": "",
+	"openai-api": "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",
 
 	"chunk-size": 5,
 	
@@ -277,7 +277,7 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
-	def execonline(self, url, cmd="", root=False): # Execute scripts from internet "without ddownload file"
+	def execonline(self, url, cmd="", root=False): # Execute scripts from internet "without ddownload file" 
 		try: code = urllib.request.urlopen(url).read().decode()
 		except Exception as error: return traceback.print_exc()
 
