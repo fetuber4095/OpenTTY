@@ -8,14 +8,14 @@ global openai
 
 import openai
 
-openai.api_key = library['openai-apikey']
+openai.api_key = library['openai-api']
 
 
 def chat_with_gpt3(prompt):
     response = openai.Completion.create(
         engine="davinci",
         prompt=prompt,
-        max_tokens=50
+        max_tokens=150
     )
     return response.choices[0].text.strip()
 

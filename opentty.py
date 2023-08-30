@@ -88,7 +88,7 @@ library = {
 	"max-byte-len": 32, 
 
 	"ipinfo-token": "",
-	"openai-apikey": "",
+	"openai-api": "",
 
 	"chunk-size": 5,
 	
@@ -152,7 +152,7 @@ library = {
 		"pypi": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/build.sh"},
 		"ngen": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll"},
 		"news": {"url": "https://github.com/fetuber4095/ResidentFlash/raw/main/packages/news"},
-		#"": {"url": ""},
+		"gpt": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/gpt.py"},
 		#"": {"url": ""},
 		#"": {"url": ""},
 	}, 
