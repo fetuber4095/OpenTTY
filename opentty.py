@@ -88,7 +88,7 @@ library = {
 	"max-byte-len": 32, 
 
 	"ipinfo-token": "",
-	"openai-api": "",
+	"openai-api": "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",
 
 	"chunk-size": 5,
 	

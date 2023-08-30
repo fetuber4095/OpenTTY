@@ -14,7 +14,7 @@ if library['openai-api']:
 
 	def chat_with_gpt3(prompt):
 	    response = openai.Completion.create(
-	        engine="davinci",
+	        engine="text-davinci-003",
 	        prompt=prompt,
 	        max_tokens=100
 	    )
