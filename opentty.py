@@ -86,7 +86,9 @@ library = {
 	# Commands settings
 	"head-lines": 10,
 	"max-byte-len": 32, 
+
 	"ipinfo-token": "",
+	"openai-apikey": "",
 
 	"chunk-size": 5,
 	
@@ -283,7 +285,7 @@ class OpenTTY:
 
 		if code.splitlines()[0] == "#!/opentty.py rundll": 
 			try: exec(self.recognize(code), self.globals, self.locals)
-			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...")
+			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...ssss")
 			except Exception as error: traceback.print_exc()
 		elif code.splitlines()[0] == "#!/opentty.py sh":
 			for cmd in code.splitlines():

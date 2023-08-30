@@ -8,7 +8,8 @@ global openai
 
 import openai
 
-openai.api_key = "YOUR_OPENAI_API_KEY"
+openai.api_key = library['openai-apikey']
+
 
 def chat_with_gpt3(prompt):
     response = openai.Completion.create(
