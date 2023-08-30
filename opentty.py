@@ -285,9 +285,9 @@ class OpenTTY:
 
 		if code.splitlines()[0] == "#!/opentty.py rundll": 
 			try: exec(self.recognize(code), self.globals, self.locals)
-			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...ssss")
+			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...")
 			except Exception as error: traceback.print_exc()
-		elif code.splitlines()[0] == "#!/opentty.py sh":
+		elif code.splitlines()[0] == "#!/opentty.py sh": 
 			for cmd in code.splitlines():
 				if cmd:
 					if cmd.startswith("#"): run = (True, True)
@@ -296,6 +296,7 @@ class OpenTTY:
 					if not run or not True in run: return 
 		else:
 			try: exec(self.recognize(code), self.globals, self.locals)
+			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...")
 			except Exception as error: traceback.print_exc()
 	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def, for, while) 
 		if len(startline.split()) >= 2 and startline.endswith(":"): 
