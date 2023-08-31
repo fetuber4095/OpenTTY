@@ -1,7 +1,7 @@
 #!/opentty.py rundll
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2023 "Mr. Lima" [explorer.py]
+#  Copyright (C) 2023 "Mr. Lima" [pname.py]
 #
 #  This code is part of OpenTTY Package Repository
 #  
@@ -23,37 +23,16 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeView, QFileSystemModel, QVBoxLayout, QWidget
+global platform
+import platform
 
-class FileExplorer(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.init_ui()
+if cmd:
+	if "-a" in cmd: print(f"Python {platform.python_version()} ({platform.python_build()[0]} {platform.python_build()[1]}) [{platform.python_compiler()}]")
 
-    def init_ui(self):
-        self.setWindowTitle('File Explorer')
+	elif "-b" in cmd: print(platform.python_build()[0])
+	elif "-d" in cmd: print(platform.python_build()[1])
+	elif "-c" in cmd: print(platform.python_compiler())
 
-        self.model = QFileSystemModel()
-        self.model.setRootPath('')
-        
-        self.tree_view = QTreeView()
-        self.tree_view.setModel(self.model)
-        self.tree_view.setRootIndex(self.model.index(''))
+	else: print(f"pname: {cmd}: invalid option")
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.tree_view)
-
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-
-        self.setGeometry(100, 100, 800, 600)
-
-def main():
-    app = QApplication(sys.argv)
-    window = FileExplorer()
-    window.show()
-    sys.exit(app.exec_())
-
-main()
+else: print(f"Python {platform.python_version()}")

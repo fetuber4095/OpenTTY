@@ -1,20 +1,40 @@
-#!/usr/bin/env python
+#!/opentty.py rundll
 # -*- coding: utf-8 -*-
-#    
-#  Copyright (C) 2023 "Mr. Lima"
+#
+#  Copyright (C) 2023 "Mr. Lima" [rundll.py]
+#
+#  This code is part of OpenTTY Package Repository
 #  
-#  This software is part of OpenTTY Python Module
-#  It run application python dlls with externally of
-#  PSH and it dependences.
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#  
+#  The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#  
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
 
 from opentty import *
 
 library['profile'] = "RunDll" 
 library['debugmode'] = True 
 
+
+app = OpenTTY()
+
 class RunDll(OpenTTY):
 	def __init__(self):
-		if not ' '.join(sys.argv[1:]): return print("rundll: missing operand [dll.script]...")
+		super().__init__()
+
 		
 		self.appname = library['appname'] 
 		self.version = library['version']
@@ -25,7 +45,7 @@ class RunDll(OpenTTY):
 		
 		self.root, self.puppydir = library['root-dir'], library['root-dir']
 
-		self.command = ' '.join(sys.argv[1:])
+		self.command = ' '.join(sys.argv[2:])
 
 		app = OpenTTY()
 
@@ -34,7 +54,7 @@ class RunDll(OpenTTY):
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
 			"config": super().loadconfig
 		}
-		self.locals = {"app": app}
+		self.locals = {}
 
 
 	def __enter__(self): return self
@@ -48,5 +68,6 @@ class RunDll(OpenTTY):
 			except Exception as error: traceback.print_exc()
 
 with RunDll() as runtime:
+	if not ' '.join(sys.argv[1:]): raise IndexError("rundll: missing operand [dll.script]...")
 
-	runtime.runfile(shlex.split(' '.join(sys.argv))[0])
+	runtime.runfile(shlex.split(' '.join(sys.argv))[1])

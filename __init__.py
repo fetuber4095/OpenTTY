@@ -1,7 +1,9 @@
-#!/usr/bin/env python
+#!/opentty.py rundll
 # -*- coding: utf-8 -*-
-#    
-#  Copyright (c) 2023 "Mr. Lima"
+#
+#  Copyright (C) 2023 "Mr. Lima" [__init__.py]
+#
+#  This code is part of OpenTTY Package Repository
 #  
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal

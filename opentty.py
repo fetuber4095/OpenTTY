@@ -44,7 +44,8 @@ library = {
 	"patch": [
 		"OpenTTY 98",
 		"Added Remote Plugin",
-		"Finished experiments ENABLE "	
+		"Added resource Background and command BG",
+		"Finished experiments ENABLE ",
 	],
     
     "developer": "Mr. Lima",
@@ -135,13 +136,20 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": []}, "ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": []},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": []}, "nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": []},
-		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []}, "busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []}, "rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
-		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools']}, "midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
-		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []}, "browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
-		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']}, "qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']},
+		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": []}, 
+		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": []},
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": []}, 
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": []},
+		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []}, 
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []}, 
+		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
+		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools']}, 
+		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
+		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []}, 
+		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
+		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']}, 
+		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']},
 		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
