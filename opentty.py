@@ -458,8 +458,9 @@ class OpenTTY:
 			# "Asset Manager"
 			elif cmd.split()[0] == "asset": self.asset()
 			elif cmd.split()[0] == "mirror": print('\n'.join(f"- {item} \033[1m[{library['resources'][item]['filename']}]\033[m" for item in library['resources']))
-			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd), root=root)
-			elif cmd.split()[0] == "install": self.install(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "get": self.get_asset(self.replace(cmd), report=report, root=root)
+			elif cmd.split()[0] == "install": self.install(self.replace(cmd), report=report, root=root)
+			elif cmd.split()[0] == "uninstall": self.uninstall(self.replace(cmd), report=report, root=root)
 			elif cmd.split()[0] == "add-repo": self.trustin(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "pull": self.pull(self.replace(cmd))
 			#
@@ -1265,16 +1266,16 @@ class OpenTTY:
 				
 
 		else: print("asset: no assets installed.")
-	def get_asset(self, asset, root=False): # Download asset files
+	def get_asset(self, asset, report="", root=False): # Download asset files
 		if asset:
 			for resource in asset.split():
-				if resource not in library['resources']: return print(f"get: {resource}: asset not found")
+				if resource not in library['resources']: return print(f"{report}get: {resource}: asset not found")
 
-				try: urllib.request.urlretrieve(library['resources'][resource]['url'], library['resources'][resource]['filename']), print(f"get: asset '{resource}' downloaded.")
-				except Exception as error: print(f"get: bad. asset download failed."), traceback.print_exc()
+				try: urllib.request.urlretrieve(library['resources'][resource]['url'], library['resources'][resource]['filename']), print(f"{report}get: asset '{resource}' downloaded.")
+				except Exception as error: print(f"{report}get: bad. asset download failed."), traceback.print_exc()
 				
 		else: raise IndexError("asset")
-	def install(self, asset, root=False): # Install file and enable it as OpenTTY local asset 
+	def install(self, asset, report="", root=False): # Install file and enable it as OpenTTY local asset 
 		if asset:
 			if not root: raise PermissionError("Unable write in profile dir. Are you root?")
 
@@ -1286,10 +1287,18 @@ class OpenTTY:
 						urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}")
 						local(f"pip install {' '.join(library['resources'][resource]['py-libs'])}") if library['resources'][resource]['py-libs'] else local("")
 
-						print(f"install: asset '{resource}' installed.")
-					except Exception as error: print(f"get: bad. asset installation failed."), traceback.print_exc()
+						print(f"{report}install: asset '{resource}' installed.")
+					except Exception as error: print(f"{report}install: bad. asset installation failed."), traceback.print_exc()
 					
 		else: raise IndexError("asset")
+	def uninstall(self, asset, report="", root=False): # Uninstall assets 
+		if asset:
+			if asset in library['resources']: filename = library['resources']['filename']
+			else: filename = asset 
+
+			try: os.remove(f"{self.root}/{filename}")
+			except (FileNotFoundError, IsADirectoryError): print(f"{report}uninstall: {asset}: asset not installed")
+			except (OSError, PermissionError): traceback.print_exc()
 	def trustin(self, filename, root=False): # Import mirrors from a file
 		if filename:
 			if not root: raise PermissionError("Unable to index mirror file. Are you root?")
