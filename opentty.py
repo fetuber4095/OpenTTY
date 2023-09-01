@@ -89,7 +89,7 @@ library = {
 	"max-byte-len": 32, 
 
 	"ipinfo-token": "",
-	"openai-api": "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",
+	"openai-api": "",
 
 	"chunk-size": 5,
 	
@@ -136,22 +136,22 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": []}, 
-		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": []},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": []}, 
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": []},
-		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": []}, 
-		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": []},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": []}, 
-		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty']},
-		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools']}, 
-		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": []},
-		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": []}, 
-		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
-		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']}, 
-		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']},
-		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": []},
-		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": []}
+		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": [], "install-requires": []}, 
+		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": [], "install-requires": []},
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": [], "install-requires": []}, 
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": [], "install-requires": []},
+		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": [], "install-requires": []}, 
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": [], "install-requires": []},
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": [], "install-requires": []}, 
+		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty'], "install-requires": []},
+		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools'], "install-requires": []}, 
+		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": [], "install-requires": []},
+		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": [], "install-requires": ['qt']}, 
+		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": [], "install-requires": ['qt']},
+		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5'], "install-requires": []}, 
+		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5'], "install-requires": []},
+		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": [], "install-requires": []},
+		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
 	},
@@ -161,7 +161,7 @@ library = {
 		"ngen": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll"},
 		"news": {"url": "https://github.com/fetuber4095/ResidentFlash/raw/main/packages/news"},
 		"gpt": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/gpt.py"},
-		#"": {"url": ""},
+		"psh.test": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/deploy/psh-tester.sh"},
 		#"": {"url": ""},
 	}, 
 
@@ -505,7 +505,7 @@ class OpenTTY:
 				elif cmd.split()[0] in library['scripts']: self.shell(f"; {library['scripts'][cmd.split()[0]]['url']} {self.replace(cmd)}", mkprocess=False, root=root)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root) and not builtin: local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
-				elif f"{cmd.split()[0]}.ui" in os.listdir(self.root) and not builtin: self.shell(f"qt {self.root}/{cmd.split()[0]}.ui {self.replace(cmd)}", mkprocess=True, builtin=False, root=root)
+				elif f"{cmd.split()[0]}.ui" in os.listdir(self.root) and not builtin: self.shell(f"qt {self.root}/{cmd.split()[0]}.ui {self.replace(cmd)}", mkprocess=True, builtin=False, report=report, root=root)
 				elif f"{cmd.split()[0]}.exe" in os.listdir(self.root) and not builtin: local(f"{self.root}\\{cmd}" if os.name == "nt" else f"echo {report}{cmd.split()[0]}: asset installed. [POSIX Without Support]") 
 				elif f"{cmd.split()[0]}.dll" in os.listdir(self.root) and not builtin: self.execfile(f"/{cmd.split()[0]}.dll", self.replace(cmd), ispkg=True)
 				elif f"{cmd.split()[0]}.zip" in os.listdir(self.root) and not builtin: 
@@ -529,7 +529,7 @@ class OpenTTY:
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
 		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]...")
-		except (ValueError, NameError, OSError, RuntimeError, UnboundLocalError): return traceback.print_exc()
+		except (ValueError, NameError, OSError, RuntimeError, UnboundLocalError, KeyError): return traceback.print_exc()
 
 		
 		return True, self.rmprocess(cmd)
@@ -1287,18 +1287,23 @@ class OpenTTY:
 						urllib.request.urlretrieve(library['resources'][resource]['url'], f"{self.root}/{library['resources'][resource]['filename']}")
 						local(f"pip install {' '.join(library['resources'][resource]['py-libs'])}") if library['resources'][resource]['py-libs'] else local("")
 
+						if library['resources'][resource]['install-requires']:
+							for requirement in library['resources'][resource]['install-requires']: self.install(requirement, report=report, root=root)
+
 						print(f"{report}install: asset '{resource}' installed.")
 					except Exception as error: print(f"{report}install: bad. asset installation failed."), traceback.print_exc()
 					
 		else: raise IndexError("asset")
 	def uninstall(self, asset, report="", root=False): # Uninstall assets 
 		if asset:
-			if asset in library['resources']: filename = library['resources']['filename']
+			if asset in library['resources']: filename = library['resources'][asset]['filename']
 			else: filename = asset 
 
 			try: os.remove(f"{self.root}/{filename}")
 			except (FileNotFoundError, IsADirectoryError): print(f"{report}uninstall: {asset}: asset not installed")
 			except (OSError, PermissionError): traceback.print_exc()
+
+		else: raise IndexError("asset")
 	def trustin(self, filename, root=False): # Import mirrors from a file
 		if filename:
 			if not root: raise PermissionError("Unable to index mirror file. Are you root?")

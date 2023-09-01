@@ -87,6 +87,9 @@ dd file.json file.json
 catbin file.json
 
 rm file.json
+rm archive.zip
+rm anyfile
+
 
 ps 
 

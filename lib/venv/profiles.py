@@ -12,6 +12,7 @@ library['profile'] = "NAME-OF-PROFILE" # Set name of profile
 
 library['debugmode'] = False # Enable or disable OpenTTY [debug mode]
 library['ipinfo-token'] = "" # Setup your "https://ipinfo.io" acess token for command FW
+library['openai-api'] = "" # Setup your openai api key
 
 library['do-auth'] = False # Ask for password at start
 library['goto-home'] = True # Enable or disable go to user home directory when join PSH

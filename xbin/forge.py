@@ -41,6 +41,7 @@ library["experiments"] = {
 # User settings
 library['passwd'] = "1234"
 library['ipinfo-token'] = ""
+library['openai-api'] = ""
 # ----------------------------
 
 
