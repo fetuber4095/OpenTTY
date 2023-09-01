@@ -150,8 +150,8 @@ library = {
 		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": []},
 		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5']}, 
 		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5']},
-		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": []}
-		#"": {"filename": "", "url": "", "py-libs": []}
+		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": []},
+		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
 		#"": {"filename": "", "url": "", "py-libs": []}
 	},
@@ -273,7 +273,7 @@ class OpenTTY:
 			print(f"(program exited with code: {code})")
 			print(f"Press return to continue"), input(), close()
 		except (KeyboardInterrupt, EOFError): print(), close()
-	
+
 	def execfile(self, filename, cmd="", ispkg=False, root=False): # Execute a dll python script 
 		if self.basename(filename).split()[0] not in library['whitelist'] and not ispkg and not root: raise PermissionError("Script not in Whitelist. Are you root?")
 
@@ -350,7 +350,7 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", mkprocess=False)
-			elif cmd.split()[0] in ["if", "with", "def", "class", "try", "for", "while"]: self.execblock(cmd)
+			elif cmd.split()[0] in ["if", "case", "with", "def", "class", "try", "for", "while"]: self.execblock(cmd.replace("case", "if"))
 			elif any(cmd.startswith(keyword) for keyword in ["from", "import", "print", "input", "nm", "app", "lambda", "raise", "assert", "del", "global"]): self.shell(f": {cmd}", mkprocess=False)
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})", mkprocess=False)
 			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"'): 
@@ -431,6 +431,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "env": self.environ(self.replace(cmd))
 			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
+			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon: missing operand [command]...", end="")
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
@@ -756,7 +757,8 @@ class OpenTTY:
 
 				ping_time_ms = (end_time - start_time) * 1000
 
-				print(f"{host}: ping is {ping_time_ms:.0f} ms")
+				if ping_time_ms < 1000: print(f"{host}: ping is {ping_time_ms:.0f} ms")
+				else: print(f"{host}: ping is 999+ ms")
 
 			except (socket.timeout, ConnectionRefusedError): print(f"{host}: bad. connection failed.")
 			except socket.gaierror: traceback.print_exc()

@@ -1,7 +1,7 @@
-#!/opentty.py rundll
+#!/opentty.py sh
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2023 "Mr. Lima" [pname.py]
+#  Copyright (C) 2023 "Mr. Lima" [psh-tester.sh]
 #
 #  This code is part of OpenTTY Package Repository
 #  
@@ -23,16 +23,71 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-global platform
-import platform
+# OpenTTY "PSH Deploy"
+#
+# Adding and removing files from whitelist
+chmod test.file
+chmod test.file
 
-if cmd:
-	if "-a" in cmd: print(f"Python {platform.python_version()} ({platform.python_build()[0]} {platform.python_build()[1]}) [{platform.python_compiler()}]")
+# Testing NETMAN Plugin
+gaddr www.google.com 
+fw 142.251.129.36
 
-	elif "-b" in cmd: print(platform.python_build()[0])
-	elif "-d" in cmd: print(platform.python_build()[1])
-	elif "-c" in cmd: print(platform.python_compiler())
+curl https://github.com/fetuber4095/OpenTTY
 
-	else: print(f"pname: {cmd}: invalid option")
+genip
+gping
 
-else: print(f"Python {platform.python_version()}")
+netstat
+
+ifconfig
+
+# Testing Plugin "The boy of Files"
+mkdir testdir
+rmdir testdir
+
+touch testfile
+rm testfile
+
+ls
+
+touch testfile2
+
+cp testfile2 testfile3
+mv testfile3 anyfile
+
+rm testfile2
+
+# Testing "The BOX Plugin"
+gzip archive.zip anyfile
+zipinfo archive.zip
+
+fstab
+
+df
+
+# Testing PSH Plugin and Miscellania
+uname
+uname -a
+
+export value 10
+env
+
+rem
+rem - Runned DEPLOYER [&time]
+
+tty 
+
+clear
+cls
+
+pull file.json
+dd file.json file.json
+
+catbin file.json
+
+rm file.json
+
+ps 
+
+echo &green&bold * Deploy Finished!
