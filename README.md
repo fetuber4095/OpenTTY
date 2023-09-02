@@ -74,3 +74,4 @@ you can put the key into `library['openai-api']`.
 
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY  
+

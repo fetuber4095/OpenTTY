@@ -20,8 +20,6 @@ library['goto-home'] = True # Enable or disable go to user home directory when j
 library['aliases']['ALIAS-NAME'] = "COMMAND" # Modify "ALIAS-NAME" with asset name and "COMMAND" with alias content 
 library['whitelist'].append("filename") # Add files permanently at whitelist
 
-library['passwd'] = "1234" # Setup your password
-
 library['head-lines'] = 10 # Setup number of file lines that will be show in 'head' and 'tail' commands
 library['max-byte-len'] = 128 # Setup max range for dd txt2bin client and ThreadIn looping
 library['hidden-files-prefix'] = "." # Setup prefix of hidden Files
@@ -43,6 +41,8 @@ library["experiments"] = {
         "GAMERULES": False, # Enable gamerules and gamemode charge
     }
 
+
+passwd = "1234" # Setup your password
 
 app = OpenTTY() # Start OpenTTY Method instance
 

@@ -21,6 +21,9 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
+"This is OpenTTY (09H3x1) First DEPLOY of 1.6"
+"Status: Sucessfully"
+
 # Importing OpenTTY Python dependences
 from os import system as local
 from socket import gethostname as hostname
@@ -35,9 +38,6 @@ import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
 import shutil, getpass, zipfile, datetime, shlex, traceback, code, io
 import threading
-
-
-passwd = "1234"
 
 library = {
 	# Informations for current installation
@@ -85,6 +85,7 @@ library = {
 	# Firewall and root settings
 	"whitelist": [],
 	"root": f"{hostname()}@root-opentty.py",
+	"passwd": "1234",
 	
 	# Commands settings
 	"head-lines": 10,
@@ -222,9 +223,7 @@ class OpenTTY:
 		self.globals = {
 			"app": self, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
-			"config": self.loadconfig,
-
-			"OpenTTY": OpenTTY, "VirtualDisk": VirtualDisk, "PythonConsole": PythonConsole, "NoneError": NoneError, 
+			"config": self.loadconfig
 		}
 		self.locals = {}
 		
@@ -248,14 +247,15 @@ class OpenTTY:
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host="localhost", port=8080, warpin=True, admin=False):
 
-		if library['do-auth'] or admin: self.runas("true"), self.rmprocess("true")
-		if library['goto-home']: os.chdir(self.root if admin else os.path.expanduser("~"))
+		if library['goto-home']: os.chdir(os.path.expanduser("~"))
+		if library['do-auth']: self.runas("true")
+
 
 		if library['sh'] not in self.process: 
 			self.ttyname = host
 			self.process[library['sh']] = (str(port))
 
-			print(f"\n\n  ___                 _____ _______   __\n / _ \ _ __   ___ _ _|_   _|_   _\ \ / /  {library['version']}\n| | | | '_ \ / _ \ '_ \| |   | |  \ V /   ({library['subject']})\n| |_| | |_) |  __/ | | | |   | |   | |    \n \___/| .__/ \___|_| |_|_|   |_|   |_|    \033[1m\033[31m[{library['profile']}]\033[m\n      |_|                              \n" if library['experiments']['Revolution-Line'] else f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
+			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 
 		else: warpin = False
 
@@ -272,19 +272,16 @@ class OpenTTY:
 				for cmd in command.split('|'):
 					if cmd:
 						if cmd.split()[0] == "logout": return 
-						elif cmd.split()[0] == "quit": raise NoneError()	
+						elif cmd.split()[0] == "quit": break
 						elif cmd.split()[0] in library['commands-blacklist']: print(f"{cmd.split()[0]}: command disabled.")
 						
 						else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin)
 					
 			except (KeyboardInterrupt, EOFError): self.clear()
-			except (IndexError, TypeError): traceback.print_exc()	
-			except (RecursionError, NoneError): break
+			except (IndexError): traceback.print_exc()
 
 		if __name__ == "__main__" and warpin:
 			with PythonConsole(self.globals) as psh: psh.run(show=False)
-
-		return (self, host, port, warpin, admin)
 	def disconnect(self, code=""): # Disconnect from python client 
 		if not code: code = 0
 
@@ -313,7 +310,7 @@ class OpenTTY:
 
 		if code.splitlines()[0] == "#!/opentty.py rundll": 
 			try: exec(self.recognize(code), self.globals, self.locals)
-			except ModuleNotFoundError as module: print(f"rundll: {module}...")
+			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...")
 			except Exception as error: traceback.print_exc()
 		elif code.splitlines()[0] == "#!/opentty.py sh": 
 			for cmd in code.splitlines():
@@ -324,7 +321,7 @@ class OpenTTY:
 					if not run or not True in run: return 
 		else:
 			try: exec(self.recognize(code), self.globals, self.locals)
-			except ModuleNotFoundError as module: print(f"rundll: {module}...")
+			except ModuleNotFoundError as module: print(f"rundll: missing Python Module [{module}]...")
 			except Exception as error: traceback.print_exc()
 	def execblock(self, startline=""): # Execute a block (ex: if, try, with, def, for, while) 
 		if len(startline.split()) >= 2 and startline.endswith(":"): 
@@ -385,7 +382,7 @@ class OpenTTY:
 			
 			# Permission Plugin
 			elif cmd.split()[0] == "chmod": self.chmod(self.replace(cmd))
-			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {library['passwd'] if root else '*' * len(library['passwd'])}")
+			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {library['passwd']}")
 			elif cmd.split()[0] == "sudo": self.runas(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
@@ -498,7 +495,7 @@ class OpenTTY:
 
 			# Miscellania
 			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
-			elif cmd.split()[0] == "initd": print(f"\n\n  ___                 _____ _______   __\n / _ \ _ __   ___ _ _|_   _|_   _\ \ / /  {library['version']}\n| | | | '_ \ / _ \ '_ \| |   | |  \ V /   ({library['subject']})\n| |_| | |_) |  __/ | | | |   | |   | |    \n \___/| .__/ \___|_| |_|_|   |_|   |_|    \033[1m\033[31m[{library['profile']}]\033[m\n      |_|                              \n" if library['experiments']['Revolution-Line'] else f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
+			elif cmd.split()[0] == "initd": print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
 
 			elif cmd.split()[0] == "cal": self.calendar()
@@ -632,15 +629,15 @@ class OpenTTY:
 			if root: return self.shell(cmdline, mkprocess=True, root=True)
 
 
-			password = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
+			passwd = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
 
-			if password == passwd: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
+			if passwd == library['passwd']: print(), self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
 			else: raise PermissionError("wrong password.")
 	def login(self, root=False): # Modify current login (to: root) 
 		if not root:
 			if library['experiments']['Disable-SU']: raise RuntimeError("SU is disabled.")
 
-			try: self.rmprocess("su"), self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
+			try: self.runas("true"), self.rmprocess("su"), self.rmprocess("true"), self.connect(self.ttyname, self.process[library['sh']], warpin=False, admin=True)
 			except KeyError: print("login: no such psh session.")
 	def chroot(self, path, root=False): # Charge root directory 
 		if path:
@@ -1509,14 +1506,6 @@ class SocketStdin(io.TextIOBase): # Class for REMOTE Plugin (Stdin method)
 	def readable(self): return True
 	def readline(self): return self.read()
 	def readlines(self): return self.read()
-
-
-
-class NoneError(Exception): # OpenTTY Internal Exception (NoneError - Run when a value is None/ Not a valid response)
-	def __init__(self, message=""): 
-		self.message = message
-
-		super().__init__(self.message)
 
 if __name__ == "__main__":
 	with OpenTTY() as app:

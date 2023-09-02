@@ -39,9 +39,10 @@ library["experiments"] = {
 # ----------------------------
 
 # User settings
-library['passwd'] = "1234"
 library['ipinfo-token'] = ""
 library['openai-api'] = ""
+
+passwd = "1234"
 # ----------------------------
 
 
@@ -50,5 +51,5 @@ app = OpenTTY()
 
 if __name__ == "__main__": 
 
-    app.connect("/dev/forge.py") # Put 'admin=True' in command line if you want start PSH as root
+    app.connect("/dev/forge.py", admin=False if not "--admin" in sys.argv else True)
 
