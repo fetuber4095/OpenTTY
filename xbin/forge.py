@@ -24,17 +24,14 @@ library['max-byte-len'] = 2048
 
 # BETA Features
 library["experiments"] = {
-        "Are-ROOT": False,
+        "Are-ROOT": False, 
         "Disable-SU": False, 
-        "ENABLE": True,
-        "Desktop": True,
-        "QT-SDK": True,
-        "Trust-Mirror": True,
-        "RRAW-IS-CURL": True,
-        "Revolution-Line": False,
-        "Dumpsys": True,
-        "GAMERULES": True,
-    }
+        "Desktop": True, 
+        "RRAW-IS-CURL": True, 
+        "Revolution-Line": True, 
+        "Dumpsys": True, 
+        "GAMERULES": True, 
+    },
     
 # ----------------------------
 

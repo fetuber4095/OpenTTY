@@ -34,12 +34,13 @@ library['resources']['RESOURCE-NAME'] = { # Setup your assets
 
 library["experiments"] = {
         "Are-ROOT": False, # Beahivor as computer admin
+        "Disable-SU": False, # Disable charge user while running PSH
         "Desktop": False, # Add support for Virtual Desktop emulation
         "RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
         "Revolution-Line": False, # Active new command line
         "Dumpsys": False, # Enable dumpsys
         "GAMERULES": False, # Enable gamerules and gamemode charge
-    }
+    },
 
 
 passwd = "1234" # Setup your password

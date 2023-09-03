@@ -62,6 +62,10 @@ rm testfile2
 gzip archive.zip anyfile
 zipinfo archive.zip
 
+gt archive.d archive.zip 
+tarinfo archive.d
+
+
 fstab
 
 df
@@ -88,6 +92,7 @@ catbin file.json
 
 rm file.json
 rm archive.zip
+rm archive.d
 rm anyfile
 
 

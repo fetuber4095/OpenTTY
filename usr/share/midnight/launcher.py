@@ -48,7 +48,6 @@ library['max-byte-len'] = 9600
 library["experiments"] = {
         "Are-ROOT": False,
         "Disable-SU": False, 
-        "ENABLE": True,
         "Desktop": True,
         "QT-SDK": True,
         "RRAW-IS-CURL": True,
@@ -60,6 +59,7 @@ library["experiments"] = {
 # ----------------------------
 
 # User settings
+passwd = "1234" # For new versions
 library['passwd'] = "1234"
 library['ipinfo-token'] = ""
 # ----------------------------
