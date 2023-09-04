@@ -167,9 +167,9 @@ library = {
 		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5'], "install-requires": []}, 
 		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5'], "install-requires": []},
 		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": [], "install-requires": []},
-		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []}
-		#"": {"filename": "", "url": "", "py-libs": []}
-		#"": {"filename": "", "url": "", "py-libs": []}
+		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []},
+		"initd": {"filename": "CONFIG.SYS", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/etc/initd", "py-libs": [], "install-requires": []}
+		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 	},
 
 	"scripts": {
