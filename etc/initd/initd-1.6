@@ -1,0 +1,27 @@
+OpenTTY - CONFIG.SYS
+
+
+; Initd "Main Menu"
+; Initd for OpenTTY 1.6
+
+[menu]
+1 = Start OpenTTY
+2 = Start OpenTTY (Safe Mode)
+3 = Start OpenTTY (With Experiments)
+4 = Bind a PSH Session
+5 = Exit
+
+[1]
+exec = 
+
+[2] 
+exec = clear | sh | se
+
+[3]
+exec = set sys.argv.append("-b") | clear | : app.__init__(runmenu=False) | 
+
+[4]
+exec = clear | root | sudo bind &random
+
+[5]
+exec = exit 1

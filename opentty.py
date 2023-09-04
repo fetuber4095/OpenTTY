@@ -195,7 +195,7 @@ library = {
 }
 
 class OpenTTY:
-	def __init__(self): 
+	def __init__(self, runmenu=True): 
 		# Application data
 		self.appname = library['appname'] # Saving application name
 		self.version = library['version'] # Saving application version
@@ -221,10 +221,7 @@ class OpenTTY:
 					if dir == letter: print(f"\033[1m[   \033[32mOK\033[m\033[1m   ] mounted {dir} in '{os.path.join(self.root, 'mnt', dir)}'"), library['fstab'].append(dir)
 		
 
-		self.config = self.loadconfig(f"{self.root}/CONFIG.SYS")
-
-		with RunConfig(self.config, self) as runconfig:
-			runconfig.run_menu()
+		self.config = self.loadconfig(f"{self.root}/CONFIG.SYS") 
 
 		# Setup of OpenTTY Runtime 
 		self.globals = {
@@ -232,9 +229,18 @@ class OpenTTY:
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
 			"config": self.config,
 
-			"OpenTTY": OpenTTY, "VirtualDisk": VirtualDisk, "PythonConsole": PythonConsole, "NoneError": NoneError, 
+			"VirtualDisk": VirtualDisk, "PythonConsole": PythonConsole, "NoneError": NoneError, 
+
+			"os": os, "sys": sys, "json": json, "time": time, "random": random, "platform": platform, "subprocess": subprocess, "calendar": calendar,
+			"http": http, "urllib": urllib, "socket": socket, "socketserver": socketserver, "shutil": shutil, "getpass": getpass, "zipfile": zipfile, 
+			"datetime": datetime, "shlex": shlex, "traceback": traceback, "code": code, "io": io, "threading": threading, "tarfile": tarfile
 		}
 		self.locals = {}
+
+		with RunConfig(self.config, self) as runconfig:
+			if not runmenu: return 
+
+			runconfig.run_menu() # Run initd Deamon from CONFIG.SYS
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
@@ -248,7 +254,7 @@ class OpenTTY:
 		for item in library['experiments']:
 			if library['experiments'][item]: 
 				print("           Starting Experiments deamon. . ."), timeout(randint(0, 3))
-				print("\033[1m[   \033[32mOK\033[m\033[1m   ] Experiments is enable.")
+				print("\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Experiments is enable.")
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
@@ -367,7 +373,7 @@ class OpenTTY:
 
 	# OpenTTY "Shell"
 	def shell(self, cmd, mkprocess=True, report="", recognize=True, builtin=False, root=False):
-		self.mkprocess(cmd.split()[0])
+		mkprocess = self.mkprocess(cmd.split()[0])
 
 		try:
 			cmd = str(self.recognize(cmd)).strip() if recognize else cmd
@@ -559,9 +565,9 @@ class OpenTTY:
 				
 				elif os.path.isfile(cmd): print(open(cmd))
 
-				else: return print(f"{report}{cmd.split()[0]}: command not found")
+				else: return print(f"{report}{cmd.split()[0]}: command not found"), self.rmprocess(cmd.split()[0])
 				
-		except (KeyboardInterrupt, EOFError): return 
+		except (KeyboardInterrupt, EOFError): return self.rmprocess(cmd.split()[0])
 
 		except FileNotFoundError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: file not found")
 		except FileExistsError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd)).split()[0]}: file with this name already exists")
@@ -585,7 +591,7 @@ class OpenTTY:
 			"&ipadress": library['ipadress'], "&subject": library['subject'], "&developer": library['developer'],
 
 			"&system": library['system'], "&root": self.root, "&path": os.getcwd(), "&profile": library['profile'],
-			"&time": time.ctime(), "&username": getpass.getuser(), "&sh": library['sh'],
+			"&time": time.ctime(), "&username": getpass.getuser(), "&sh": library['sh'], "&random": random.randint(1000, 9999),
 
 			# Colorama Utilities
 			"&black": "\033[30m", "&red": "\033[31m", "&green": "\033[32m", "&yellow": "\033[33m", 
@@ -597,6 +603,7 @@ class OpenTTY:
 		for key in self.values: text = text.replace(key, str(self.values[key]))
 		for key in os.environ: text = text.replace(f"${key}", str(os.environ[key]))
 		for key in self.locals: text = text.replace(f"${key}", str(self.locals[key]))
+
 
 		return text.replace("~", os.path.expanduser("~"))
 
@@ -1553,6 +1560,7 @@ class PythonConsole(code.InteractiveConsole, OpenTTY): # Call a python interacti
 
 	def run(self, show=True): self.interact(f'\033[mPython {platform.python_version()} ({platform.python_build()[0]} {platform.python_build()[1]}) [{platform.python_compiler()}] on {platform.system().lower()}\nType "help", "copyright", "credits" or "license" for more information.' if show else '')
 
+
 class RunConfig(OpenTTY): # Run Settings from CONFIG.SYS 
 	def __init__(self, config, opentty):
 		self.app = opentty
@@ -1569,15 +1577,15 @@ class RunConfig(OpenTTY): # Run Settings from CONFIG.SYS
 		print("\033[m")
 		print("\n".join(f"{item}. {self.config['menu'][item]}" for item in self.config['menu']))
 
-		choice = input("\n > ").strip()
-
-		self.run_command(self.config[choice]['exec'], mkprocess=False, report="[Config.] ", root=True)
+		self.run_command(self.config[input("\n > ").strip()]['exec'], mkprocess=False, report="[Config.] ", root=True)
 
 	
 	def run_command(self, command, mkprocess=True, report="", builtin=False, root=False): # Execute PSH Commands
 		
 		for cmd in command.split("|"):
-			if cmd: self.app.shell(cmd, mkprocess, report, builtin, root)
+			if cmd: self.app.shell(cmd, mkprocess, report, False, builtin, root)
+
+
 
 class SocketStdout(io.TextIOBase): # Class for REMOTE Plugin (Stdout method)
 	def __init__(self, sock): self.sock = sock
