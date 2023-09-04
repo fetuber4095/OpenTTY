@@ -71,6 +71,56 @@ requires Python module `openai` that can be installed with `pip install openai`.
 Create a profile with `venv [filename]...` and setup your openai api key to use the tool
 you can put the key into `library['openai-api']`.
 
+7. New INIT Deamon for OpenTTY  
+
+Now is possible setup a Boot Menu for OpenTTY, it is part of the class `__main__.RunConfig()`  
+that run a menu from CONFIG.SYS setting file. It works with: 
+
+```
+[menu]
+1 = First ITEM;
+2 = Second ITEM
+
+[1]
+exec = command
+
+[2]
+exec = command
+```
+
+The `RunConfig()` show the menu items and prompt the user select to choice what he/ she  
+will execute. The command in `exec` will be executed in a emulated PSH Session with OpenTTY  
+superuser permissions.
+
+This tool can be used to execute automatically commands in OpenTTY execution, as aliases auto
+creation, modifying a value, etc. It's a other kind to charge settings without use profiles.
+
+8. Updated Permission Plugin  
+
+Now normal users as guests cant use `passwd` to see the OpenTTY ROOT Password, it will show  
+password with `*` characters replaced by normal password. With this charge only root can see  
+the setup password.  
+
+Was charged the SU Authentication Method, now if `app.connect()` read argument `admin=True`, it  
+will ask for password, some if you already is logged as Admin. It mean that was charged the auth  
+of `app.login()` for `app.connect()`.  
+
+9. New command extructure  
+
+In 1.6 *Resource Upgrade* was added the deamon _The Deamon of Characters_ it add the possibility  
+of run more than one commands in a line of OpenTTY, it's a resource that works in `app.connect()`  
+PSH Client.
+
+It's works simple, code will split `|` itens and get commands and execute those.  
+  
+10. Added in Box Plugin (Tarfile Utilities)  
+
+Some as zip tools, this have the commands:  
+
+- `tarinfo` Show informations for Tar Archive  
+- `untar` Uncompress a Tar Archive  
+- `gt` Compress files and directories into a Tar Archive  
+
 
 Contribuitors: Mr. Lima  
 Github Repository: https://github.com/fetuber4095/OpenTTY  

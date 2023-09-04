@@ -47,7 +47,10 @@ library = {
 	"patch": [
 		"OpenTTY 98",
 		"Added Remote Plugin",
+		"Added INITD Deamon for CONFIG.SYS",
 		"Added resource Background and command BG",
+		"Added into Box Plugin (Tar Archive Tools)",
+		"Fixed logical bugs in Permission Plugin",
 		"Finished experiments ENABLE ",
 	],
     
@@ -285,9 +288,10 @@ class OpenTTY:
 				
 				for cmd in command.split('|'):
 					if cmd:
-						if cmd.split()[0] == "logout": return # Quit from PSH Terminal (End of Code/ End of PSH Envirronment)
+						if cmd.split()[0] in library['commands-blacklist']: print(f"{cmd.split()[0]}: command disabled.") # Block a command call
+
+						elif cmd.split()[0] == "logout": return # Quit from PSH Terminal (End of Code/ End of PSH Envirronment)
 						elif cmd.split()[0] == "quit": raise NoneError() # Quit from PSH Terminal (Warp to Python Console)
-						elif cmd.split()[0] in library['commands-blacklist']: print(f"{cmd.split()[0]}: command disabled.") # Block a command call
 						
 						else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin) # Send a command for PSH Execution
 					
@@ -619,7 +623,7 @@ class OpenTTY:
 	def mkprocess(self, pname): self.process[pname] = (str(randint(1000, 9999))) # Create process
 	def rmprocess(self, pname): # Kill process by name
 		try: 
-			if pname.startswith("python") or pname.startswith("psh"): return 
+			if pname == "python" or pname == "psh": return 
 
 			del self.process[pname.split()[0]]
 		except Exception as error: return
