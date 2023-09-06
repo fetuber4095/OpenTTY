@@ -1,12 +1,12 @@
 {
     "name": "opentty",
-    "version": "1.6",
+    "version": "1.6.1",
 
     "author": "Mr. Lima",
     "author_email": "felipebr4095@gmail.com",
 
     "description": "The OpenTTY is a Terminal Emulator created tottaly in python based-on Unix-Like Shells",
-    "long_description_filename": "/home/mint/OpenTTY/README.md",
+    "long_description_filename": "/home/mint/OpenTTY/README.",
     "long_description_content_type": "text/markdown",
 
     "url": "https://github.com/fetuber4095/OpenTTY",
