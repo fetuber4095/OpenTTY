@@ -63,7 +63,7 @@ gzip archive.zip anyfile
 zipinfo archive.zip
 
 gt archive.d archive.zip 
-tarinfo archive.d
+tar archive.d
 
 
 fstab

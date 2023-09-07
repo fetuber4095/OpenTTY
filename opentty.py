@@ -37,7 +37,7 @@ import shutil, getpass, zipfile, datetime, shlex, traceback, code, io
 import threading, tarfile, warnings
 
 
-passwd = "1234"
+passwd = ""
 
 library = {
 	# Informations for current installation
@@ -46,7 +46,8 @@ library = {
     "subject": "The Resources Upgrade",
 	"patch": [
 		"OpenTTY 98",
-		"Bug fix: Missing BG Argument [args]..."
+		"Bug fix: Missing BG Argument [args]...",
+		"New Warnings experiment "
 	],
     
     "developer": "Mr. Lima",
@@ -145,6 +146,7 @@ library = {
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
 		"Dumpsys": False, # Enable dumpsys
+		"Warnings": False, # Enable Warnings
 		"GAMERULES": False, # Enable gamerules and gamemode charge
 	},
 
@@ -255,7 +257,7 @@ class OpenTTY:
 				print("           Starting Experiments deamon. . ."), timeout(randint(0, 3))
 				print("\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Experiments is enable.")
 
-				warnings.warn("Experiments deamon is running. It can result in some error in OpenTTY kernel.")
+				warnings.warn("Experiments deamon is running. It can result in some error in OpenTTY kernel.", DeprecationWarning)
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
@@ -390,26 +392,6 @@ class OpenTTY:
 				try: exec(self.replace(cmd), self.globals, self.locals)
 				except Exception as error: traceback.print_exc() # Excute a Python Syntax
 			
-			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
-			elif cmd.startswith("dir"): self.shell(f": print({cmd})", builtin=True)
-			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", builtin=True)
-			elif cmd.startswith("if") or cmd.startswith("case") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.shell(f": {cmd}")
-			elif cmd.startswith("for") or cmd.startswith("while") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.shell(f": {cmd}")
-			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}")
-			elif cmd.startswith("lambda") or cmd.startswith("raise") or cmd.startswith("assert") or cmd.startswith("del") or cmd.startswith("global"): self.shell(f": {cmd}")
-			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})")
-			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"') or cmd.startswith("["): 
-				try:
-					run = eval(cmd, self.globals, self.locals)
-
-					if run: print(run)
-				except Exception as error: traceback.print_exc()
-			
-			elif cmd.split()[0] == "cl0": self.locals = {}
-			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-			elif cmd.split()[0] == "remm": self.json_explorer(jsoniten=self.config)
-			
 			# Permission Plugin
 			elif cmd.split()[0] == "chmod": self.chmod(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {passwd if root else '*' * passwd}")
@@ -467,6 +449,27 @@ class OpenTTY:
 			elif cmd.split()[0] == "static": self.modstatic(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
 
+			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
+			elif cmd.startswith("dir"): self.shell(f": print({cmd})", builtin=True)
+			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", builtin=True)
+			elif cmd.startswith("if") or cmd.startswith("case") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.execblock(f"{cmd}")
+			elif cmd.startswith("for") or cmd.startswith("while") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.shell(f": {cmd}")
+			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}")
+			elif cmd.startswith("lambda") or cmd.startswith("raise") or cmd.startswith("assert") or cmd.startswith("del") or cmd.startswith("global"): self.shell(f": {cmd}")
+			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})")
+			elif cmd.startswith("(") or cmd.startswith('"') or cmd.startswith('f"') or cmd.startswith("["): 
+				try:
+					run = eval(cmd, self.globals, self.locals)
+
+					if run: print(run)
+				except Exception as error: traceback.print_exc()
+			
+			elif cmd.split()[0] == "cl0": self.locals = {}
+			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+			elif cmd.split()[0] == "remm": self.json_explorer(jsoniten=self.config)
+				
+
 			# The Box Plugin
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"{report}fstab: no drives detected.")
 			#
@@ -485,7 +488,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "env": self.environ(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
-			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon: missing operand [command]...", end="")
+			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon: missing operand [command]...\n", end="")
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
@@ -502,6 +505,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), report=report, root=root)
 			elif cmd.split()[0] == "crash": print(self.crash(self.replace(cmd)))
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd), report=report)
+			elif cmd.split()[0] == "warn": warnings.warn(self.replace(cmd), UserWarning) if self.replace(cmd) else print(f"{report}warn: missing operand [notify]...")
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
@@ -541,7 +545,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "github": print(library['github.com'])
 			elif cmd.split()[0] == "inbox": self.curl(library['docs']['inbox'], show=True)
 			elif cmd.split()[0] == "root": self.pushdir(self.root)
-			elif cmd.split()[0] == "home": self.pushdir(os.path.expanduser("~"))
+			elif cmd.split()[0] == "home": self.pushdir(self.root) if root else self.pushdir(os.path.expanduser("~"))
 			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
@@ -615,7 +619,7 @@ class OpenTTY:
 		for key in self.locals: text = text.replace(f"${key}", str(self.locals[key]))
 
 
-		return text.replace("~", os.path.expanduser("~"))
+		return text
 
 	def ThreadIn(self): # Thread a loop until 'MAX-BYTE-LEN' listenning sys.stdin 
 		for _ in range(library['max-byte-len']): print(input())
@@ -665,7 +669,7 @@ class OpenTTY:
 		else: print('\n'.join([str(i) for i in library['whitelist']]) if library['whitelist'] else f"{report}chmod: whitelist is empty")
 	def runas(self, cmdline, root=False): # Run command as [...] 
 		if cmdline:
-			if root: return self.shell(cmdline, mkprocess=True, root=True)
+			if root or not passwd: return self.shell(cmdline, mkprocess=True, report=f"sudo: ", root=True)
 
 
 			password = getpass.getpass(f"password for '{getpass.getuser()}': ").strip()
