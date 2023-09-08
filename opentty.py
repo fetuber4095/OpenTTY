@@ -517,6 +517,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), report=report, root=root)
 			elif cmd.split()[0] == "crash": print(self.crash(self.replace(cmd)))
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd), report=report)
+			elif cmd.split()[0] == "setup": self.setup(self.replace(cmd), report=report, root=root)
 			elif cmd.split()[0] == "warn": warnings.warn(self.replace(cmd), UserWarning) if self.replace(cmd) else print(f"{report}warn: missing operand [notify]...")
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
@@ -1384,7 +1385,7 @@ class OpenTTY:
 	def sleep(self, time, report=""): # Delay any seconds 
 		try: timeout(int(time))
 		except ValueError: print(f"{report}sleep: invalid time interval '{time}'\n" if time else f"{report}sleep: missing operand [delay]...\n"), traceback.print_exc()
-	def setup(self, resource, root=False): # Setup OpenTTY resources
+	def setup(self, resource, report="", root=False): # Setup OpenTTY resources
 		if resource:
 			if not root: raise PermissionError("Unable to perform a setup. Are you root?")
 
@@ -1393,7 +1394,12 @@ class OpenTTY:
 					setting = urllib.request.urlopen(library['setup'][resource]['url'])
 
 					with open(self.recognize(library['setup'][resource]['filename']), "a") as file:
-						file.write(setting)
+						file.write(setting.read().decode())
+
+				except Exception as error: traceback.print_exc()
+			else: print(f"{report}setup: unknown setting '{resource}'")
+
+		else: raise IndexError("config")
 	#
 	# "OpenTTY Version Utilities"
 	def updater(self, root=False): # Update OpenTTY 
