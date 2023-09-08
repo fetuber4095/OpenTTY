@@ -1,4 +1,3 @@
-OpenTTY - CONFIG.SYS
 
 
 ; Initd "Main Menu"
@@ -13,6 +12,5 @@ exec =
 
 [2]
 exec = set sys.argv.append("-b") | clear | : app.__init__(runmenu=False) | 
-
 
 

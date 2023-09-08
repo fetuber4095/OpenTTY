@@ -42,15 +42,11 @@ passwd = ""
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.6.1", "build": "09H4",
+    "version": "1.6.2", "build": "09H5",
     "subject": "The Resources Upgrade",
 	"patch": [
 		"OpenTTY 98",
-		"Bug fix: Missing BG Argument [args]...",
-		"New assets 'figlet', 'rss'",
-		"New interactive manager __main__.OpenTTY.flush",
-		"New OpenTTY Exceptions 'StaticError' and 'NotStaticError'",
-		"Removed password for profile [Fabric]"
+		
 
 	],
     
@@ -190,6 +186,10 @@ library = {
 		#"": {"url": ""},
 		#"": {"url": ""},
 	}, 
+
+	"setup": {
+		"initd": {"filename": "&root/CONFIG.SYS", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/etc/initd"}
+	},
 
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
@@ -603,7 +603,7 @@ class OpenTTY:
 		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]..."), self.rmprocess(cmd.split()[0])
 		except (ValueError, NameError, OSError, RuntimeError, UnboundLocalError, KeyError): return traceback.print_exc(), self.rmprocess(cmd.split()[0])
-		except (StaticError, NoneError): return traceback.print_exc(), self.rmprocess(cmd.split()[0])
+		except (StaticError, NoneError, NotStaticError): return traceback.print_exc(), self.rmprocess(cmd.split()[0])
 
 		
 		return True, self.rmprocess(cmd.split()[0])
@@ -1384,6 +1384,16 @@ class OpenTTY:
 	def sleep(self, time, report=""): # Delay any seconds 
 		try: timeout(int(time))
 		except ValueError: print(f"{report}sleep: invalid time interval '{time}'\n" if time else f"{report}sleep: missing operand [delay]...\n"), traceback.print_exc()
+	def setup(self, resource, root=False): # Setup OpenTTY resources
+		if resource:
+			if not root: raise PermissionError("Unable to perform a setup. Are you root?")
+
+			if resource in library['setup']: 
+				try: 
+					setting = urllib.request.urlopen(library['setup'][resource]['url'])
+
+					with open(self.recognize(library['setup'][resource]['filename']), "a") as file:
+						file.write(setting)
 	#
 	# "OpenTTY Version Utilities"
 	def updater(self, root=False): # Update OpenTTY 
