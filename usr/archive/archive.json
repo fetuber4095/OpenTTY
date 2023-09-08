@@ -1,4 +1,5 @@
 {
+	"09H5": {"version": "1.6.1", "patch": "The Resources Upgrade", "url": ""},
 	"09H4": {"version": "1.6", "patch": "The Resources Upgrade", "url": ""},
 	"09H3": {"version": "1.5", "patch": "The OpenQT Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.5/opentty.py"},
 	"09H2": {"version": "1.4", "patch": "The Midnight Update", "url": "https://github.com/fetuber4095/OpenTTY/releases/download/1.4/opentty.py"},
