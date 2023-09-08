@@ -33,5 +33,5 @@ def figlet(text, font="standard"):
     except pyfiglet.FigletError as e:
         return str(e)
 
-if cmd: print(figlet(cmd))
+if cmd: figlet(cmd)
 else: print("figlet: missing operand [text]...")
