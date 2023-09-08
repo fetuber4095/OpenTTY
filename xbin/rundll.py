@@ -52,7 +52,14 @@ class RunDll(OpenTTY):
 		self.globals = {
 			"app": app, "library": library, "__name__": "__main__", "stdin": stdin, "stdout": stdout,
 			"nm": socket.socket(socket.AF_INET, socket.SOCK_STREAM), "OpenTTY": OpenTTY, "local": local,
-			"config": super().loadconfig
+			"config": self.config, "cmd": "",
+
+			"VirtualDisk": VirtualDisk, "PythonConsole": PythonConsole, "NoneError": NoneError, 
+
+			"os": os, "sys": sys, "json": json, "time": time, "random": random, "platform": platform, "subprocess": subprocess, "calendar": calendar,
+			"http": http, "urllib": urllib, "socket": socket, "socketserver": socketserver, "shutil": shutil, "getpass": getpass, "zipfile": zipfile, 
+			"datetime": datetime, "shlex": shlex, "traceback": traceback, "code": code, "io": io, "threading": threading, "tarfile": tarfile,
+			"warnings": warnings
 		}
 		self.locals = {}
 

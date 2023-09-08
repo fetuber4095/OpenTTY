@@ -1,7 +1,7 @@
 #!/opentty.py rundll
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2023 "Mr. Lima" [deb-pkg.py]
+#  Copyright (C) 2023 "Mr. Lima" [rss.dll]
 #
 #  This code is part of OpenTTY Package Repository
 #  
@@ -23,29 +23,36 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-import debian.deb822
-import sys, arfile
+global feedparser
 
-def debinfo(deb_file_path):
-    with open(deb_file_path, 'rb') as deb_file:
-        package = debian.deb822.Deb822(deb_file, encoding='latin1')
+import feedparser
+import json
 
-        # Exibe informações gerais sobre o pacote
-        print(f"Package name: {package['Package']}")
-        print(f"Version: {package['Version']}")
-        print(f"Architure: {package['Architecture']}")
-        print(f"Description: {package['Description']}\n")
+def rss(feed_url):
+    # Faz o parse do feed RSS
+    feed = feedparser.parse(feed_url)
 
-        # Exibe a lista de arquivos do pacote
-        if 'Files' in package:
-            print("Files:")
-            for file_info in package['Files']:
-                file_name = file_info['name']
-                file_size = file_info['size']
-                file_md5sum = file_info['md5sum']
-                print(f"Name: {file_name}")
-                print(f"Size: {file_size} bytes")
-                print(f"MD5sum: {file_md5sum}\n")
+    # Inicializa uma lista para armazenar os itens do feed em formato JSON
+    feed_json = []
 
-try: debinfo(sys.argv[1])
-except IndexError: print(f"deb: missing operand [deb.package]...")
+    # Itera pelos itens do feed e os converte em dicionários JSON
+    for entry in feed.entries:
+        item = {
+            'title': entry.title,
+            'link': entry.link,
+            'published': entry.published,
+            'summary': entry.summary,
+        }
+        feed_json.append(item)
+
+    # Converte a lista de itens em JSON
+    feed_json = json.dumps(feed_json, indent=4)
+
+    return feed_json
+
+if cmd:
+    feed = rss(cmd)
+
+    app.json_explorer(jsoniten=feed)
+
+else: print("rss: missing operand [url]...")

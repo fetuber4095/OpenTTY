@@ -178,7 +178,7 @@ library = {
 		"news": {"url": "https://github.com/fetuber4095/ResidentFlash/raw/main/packages/news"},
 		"gpt": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/gpt.py"},
 		"psh.test": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/deploy/psh-tester.sh"},
-		#"": {"url": ""},
+		"rss": {"url": ""},
 		#"": {"url": ""},
 		#"": {"url": ""},
 	}, 
@@ -1700,6 +1700,7 @@ class NotStaticError(Exception): # OpenTTY Internal Exception (NotStaticError - 
 		self.message = message
 
 		super().__init__(self.message)
+
 
 
 if __name__ == "__main__":
