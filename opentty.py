@@ -47,7 +47,11 @@ library = {
 	"patch": [
 		"OpenTTY 98",
 		"Bug fix: Missing BG Argument [args]...",
-		"New Warnings experiment "
+		"New assets 'figlet', 'rss'",
+		"New interactive manager __main__.OpenTTY.flush",
+		"New OpenTTY Exceptions 'StaticError' and 'NotStaticError'",
+		"Removed password for profile [Fabric]"
+
 	],
     
     "developer": "Mr. Lima",
@@ -75,7 +79,7 @@ library = {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
 		"type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
-		"floppy": "warp a", "ll": "busybox ls --color=auto", "opentty": "python -m opentty"
+		"floppy": "warp a", "ll": "busybox ls --color=auto"
 	},
 
 	# Disabled Commands list
@@ -215,7 +219,7 @@ class OpenTTY:
 		self.write32u(show=False)
 		self.beta()
 
-		# Setup Virtual Disk Envirronment 
+		# Setup Virtual Disk Environment 
 		try: os.makedirs(f"{self.root}/mnt") # Create Virtual Mount Point (if doesn't exists)
 		except FileExistsError: True # Do anything if Already exists
 
@@ -261,7 +265,7 @@ class OpenTTY:
 				print("           Starting Experiments deamon. . ."), timeout(randint(0, 3))
 				print("\033[1m[   \033[32mOK\033[m\033[1m   ]\033[m Experiments is enable.")
 
-				warnings.warn("Experiments deamon is running. It can result in some error in OpenTTY kernel.", DeprecationWarning)
+				warnings.warn("Experiments daemon is running. It can result in some error in OpenTTY kernel.", DeprecationWarning)
 				break
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
@@ -300,7 +304,7 @@ class OpenTTY:
 					if cmd:
 						if cmd.split()[0] in library['commands-blacklist']: print(f"{cmd.split()[0]}: command disabled.") # Block a command call
 
-						elif cmd.split()[0] == "logout": return # Quit from PSH Terminal (End of Code/ End of PSH Envirronment)
+						elif cmd.split()[0] == "logout": return # Quit from PSH Terminal (End of Code/ End of PSH Environment)
 						elif cmd.split()[0] == "quit": raise NoneError() # Quit from PSH Terminal (Warp to Python Console)
 						
 						else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin) # Send a command for PSH Execution
@@ -335,7 +339,7 @@ class OpenTTY:
 		with open(filename, "r") as script:
 			try: exec(self.recognize(script.read()), self.globals, self.locals)
 			except Exception as error: traceback.print_exc()
-	def execonline(self, url, cmd="", root=False): # Execute scripts from internet "without ddownload file" 
+	def execonline(self, url, cmd="", root=False): # Execute scripts from internet "without download file" 
 		try: code = urllib.request.urlopen(url).read().decode()
 		except Exception as error: return traceback.print_exc()
 
@@ -453,6 +457,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "insmod": self.insmod(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "public": self.public(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "static": self.modstatic(self.replace(cmd), report=report)
+			elif cmd.split()[0] == "flush": self.flush(self.replace(cmd))
+			elif cmd.split()[0] == "pub": self.json_explorer(jsoniten=self.functions)
 			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
 
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
@@ -542,7 +548,7 @@ class OpenTTY:
 			# The Remote Plugin
 			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else 4095)
 
-			# Miscellania
+			# Miscellaneous
 			elif cmd.split()[0] == "banner": print("  ___                 _____ _______   __\n / _ \\ _ __   ___ _ _|_   _|_   _\\ \\ / /\n| | | | '_ \\ / _ \\ '_ \\| |   | |  \\ V /\n| |_| | |_) |  __/ | | | |   | |   | |\n \\___/| .__/ \\___|_| |_|_|   |_|   |_|\n      |_|")
 			elif cmd.split()[0] == "initd": print(f"\n\n  ___                 _____ _______   __\n / _ \ _ __   ___ _ _|_   _|_   _\ \ / /  {library['version']}\n| | | | '_ \ / _ \ '_ \| |   | |  \ V /   ({library['subject']})\n| |_| | |_) |  __/ | | | |   | |   | |    \n \___/| .__/ \___|_| |_|_|   |_|   |_|    \033[1m\033[31m[{library['profile']}]\033[m\n      |_|                              \n" if library['experiments']['Revolution-Line'] else f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 			elif cmd.split()[0] == "cmatrix": self.ThreadRandom()
@@ -552,7 +558,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "inbox": self.curl(library['docs']['inbox'], show=True)
 			elif cmd.split()[0] == "root": self.pushdir(self.root)
 			elif cmd.split()[0] == "home": self.pushdir(self.root) if root else self.pushdir(os.path.expanduser("~"))
-			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd), report=report)
+			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
 			#elif cmd.split()[0] == "":
@@ -560,6 +566,7 @@ class OpenTTY:
 			# Return codes
 			elif cmd.split()[0] == "true": return True
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
+			elif cmd.split()[0] == "return": return self.rmprocess(cmd.split()[0]), self.replace(cmd), True
 
 			else:
 				if cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}")
@@ -602,10 +609,10 @@ class OpenTTY:
 		return True, self.rmprocess(cmd.split()[0])
 			
 	# OpenTTY "Text API"
-	def basename(self, path): return os.path.basename(path) # Get basename
+	def basename(self, path): return os.path.basename(path) # Get base name
 	def replace(self, text): return ' '.join(text.split()[1:]) # Remove first keyword of a text
 	
-	def recognize(self, text): # Recognize Text values (Colors code; Envirronment keys; Local KEYS) 
+	def recognize(self, text): # Recognize Text values (Colors code; Environment keys; Local KEYS) 
 		self.values = {
 			"&appname": self.appname, "&version": self.version, "&hostname": library['hostname'], 
 			"&ipadress": library['ipadress'], "&subject": library['subject'], "&developer": library['developer'],
@@ -627,12 +634,12 @@ class OpenTTY:
 
 		return text
 
-	def ThreadIn(self): # Thread a loop until 'MAX-BYTE-LEN' listenning sys.stdin 
+	def ThreadIn(self): # Thread a loop until 'MAX-BYTE-LEN' listening sys.stdin 
 		for _ in range(library['max-byte-len']): print(input())
-	def ThreadOut(self, text): # Thread a loop for infinit printing a string at sys.stdout 
+	def ThreadOut(self, text): # Thread a loop for infinite printing a string at sys.stdout 
 		while True: print(text if text else f"y")
 	def ThreadList(self, text, prefix=""): print('\n'.join([f"{prefix}{key}='{text[key]}'" for key in text])) 
-	def ThreadRandom(self): # Thread a loop for infinit printing random characters [Method for command 'CMATRIX'] 
+	def ThreadRandom(self): # Thread a loop for infinite printing random characters [Method for command 'CMATRIX'] 
 		while True: print(f"\033[32m{random.choice(['0', '1', '0', '1', '(', ')', '[', ']',	'!', '@', '#', '&', '/', '.', '0', '1', '▒', '▒', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])}", end="")
 	
 	# OpenTTY "Process Methods"
@@ -644,7 +651,7 @@ class OpenTTY:
 			del self.process[pname.split()[0]]
 		except Exception as error: return
 	
-	def pslist(self): # List runnning process at PSH 
+	def pslist(self): # List running process at PSH 
 		print("     PID  CMD")
 		print('\n'.join([f"    {self.process[process]}  {process}" for process in self.process]))
 	def kill(self, pid, report=""): # Kill a process by virtual PID 
@@ -703,13 +710,13 @@ class OpenTTY:
 		raise IndexError("path") 
 	
 	# Netman
-	def gaddr(self, hostname): # Get IP Adress of a machine with it name 
+	def gaddr(self, hostname): # Get IP Address of a machine with it name 
 		if hostname:
 			try: print(socket.gethostbyname(hostname))
 			except Exception as error: traceback.print_exc()
 
 		else: print(library['ipadress'])
-	def hostname(self, adress=""): # Get hostname by IP Adress of a host 
+	def hostname(self, adress=""): # Get host name by IP Address of a host 
 		if adress:
 			try:
 				hostname, _, _ = socket.gethostbyaddr(adress)
@@ -717,7 +724,7 @@ class OpenTTY:
 
 			except Exception as error: traceback.print_exc()
 		else: print(library['hostname'])
-	def fwadress(self, ipadress, report=""): # Get informations about IP Address (like hostname, time zone, country and others) 
+	def fwadress(self, ipadress, report=""): # Get Informations about IP Address (like host name, time zone, country and others) 
 		def get_ip_info(ip):
 			try:
 				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
@@ -763,7 +770,7 @@ class OpenTTY:
 			except ValueError: return print(f"{report}server: invalid port '{port}'")
 
 		else: self.server(randint(2048, 4096), root=root)
-	def gen_adress(self): # Generate random IP Adress 
+	def gen_adress(self): # Generate random IP Address 
 		group1 = f"1{randint(4, 9)}{randint(2, 5)}"
 		group2 = f"{randint(1, 2)}{randint(2, 9)}{randint(1, 9)}"
 		group3 = random.choice(['1', '15', '132', '181'])
@@ -848,7 +855,7 @@ class OpenTTY:
 			print(f"{report}github.com: ping is {ping_time_ms:.0f} ms")
 
 		except Exception as error: traceback.print_exc()
-	def ifconfig(self, target): # Get informations about socket objects of a host 
+	def ifconfig(self, target): # Get Informations about socket objects of a host 
 		if target:
 			print("Informations for Network Adapters: \n")
 
@@ -872,16 +879,16 @@ class OpenTTY:
 	def makedir(self, dirname): # Create directories 
 		if dirname: os.makedirs(dirname), self.touch(f"{dirname}/.nomedia")
 		else: raise IndexError("dirname")
-	def removedir(self, dirname): # Remove diretories 
+	def removedir(self, dirname): # Remove directories 
 		if dirname: shutil.rmtree(dirname)
 		else: raise IndexError("dirname")
 	def remove(self, filename): # Remove files 
 		if filename: os.remove(filename)
 		else: raise IndexError("filename")
-	def touch(self, filename): # Touch a file reseting it modify date and the content 
+	def touch(self, filename): # Touch a file resetting it modify date and the content 
 		if filename: open(filename, "wt+").close()
 		else: raise IndexError("filename")
-	def tree(self, directory, indent=""): # Show directory tree [Folder, subfolders and files] 
+	def tree(self, directory, indent=""): # Show directory tree [Folder, sub-folders and files] 
 		if directory:
 			print(indent + f"\033[34m\033[1m{os.path.basename(directory)}\033[m" if os.path.isdir(directory) else indent + os.path.basename(directory)) 
 			
@@ -1064,7 +1071,7 @@ class OpenTTY:
 
 			return decoded_bytes
 		else: raise IndexError("filename")
-	def write(self, cmdline): # Append lines in a file (Write trought in the end)
+	def write(self, cmdline): # Append lines in a file (Write trough in the end)
 		if len(shlex.split(cmdline)) < 2: raise IndexError("words" if shlex.split(cmdline) else "filename << line")
 
 		with open(shlex.split(cmdline)[0], 'a') as file:
@@ -1083,7 +1090,7 @@ class OpenTTY:
 		else: raise IndexError("words")
 	
 	# The PIPES Plugin
-	def json_explorer(self, filename="", jsoniten="", indent=0): # Explorer a json extructure 
+	def json_explorer(self, filename="", jsoniten="", indent=0): # Explorer a JSON structure 
 		def print_with_indent(text, indent):
 			print("  " * indent + text)
 
@@ -1141,7 +1148,7 @@ class OpenTTY:
 				self.functions[self.basename(filename).split(".")[0].replace(" ", ".")] = {"source": "script", "commands": script, "static": False}
 
 		else: raise IndexError("script")
-	def public(self, function, report=""): # Charge functions propierty
+	def public(self, function, report=""): # Charge functions property
 		if function:
 			if function in self.functions:
 				print(f"public ({function}); for static is {self.functions[function]['static']} ")
@@ -1174,6 +1181,17 @@ class OpenTTY:
 			print()
 		
 		else: raise IndexError("method.name")
+	def flush(self, function, root=False): # Flush a function and run it in Device Shell
+		if function:
+			if function in self.functions:
+				if self.functions[function]['static']: raise StaticError(f"Invalid operation for Static Method.")
+
+				self.functions[function]['commands'] = []
+
+			else: raise NameError("[InternalError] Function not found")
+
+		else: raise IndexError("method.name")
+
 	def callmethod(self, function): # Call a function 
 		if function in self.functions:
 
@@ -1191,7 +1209,7 @@ class OpenTTY:
 	# The box Plugin
 	#
 	# "Archive Utilities"
-	def zipinfo(self, zip_path, report=""): # Show informations for a zip archive 
+	def zipinfo(self, zip_path, report=""): # Show Informations for a zip archive 
 		if zip_path: 
 			try:
 				with zipfile.ZipFile(zip_path, 'r') as zip_file:
@@ -1231,7 +1249,7 @@ class OpenTTY:
 
 		else: raise IndexError("filename << source")
 	
-	def tarinfo(self, archive_path, report=""): # Show informations for a tar archive
+	def tarinfo(self, archive_path, report=""): # Show Informations for a tar archive
 		if archive_path:
 			try:
 				with tarfile.open(archive_path, 'r') as tar_file:
@@ -1270,7 +1288,7 @@ class OpenTTY:
 		else: raise IndexError("filename << source")
 
 	# The PSH
-	def uname(self, argv="", report=""): # Show informations about system and machine 
+	def uname(self, argv="", report=""): # Show Informations about system and machine 
 		if argv:
 			if "-a" in argv: print(f"{platform.system()} {platform.node()} {platform.release()} {platform.version()} {platform.machine()}")
 
@@ -1286,7 +1304,7 @@ class OpenTTY:
 	def export(self, cmdline=""): # Create global registers
 		if cmdline: os.environ[cmdline.split()[0]] = self.replace(cmdline)
 		else: print('from opentty import *\n\n\nif __name__ == "__main__":\n\tapp = OpenTTY()\n\n\tapp.connect("localhost")\n\tapp.disconnect(0)')
-	def environ(self, key="", report=""): # Show global registers at envirronment 
+	def environ(self, key="", report=""): # Show global registers at environment 
 		if key: print(os.environ[key] if key in os.environ else f"{report}env: {key}: register not found")
 		else: self.ThreadList(os.environ)
 	def write32u(self, setting="", show=True): # [Method for command 'REM']: CONFIG.SYS Manager 
@@ -1443,7 +1461,7 @@ class OpenTTY:
 				except json.decoder.JSONDecodeError as error: traceback.print_exc()
 
 		else: raise IndexError("filename")
-	def pull(self, filename): # Save current status of library in a json file 
+	def pull(self, filename): # Save current status of library in a JSON file 
 		if filename: json.dump(library, open(filename, "wt+"))
 		else: raise IndexError("filename")
 	#
@@ -1694,7 +1712,7 @@ class NoneError(Exception): # OpenTTY Internal Exception (NoneError - Run when a
 
 		super().__init__(self.message)
 
-class StaticError(Exception): # OpenTTY Internal Exception (StaticError - Run when tried to make a interation with a Static function)
+class StaticError(Exception): # OpenTTY Internal Exception (StaticError - Run when tried to make a interaction with a Static function)
 	def __init__(self, message=""): 
 		self.message = message
 

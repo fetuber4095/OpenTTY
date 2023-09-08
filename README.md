@@ -1,7 +1,7 @@
 # OpenTTY 1.6.1 "The Resources Upgrade"
 
 > This is OpenTTY, a terminal emulator  
-> tottaly created in python that run a minimalish  
+> totally created in python that run a minimalist  
 > version of shell into your system (Windows and Linux)  
 > is supported by app.  
 
@@ -15,7 +15,18 @@ help development team to turn the OpenTTY better.
  
 ## Release Notes  
 
+1. Removed password for FABRIC
 
-Contribuitors: Mr. Lima  
-Github Repository: https://github.com/fetuber4095/OpenTTY  
+In this release OpenTTY [Fabric] profile had your password removed  
+adding a new daemon for ignore authentication if password setting is  
+null. 
+
+_It isn't recommended 'cause don't propose security_
+
+2. New assets `figlet` and `rss`
+3. New tests with Warnings recipient 
+4. Added new manager `flush` to remove functions
+
+Contributors: Mr. Lima  
+GitHub Repository: https://github.com/fetuber4095/OpenTTY  
 
