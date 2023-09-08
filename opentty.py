@@ -178,7 +178,7 @@ library = {
 		"news": {"url": "https://github.com/fetuber4095/ResidentFlash/raw/main/packages/news"},
 		"gpt": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/gpt.py"},
 		"psh.test": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/deploy/psh-tester.sh"},
-		"rss": {"url": ""},
+		"rss": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/rss.dll"},
 		#"": {"url": ""},
 		#"": {"url": ""},
 	}, 

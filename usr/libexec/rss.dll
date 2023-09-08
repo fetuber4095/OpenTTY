@@ -28,6 +28,22 @@ global feedparser
 import feedparser
 import json
 
+def explore_json(data, indent=0):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, dict):
+                print_with_indent(f"{key}:", indent)
+                explore_json(value, indent + 1)
+            else:
+                print_with_indent(f"{key}: '{value}'", indent)
+    elif isinstance(data, list):
+        for index, value in enumerate(data):
+            if isinstance(value, dict):
+                print_with_indent(f"Item {index}:", indent)
+                explore_json(value, indent + 1)
+            else:
+                print_with_indent(f"Item {index}: '{value}'", indent)
+
 def rss(feed_url):
     # Faz o parse do feed RSS
     feed = feedparser.parse(feed_url)
@@ -53,6 +69,6 @@ def rss(feed_url):
 if cmd:
     feed = rss(cmd)
 
-    app.json_explorer(jsoniten=feed)
+    explore_json(cmd)
 
 else: print("rss: missing operand [url]...")
