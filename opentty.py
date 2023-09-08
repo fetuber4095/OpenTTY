@@ -73,8 +73,8 @@ library = {
 	"aliases": {},
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
-		"logname": "whoami", "profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"whoami": "echo &username", "type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
+		"profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
+		"type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
 		"floppy": "warp a", "ll": "busybox ls --color=auto", "opentty": "python -m opentty"
 	},
 
@@ -282,6 +282,12 @@ class OpenTTY:
 			for asset in os.listdir(self.root): 
 				if asset.endswith(".sh"): self.insmod(f"{self.root}/{asset}", root=True)
 
+			# Reload CONFIG.SYS Database
+			try: 
+				self.config = self.loadconfig(f"{self.root}/CONFIG.SYS")
+
+				self.globals['config'] = self.config # Reload for Emulated Python Scene
+			except FileNotFoundError: self.write32u(show=False)
 
 			try:
 				command = input(f"\033[32m\033[1m{getpass.getuser()}@{hostname()}\033[m\033[1m:\033[34m{os.getcwd().replace(os.path.expanduser('~'), '~')}\033[m{library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m" if library['experiments']['Revolution-Line'] else f"\033[31m\033[1m[{library['profile']}] \033[34m\033[1m{os.getcwd().replace(os.path.expanduser('~'), '~')} {library['sh-prefix'] if not admin else library['root-sh-prefix']}\033[m").strip()
@@ -299,12 +305,7 @@ class OpenTTY:
 			except (IndexError, TypeError): traceback.print_exc()	
 			except (RecursionError, NoneError): break
 
-			# Reload CONFIG.SYS Database
-			try: 
-				self.config = self.loadconfig(f"{self.root}/CONFIG.SYS")
-
-				self.globals['config'] = self.config # Reload for Emulated Python Scene
-			except FileNotFoundError: self.write32u(show=False)
+			
 
 		if __name__ == "__main__" and warpin: # Start a emulated Python Console Session
 			with PythonConsole(self.globals) as psh: psh.run(show=False)
@@ -394,7 +395,8 @@ class OpenTTY:
 			
 			# Permission Plugin
 			elif cmd.split()[0] == "chmod": self.chmod(self.replace(cmd), report=report)
-			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {passwd if root else '*' * passwd}")
+			elif cmd.split()[0] == "whoami" or cmd.split()[0] == "logname": print("root" if root else getpass.getuser())
+			elif cmd.split()[0] == "passwd": print(f"{report}passwd: your password is {passwd if root else '*' * passwd}" if passwd else f"{report}passwd: you dont have a password.")
 			elif cmd.split()[0] == "sudo": self.runas(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "su": self.login(root=root)
 			elif cmd.split()[0] == "chroot": self.chroot(self.replace(cmd), root=root)
@@ -452,7 +454,7 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", builtin=True)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", builtin=True)
-			elif cmd.startswith("if") or cmd.startswith("case") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.execblock(f"{cmd}")
+			elif cmd.startswith("if") or cmd.startswith("case") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.execblock(f"{cmd.replace('case', 'if')}")
 			elif cmd.startswith("for") or cmd.startswith("while") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.shell(f": {cmd}")
 			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}")
 			elif cmd.startswith("lambda") or cmd.startswith("raise") or cmd.startswith("assert") or cmd.startswith("del") or cmd.startswith("global"): self.shell(f": {cmd}")
