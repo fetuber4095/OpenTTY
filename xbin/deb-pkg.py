@@ -24,6 +24,7 @@
 #  SOFTWARE.
 
 import debian.deb822
+import sys
 
 def list_deb_package_info(deb_file_path):
     with open(deb_file_path, 'rb') as deb_file:
