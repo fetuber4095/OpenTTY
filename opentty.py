@@ -6,7 +6,7 @@
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
 #  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  to use, copy, modify, merge, publish, distribute, sub license, and/or sell
 #  copies of the Software, and to permit persons to whom the Software is
 #  furnished to do so, subject to the following conditions:
 #  
@@ -21,7 +21,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-# Importing OpenTTY Python dependences
+# Importing OpenTTY Python dependencies
 from os import system as local
 from socket import gethostname as hostname
 from random import randint, choice
@@ -245,7 +245,7 @@ class OpenTTY:
 		with RunConfig(self.config, self) as runconfig:
 			if not runmenu: return 
 
-			runconfig.run_menu() # Run initd Deamon from CONFIG.SYS
+			runconfig.run_menu() # Run initd Daemon from CONFIG.SYS
 		
 	def __enter__(self): return self
 	def __exit__(self, exc_type, exc_value, traceback): return 
@@ -717,7 +717,7 @@ class OpenTTY:
 
 			except Exception as error: traceback.print_exc()
 		else: print(library['hostname'])
-	def fwadress(self, ipadress, report=""): # Get informations about IP Adress (like hostname, time zone, country and others) 
+	def fwadress(self, ipadress, report=""): # Get informations about IP Address (like hostname, time zone, country and others) 
 		def get_ip_info(ip):
 			try:
 				with urllib.request.urlopen(f"http://ipinfo.io/{ip}/json?token={library['ipinfo-token']}") as response: return json.load(response)
