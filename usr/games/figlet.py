@@ -1,7 +1,7 @@
 #!/opentty.py rundll
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2023 "Mr. Lima" [rss.dll]
+#  Copyright (C) 2023 "Mr. Lima" [figlet.py]
 #
 #  This code is part of OpenTTY Package Repository
 #  
@@ -23,33 +23,15 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-global feedparser
+global pyfiglet
+import pyfiglet
 
-import feedparser
-import json
+def figlet(text, font="standard"):
+    try:
+        ascii_art = pyfiglet.figlet_format(text, font=font)
+        return ascii_art
+    except pyfiglet.FigletError as e:
+        return str(e)
 
-
-def rss(feed_url):
-    # Faz o parse do feed RSS
-    feed = feedparser.parse(feed_url)
-
-    # Inicializa uma lista para armazenar os itens do feed em formato JSON
-    feed_json = []
-
-    # Itera pelos itens do feed e os converte em dicionários JSON
-    for entry in feed.entries:
-        item = {
-            'title': entry.title,
-            'link': entry.link,
-            'published': entry.published,
-            'summary': entry.summary,
-        }
-        feed_json.append(item)
-
-    # Converte a lista de itens em JSON
-    feed_json = json.dumps(feed_json, indent=4)
-
-    return feed_json
-
-if cmd: print(rss(cmd)) # https://pypi.org/rss/project/opentty/releases.xml
-else: print("rss: missing operand [url]...")
+if cmd: figlet(cmd)
+else: print("figlet: missing operand [text]...")
