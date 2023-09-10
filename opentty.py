@@ -130,7 +130,8 @@ library = {
 		"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
 
 		" ", "'", '"', "!", "@", "#", "$", "%", "¨", "&", "*", "(", ")", "[", "]", "{", "}", "-", "_", "=", "+", "`", "´", "~", "^", "<", ">",
-		":", ";", "?", "¹", "²", "³", "£", "¢", "¬", "«", "»", "ß", "Æ", "Ð", "©", "®", "Ŧ", "←", "↓", "→", "ĸ", "̉", "Þ", "Ŋ", "“", "”", "µ" 
+		":", ";", "?", "¹", "²", "³", "£", "¢", "¬", "«", "»", "ß", "Æ", "Ð", "©", "®", "Ŧ", "←", "↓", "→", "ĸ", "̉", "Þ", "Ŋ", "“", "”", "µ" ,
+		".",
 	],
 
 	# Systems commands
@@ -560,7 +561,7 @@ class OpenTTY:
 			# "OpenTTY Process Manager"
 			elif cmd.split()[0] == "ps": self.pslist()
 			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd), report=report)
-			elif cmd.split()[0] == "bg": self.bg(self.shell, args=(self.replace(cmd), "bg: ", root)) if self.replace(cmd) else print(f"{report}bg: missing operand [command]...")
+			elif cmd.split()[0] == "bg": self.bg(self.shell, args=(self.replace(cmd), True, "bg: ", root)) if self.replace(cmd) else print(f"{report}bg: missing operand [command]...")
 			
 			# The Remote Plugin
 			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else 4095)
@@ -1232,39 +1233,30 @@ class OpenTTY:
 		if function: raise NameError("[InternalError] Function not found")
 	#
 	# "Hash Security"
-	def encript(self, text, max_lenght=64, advance=2, table=library['char-table']):
-		if len(text) > max_lenght:
-			raise RecursionError(f"Text to hash OpenTTY 'max_lenght' setting.")
+	def encript(self, text, advance=2, table=library['char-table']):
+		encrypted_text = ""
 
 		for char in text:
-			where = 0
+			if char in table:
+				index = table.index(char)
+				new_index = (index - advance) % len(table)
+				encrypted_text += table[new_index]
+			else:
+				encrypted_text += char
 
-			for ch in table:
-				if ch == char: break
-
-				where = where + 1
-
-			try: text = text.replace(char, table[where + advance])
-			except: text = text.replace(char, table[where - advance])
-
-		return text
-
-	def decript(self, text, max_lenght=64, advance=2, table=library['char-table']):
-		if len(text) > max_lenght:
-			raise RecursionError(f"Text to unhash OpenTTY 'max_lenght' setting.")
+		return encrypted_text
+	def decript(self, text, advance=2, table=library['char-table']):
+		decrypted_text = ""
 
 		for char in text:
-			where = 0
+			if char in table:
+				index = table.index(char)
+				new_index = (index + advance) % len(table)
+				decrypted_text += table[new_index]
+			else:
+				decrypted_text += char
 
-			for ch in table:
-				if ch == char: break
-
-				where = where + 1
-
-			try: text = text.replace(char, table[where - advance])
-			except: text = text.replace(char, table[where + advance])
-
-		return text
+		return decrypted_text
 
 	# The box Plugin
 	#
