@@ -1,7 +1,7 @@
 
 
 ; Initd "Main Menu"
-; Initd for OpenTTY 1.6
+; Initd for OpenTTY 1.6.2
 
 [menu]
 1 = Start OpenTTY

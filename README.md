@@ -15,7 +15,21 @@ help development team to turn the OpenTTY better.
  
 ## Release Notes  
 
+1. OpenTTY Free Runtime
 
+This is the focus of this release, now is possible run PSH
+syntax in app call with `python -m opentty [command]`.
+
+It can run assets, open servers, etc. Only the Background
+Daemon isn't works 'cause it run while OpenTTY is running,
+meaning that with this Runtime it will execute normally.
+
+Other daemon that doesn't works is The PIPES Plugin, 'cause
+it saves the data in current cache session, what don't happens
+'cause it's call only and closes.
+
+2. Added assets `ss` and `notepad`
+3. 
 
 Contributors: Mr. Lima  
 GitHub Repository: https://github.com/fetuber4095/OpenTTY  

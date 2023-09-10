@@ -73,9 +73,9 @@ library = {
 	"aliases": {},
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
-		"profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true",
-		"type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod",
-		"floppy": "warp a", "ll": "busybox ls --color=auto"
+		"profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true", "vi": "busybox vi",
+		"type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod", "nslookup": "hostname",
+		"floppy": "warp a", "ll": "busybox ls --color=auto", "help": "curl https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/help.txt"
 	},
 
 	# Disabled Commands list
@@ -120,7 +120,18 @@ library = {
 	# Virtual disks info
 	"fstab": [],
 
- 
+ 	
+	"letters": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
+
+	"char-table": [
+		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "Ç",
+		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "Y", "z", "ç", 
+
+		"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+
+		" ", "'", '"', "!", "@", "#", "$", "%", "¨", "&", "*", "(", ")", "[", "]", "{", "}", "-", "_", "=", "+", "`", "´", "~", "^", "<", ">",
+		":", ";", "?", "¹", "²", "³", "£", "¢", "¬", "«", "»", "ß", "Æ", "Ð", "©", "®", "Ŧ", "←", "↓", "→", "ĸ", "̉", "Þ", "Ŋ", "“", "”", "µ" 
+	],
 
 	# Systems commands
 	#
@@ -193,7 +204,8 @@ library = {
 
 	"docs": {
 		"license": "https://github.com/fetuber4095/OpenTTY/raw/main/LICENSE",
-		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/var/mail/inbox"
+		"inbox": "https://github.com/fetuber4095/OpenTTY/raw/main/var/mail/inbox",
+		"help": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/help.txt"
 	},
 
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
@@ -230,6 +242,7 @@ class OpenTTY:
 		
 
 		self.config = self.loadconfig(f"{self.root}/CONFIG.SYS") 
+		self.latest = "true"
 
 		# Setup of OpenTTY Runtime 
 		self.globals = {
@@ -302,18 +315,17 @@ class OpenTTY:
 				
 				for cmd in command.split('|'):
 					if cmd:
-						if cmd.split()[0] in library['commands-blacklist']: print(f"{cmd.split()[0]}: command disabled.") # Block a command call
-
-						elif cmd.split()[0] == "logout": return # Quit from PSH Terminal (End of Code/ End of PSH Environment)
+						if cmd.split()[0] == "logout": return # Quit from PSH Terminal (End of Code/ End of PSH Environment)
 						elif cmd.split()[0] == "quit": raise NoneError() # Quit from PSH Terminal (Warp to Python Console)
 						
 						else: self.shell(cmd, mkprocess=True, report=f"{library['sh']}: " if admin else "", root=admin) # Send a command for PSH Execution
 					
+				self.latest = command.replace("fc", "true")
 			except (KeyboardInterrupt, EOFError): self.clear()
 			except (IndexError, TypeError): traceback.print_exc()	
 			except (RecursionError, NoneError): break
+			except UnboundLocalError: continue
 
-			
 
 		if __name__ == "__main__" and warpin: # Start a emulated Python Console Session
 			with PythonConsole(self.globals) as psh: psh.run(show=False)
@@ -391,7 +403,8 @@ class OpenTTY:
 		try:
 			cmd = str(self.recognize(cmd)).strip() if recognize else cmd
 
-			if cmd.split()[0] in self.aliases and not builtin: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
+			if cmd.split()[0] in library['commands-blacklist']: print(f"{report}{cmd.split()[0]}: command disabled.") # Block a command call
+			elif cmd.split()[0] in self.aliases and not builtin: self.shell(f"{self.aliases[cmd.split()[0]]} {self.replace(cmd)}", mkprocess=False)
 			
 			elif cmd.split()[0] == ".": 
 				if self.replace(cmd): self.execfile(shlex.split(self.replace(cmd))[0], self.replace(self.replace(cmd)), root=root) # Call OpenTTY Rundll 
@@ -449,7 +462,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "nl": self.nl(self.replace(cmd))
 			elif cmd.split()[0] == "find": self.find(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "catbin": print(self.catbin(self.replace(cmd)))
-			elif cmd.split()[0] == "write": app.write(self.replace(cmd))
+			elif cmd.split()[0] == "write": self.write(self.replace(cmd))
 			elif cmd.split()[0] == "sort": self.sort(self.replace(cmd))
 
 			# The PIPES Plugin
@@ -464,8 +477,7 @@ class OpenTTY:
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
 			elif cmd.startswith("dir"): self.shell(f": print({cmd})", builtin=True)
 			elif cmd.split()[0] == "set": self.shell(f": {self.replace(cmd)}", builtin=True)
-			elif cmd.startswith("if") or cmd.startswith("case") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.execblock(f"{cmd.replace('case', 'if')}")
-			elif cmd.startswith("for") or cmd.startswith("while") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try"): self.shell(f": {cmd}")
+			elif cmd.startswith("for") or cmd.startswith("while") or cmd.startswith("with") or cmd.startswith("def") or cmd.startswith("class") or cmd.startswith("try") or cmd.startswith("if") or cmd.startswith("case"): self.execblock(f"{cmd.replace('case', 'if')}")
 			elif cmd.startswith("from") or cmd.startswith("import") or cmd.startswith("print") or cmd.startswith("input") or cmd.startswith("nm") or cmd.startswith("app"): self.shell(f": {cmd}")
 			elif cmd.startswith("lambda") or cmd.startswith("raise") or cmd.startswith("assert") or cmd.startswith("del") or cmd.startswith("global"): self.shell(f": {cmd}")
 			elif cmd.startswith("stdin") or cmd.startswith("stdout"): self.shell(f": {cmd}", mkprocess=False) if cmd.replace("stdin", "").replace("stdout", "") else self.shell(f": print({cmd})")
@@ -480,7 +492,10 @@ class OpenTTY:
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 			elif cmd.split()[0] == "remm": self.json_explorer(jsoniten=self.config)
-				
+			#
+			# "Hash Security"
+			elif cmd.split()[0] == "hash": print(self.encript(self.replace(cmd)))
+			elif cmd.split()[0] == "uhash": print(self.decript(self.replace(cmd)))
 
 			# The Box Plugin
 			elif cmd.split()[0] == "fstab": print("\n".join([f"Drive {item}" for item in library['fstab']]) if library['fstab'] else f"{report}fstab: no drives detected.")
@@ -502,7 +517,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon: missing operand [command]...\n", end="")
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
-			elif cmd.split()[0] == "sh": self.connect(self.ttyname, 8080, warpin=False, admin=root)
+			elif cmd.split()[0] == "sh" or cmd.split()[0] == library['sh']: self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
 			elif cmd.split()[0] == "enable": self.enable(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "builtin": self.shell(self.replace(cmd), builtin=True, report="builtin: ", root=root) if self.replace(cmd) else print(f"{report}builtin: missing operand [command]...")
@@ -522,6 +537,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
 			elif cmd.split()[0] == "pwd": print(os.getcwd())
+			elif cmd.split()[0] == "arch": print(platform.architecture()[0])
 			#
 			# "OpenTTY Version Utilities"
 			elif cmd.split()[0] == "build": print(library['build'])
@@ -559,13 +575,17 @@ class OpenTTY:
 			elif cmd.split()[0] == "inbox": self.curl(library['docs']['inbox'], show=True)
 			elif cmd.split()[0] == "root": self.pushdir(self.root)
 			elif cmd.split()[0] == "home": self.pushdir(self.root) if root else self.pushdir(os.path.expanduser("~"))
+			elif cmd.split()[0] == "fc": self.shell(self.latest, builtin=True, report=report, root=root)
 			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd))
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
+			elif cmd.split()[0] == "help": self.help()
+			elif cmd.split()[0] == "yes": self.ThreadOut(self.replace(cmd))
 			#elif cmd.split()[0] == "":
 
+
 			# Return codes
-			elif cmd.split()[0] == "true": return True
+			elif cmd.split()[0] == "true": pass
 			elif cmd.split()[0] == "false": return self.rmprocess(cmd.split()[0])
 			elif cmd.split()[0] == "return": return self.rmprocess(cmd.split()[0]), self.replace(cmd), True
 
@@ -589,6 +609,7 @@ class OpenTTY:
 				elif cmd.split()[0] in library['resources'] and not builtin:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{report}{cmd.split()[0]}: asset is actived.")
 					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
+				elif cmd.split()[0] in os.listdir(self.root): print(f"{report}{cmd.split()[0]}: asset is actived.")
 				
 				elif os.path.isfile(cmd): print(open(cmd))
 
@@ -644,7 +665,10 @@ class OpenTTY:
 		while True: print(f"\033[32m{random.choice(['0', '1', '0', '1', '(', ')', '[', ']',	'!', '@', '#', '&', '/', '.', '0', '1', '▒', '▒', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '])}", end="")
 	
 	# OpenTTY "Process Methods"
-	def mkprocess(self, pname): self.process[pname] = (str(randint(1000, 9999))) # Create process
+	def mkprocess(self, pname): # Create process
+		if pname in ['sh']: return
+
+		self.process[pname] = (str(randint(1000, 9999)))
 	def rmprocess(self, pname): # Kill process by name
 		try: 
 			if pname == "python" or pname == "psh": return 
@@ -918,7 +942,7 @@ class OpenTTY:
 				else: print(file)
 
 		else: self.listdir(os.getcwd())
-	def txt2bin(self, filenames): # Convert text files to binary type 
+	def txt2bin(self, filenames=""): # Convert text files to binary type 
 		def hashbytes(text): return bytes([random.randint(0, 255) for _ in range(len(text))])
 		def writeBytes(source, output): 
 			with open(source, "r") as source: text = source.read()
@@ -1017,7 +1041,7 @@ class OpenTTY:
 					for cache in range(library['head-lines']): print(self.recognize(text[cache]))
 				except IndexError: return text
 
-		else: self.ThreadIn()
+		else: self.txt2bin()
 	def tail(self, filename): # Show last lines of a file 
 		if filename:
 			def tailrepliant(filename):
@@ -1206,6 +1230,41 @@ class OpenTTY:
 			return
 
 		if function: raise NameError("[InternalError] Function not found")
+	#
+	# "Hash Security"
+	def encript(self, text, max_lenght=64, advance=2, table=library['char-table']):
+		if len(text) > max_lenght:
+			raise RecursionError(f"Text to hash OpenTTY 'max_lenght' setting.")
+
+		for char in text:
+			where = 0
+
+			for ch in table:
+				if ch == char: break
+
+				where = where + 1
+
+			try: text = text.replace(char, table[where + advance])
+			except: text = text.replace(char, table[where - advance])
+
+		return text
+
+	def decript(self, text, max_lenght=64, advance=2, table=library['char-table']):
+		if len(text) > max_lenght:
+			raise RecursionError(f"Text to unhash OpenTTY 'max_lenght' setting.")
+
+		for char in text:
+			where = 0
+
+			for ch in table:
+				if ch == char: break
+
+				where = where + 1
+
+			try: text = text.replace(char, table[where - advance])
+			except: text = text.replace(char, table[where + advance])
+
+		return text
 
 	# The box Plugin
 	#
@@ -1518,7 +1577,38 @@ class OpenTTY:
 			except ValueError: print(f"{report}genn: invalid range '{limit}'\n"), traceback.print_exc()
 
 		else: raise IndexError("max.number")
-	
+
+	def help(self): # OpenTTY HELP
+		print(f"OpenTTY v{library['version']} ({library['system']}) Python Utilities.")
+		print(f'OpenTTY (C) 2023 - Copyrighted by "{library["developer"]}"')
+		print("Licensed under MIT. See source distribution in GitHub")
+		print("repository for more informations.\n")
+		print("Usage: python -m opentty [--admin - Start as ROOT]")
+		print("   or: python -m opentty [-b :: Active experiments daemon]\n")
+		print("   OpenTTY is a Terminal Emulator that combine many common Unix")
+		print("   utilities in a single Python Module. The shell in this build")
+		print("   is configured to run built-in utilities without $PATH search,") 
+		print("   only considering the Assets in profile directory.")
+		print("   To run external python programs, use (. <filename> [arguments]...)\n")
+		print("Built-in commands:")
+		print("   ((expr)), alias, attrib, arch, asset, add-repo, basename, bg, bind")
+		print("   builtin, basic, block, build, cal, cd, chmod, chown, chroot, clear,")
+		print("   cmp, cmatrix, cp, cron, clone, connect, catbin, curl, dd, df, du,")
+		print("   dumpsys, dir, del, declare, del, deamon, diff, date, dog, echo, exit,") 
+		print("   eval, exec, enable, export, false, find, fw, feed, for, from, fstab,") 
+		print("   grep, gear, genn, genip, gaddr, get, gzip, gping, gt, help, hash,")
+		print("   head, hat, hostname, hostid, install, insmod, ifconfig, init, idle,")
+		print("   join, json, kill, ls, login, ll, ln, logname, mkdir, md, mode, mount,") 
+		print("   more, mt, mv, mkswap, merge, netstat, no, nl, nuke, nslookup, nm,")
+		print("   open, od, path, ping, passwd, paste, patch, ps, pwd, pull, public,") 
+		print("   pub, reset, rm, rmdir, route, rmswap, run, rss, resume, rev, read,") 
+		print("   rem, remm, start, swap, stty, sleep, sync, sudo, su, sort, server,") 
+		print("   seq, stat, static, stop, svc, system, stdin, stdout, sh, share, tac,") 
+		print("   tar, tail, tap, tr, thread, time, timeout, true, touch, test, type,") 
+		print("   touch, tty, uname, unmount, unzip, untar, uptime, vi, version, var,") 
+		print("   vip, wc, wget, where, whoami, wait, xargs, yes, zipinfo")
+
+
 	# The Remote Plugin
 	def bind(self, port=4095):
 		server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1744,5 +1834,5 @@ class NotStaticError(Exception): # OpenTTY Internal Exception (NotStaticError - 
 if __name__ == "__main__":
 	with OpenTTY() as app:
 
-		app.connect("localhost", admin=False if not "--admin" in sys.argv else True)
-
+		try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""))
+		except IndexError: app.help()
