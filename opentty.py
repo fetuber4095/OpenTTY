@@ -46,7 +46,9 @@ library = {
     "subject": "The Resources Upgrade",
 	"patch": [
 		"OpenTTY 98",
-		
+		"New out-shell runtime daemon",
+		"Added new assets 'enchant' and 'openpad'",
+		"Added new service into 'PIPEs Plugin'",
 
 	],
     
@@ -181,9 +183,9 @@ library = {
 		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": [], "install-requires": []},
 		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []},
 		"deb": {"filename": "deb.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/deb-pkg.py", "py-libs": ['python-debian'], "install-requires": []},
-		"figlet": {"filename": "figlet.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/figlet.py", "py-libs": ['pyfiglet'], "install-requires": []}
-		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
-		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
+		"figlet": {"filename": "figlet.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/figlet.py", "py-libs": ['pyfiglet'], "install-requires": []},
+		"openpad": {"filename": "openpad.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/openpad.py", "py-libs": [], "install-requires": []},
+		"enchant": {"filename": "enchant.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/enchant.py", "py-libs": [], "install-requires": []}
 		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 	},

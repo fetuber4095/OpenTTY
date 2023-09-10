@@ -28,8 +28,8 @@ Other daemon that doesn't works is The PIPES Plugin, 'cause
 it saves the data in current cache session, what don't happens
 'cause it's call only and closes.
 
-2. Added assets `ss` and `notepad`
-3. 
+2. Added assets `enchant` and `openpad`
+3. New HASH Security service in *Permission Plugin*
 
 Contributors: Mr. Lima  
 GitHub Repository: https://github.com/fetuber4095/OpenTTY  
