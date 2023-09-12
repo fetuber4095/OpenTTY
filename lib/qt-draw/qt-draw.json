@@ -1,0 +1,7 @@
+{
+    "version": "1.0.0",
+    "interface": "github.com",
+
+    "libexec": "/lib/qt-draw/draw.py",
+    "workspace": "opentty.qtsdk.window.application.draw"
+}
