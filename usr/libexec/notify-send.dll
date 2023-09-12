@@ -29,12 +29,9 @@ import tkinter as tk
 from tkinter import messagebox
 
 
-def notify(text):
-	if text:
-		if text.split()[0] == "-a": messagebox.showwarning(f"{library['appname']} {library['version']}", text.replace("-a", ""))
-		elif text.split()[0] == "-e": messagebox.showwerror(f"{library['appname']} {library['version']}", text.replace("-e", ""))
-		else: messagebox.showinfo(f"{library['appname']} {library['version']}", text)
+if cmd:
+	if cmd.split()[0] == "-a": messagebox.showwarning(f"{library['appname']} {library['version']}", cmd.replace("-a", ""))
+	elif cmd.split()[0] == "-e": messagebox.showwerror(f"{library['appname']} {library['version']}", cmd.replace("-e", ""))
+	else: messagebox.showinfo(f"{library['appname']} {library['version']}", cmd)
 
-	else: print("notify-send: missing operand [text]...")
-
-notify(cmd)
+else: print("notify-send: missing operand [text]...")
