@@ -42,13 +42,11 @@ passwd = ""
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.6.2", "build": "09H5",
+    "version": "1.6.3", "build": "09H7",
     "subject": "The Resources Upgrade",
 	"patch": [
 		"OpenTTY 98",
-		"New out-shell runtime daemon",
-		"Added new assets 'enchant' and 'openpad'",
-		"Added new service into 'PIPEs Plugin'",
+
 
 	],
     
@@ -493,6 +491,7 @@ class OpenTTY:
 			
 			elif cmd.split()[0] == "cl0": self.locals = {}
 			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			elif cmd.split()[0] == "reset.cf": self.uninstall("CONFIG.SYS", report="reset: ", root=True)
 
 			elif cmd.split()[0] == "remm": self.json_explorer(jsoniten=self.config)
 			#
@@ -518,7 +517,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "env": self.environ(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "local": self.ThreadList(self.locals, prefix="local ")
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
-			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon: missing operand [command]...\n", end="")
+			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon--: missing operand [command]...\n", end="")
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
 			elif cmd.split()[0] == "sh" or cmd.split()[0] == library['sh']: self.connect(self.ttyname, 8080, warpin=False, admin=root)
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))
@@ -1235,7 +1234,7 @@ class OpenTTY:
 		if function: raise NameError("[InternalError] Function not found")
 	#
 	# "Hash Security"
-	def encript(self, text, advance=2, table=library['char-table']):
+	def decript(self, text, advance=library['max-byte-len'], table=library['char-table']):
 		encrypted_text = ""
 
 		for char in text:
@@ -1247,7 +1246,7 @@ class OpenTTY:
 				encrypted_text += char
 
 		return encrypted_text
-	def decript(self, text, advance=2, table=library['char-table']):
+	def encript(self, text, advance=library['max-byte-len'], table=library['char-table']):
 		decrypted_text = ""
 
 		for char in text:
@@ -1399,15 +1398,12 @@ class OpenTTY:
 	def reload(self, cmdline="", root=True): # Reload OpenTTY Program 
 		if not "--confirm" in cmdline: return print(f"reload: it can charge normal {self.appname} beahvior. Cache will be cleaned.\nIf are you sure, run 'sudo reload --confirm'")
 
-		if root:
-			os.chdir(self.root)
-
-			local(' '.join(sys.argv))
-
+		if library['debugmode']:
+			os.chdir(self.root), local(f"{'python ' if sys.argv[0] in ['opentty', 'opentty.py'] else ' '}{' '.join(sys.argv)}")
 
 			raise SystemExit
 
-		else: raise PermissionError("Unable to reload. Are you root?")
+		else: raise RuntimeError("RELOAD isn't enabled. Turn on this resource with `debugmode`.")
 	def venv(self, venvname, report="", root=False): # Create profiles from network template 
 		if venvname:
 			if not root: raise PermissionError("Unable to create profiles. Are you root?")
@@ -1588,10 +1584,10 @@ class OpenTTY:
 		print("   ((expr)), alias, attrib, arch, asset, add-repo, basename, bg, bind")
 		print("   builtin, basic, block, build, cal, cd, chmod, chown, chroot, clear,")
 		print("   cmp, cmatrix, cp, cron, clone, connect, catbin, curl, dd, df, du,")
-		print("   dumpsys, dir, del, declare, del, deamon, diff, date, dog, echo, exit,") 
+		print("   dumpsys, dir, del, declare, db, deamon, diff, date, dog, echo, exit,") 
 		print("   eval, exec, enable, export, false, find, fw, feed, for, from, fstab,") 
 		print("   grep, gear, genn, genip, gaddr, get, gzip, gping, gt, help, hash,")
-		print("   head, hat, hostname, hostid, install, insmod, ifconfig, init, idle,")
+		print("   head, hat, hostname, hostid, install, insmod, ifconfig, initd, idle,")
 		print("   join, json, kill, ls, login, ll, ln, logname, mkdir, md, mode, mount,") 
 		print("   more, mt, mv, mkswap, merge, netstat, no, nl, nuke, nslookup, nm,")
 		print("   open, od, path, ping, passwd, paste, patch, ps, pwd, pull, public,") 
@@ -1599,7 +1595,7 @@ class OpenTTY:
 		print("   rem, remm, start, swap, stty, sleep, sync, sudo, su, sort, server,") 
 		print("   seq, stat, static, stop, svc, system, stdin, stdout, sh, share, tac,") 
 		print("   tar, tail, tap, tr, thread, time, timeout, true, touch, test, type,") 
-		print("   touch, tty, uname, unmount, unzip, untar, uptime, vi, version, var,") 
+		print("   tty, uname, unmount, unzip, untar, uptime, vi, version, var,") 
 		print("   vip, wc, wget, where, whoami, wait, xargs, yes, zipinfo")
 
 

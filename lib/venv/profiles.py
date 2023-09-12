@@ -21,7 +21,7 @@ library['aliases']['ALIAS-NAME'] = "COMMAND" # Modify "ALIAS-NAME" with asset na
 library['whitelist'].append("filename") # Add files permanently at whitelist
 
 library['head-lines'] = 10 # Setup number of file lines that will be show in 'head' and 'tail' commands
-library['max-byte-len'] = 128 # Setup max range for dd txt2bin client and ThreadIn looping
+library['max-byte-len'] = 32 # Setup for HASH and UHASH Services (Bytes to warp)
 library['hidden-files-prefix'] = "." # Setup prefix of hidden Files
 
 library['dircolors']['extension'] = "\033[COLORCODEm" # Add and modify files colors
@@ -49,5 +49,9 @@ app = OpenTTY() # Start OpenTTY Method instance
 
 if __name__ == "__main__":
     
-    app.connect("NAME-OF-SESSION", port=8080, admin=False) # Start PSH session [PORT is PID of psh at OpenTTY Envirronment]
+    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""))
+    except IndexError: app.help()
+
+    # Classic PSH Initialization
+    #app.connect("NAME-OF-SESSION", port=8080, admin=False) # Start PSH session [PORT is PID of psh at OpenTTY Envirronment]
 

@@ -27,5 +27,5 @@ Built-in commands:
 	rem, remm, start, swap, stty, sleep, sync, sudo, su, sort, server, 
 	seq, stat, static, stop, svc, system, stdin, stdout, sh, share, tac, 
 	tar, tail, tap, tr, thread, time, timeout, true, touch, test, type, 
-	touch, tty, uname, unmount, unzip, untar, uptime, vi, version, var, 
+	tty, uname, unmount, unzip, untar, uptime, vi, version, var, 
 	vip, wc, wget, where, whoami, wait, xargs, yes, zipinfo

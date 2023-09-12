@@ -19,7 +19,7 @@ library['whitelist'].append("opentty.py")
 library['whitelist'].append("forge.py")
 
 library['head-lines'] = 10
-library['max-byte-len'] = 2048 
+library['max-byte-len'] = 32 
 # ----------------------------
 
 # BETA Features
@@ -47,6 +47,8 @@ passwd = "1234"
 app = OpenTTY() 
 
 if __name__ == "__main__": 
+    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""))
+    except IndexError: app.help()
 
-    app.connect("/dev/forge.py", admin=False if not "--admin" in sys.argv else True)
+    #app.connect("/dev/forge.py", admin=False if not "--admin" in sys.argv else True)
 
