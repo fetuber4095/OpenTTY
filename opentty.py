@@ -186,6 +186,7 @@ library = {
 		"enchant": {"filename": "enchant.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/enchant.py", "py-libs": [], "install-requires": []}
 		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
+		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 	},
 
 	"scripts": {
@@ -195,6 +196,8 @@ library = {
 		"gpt": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/gpt.py"},
 		"psh.test": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/deploy/psh-tester.sh"},
 		"rss": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/rss.dll"},
+		"notify-send": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/notify-send.dll"},
+		#"": {"url": ""},
 		#"": {"url": ""},
 		#"": {"url": ""},
 	}, 
