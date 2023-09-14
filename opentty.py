@@ -157,34 +157,35 @@ library = {
 		"Desktop": False, # Add support for Virtual Desktop emulation
 		"RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
 		"Revolution-Line": False, # Active new command line
+		"Revolution-Daemon": False, # Active new daemons and functions for OpenTTY Revolution
 		"Dumpsys": False, # Enable dumpsys
-		"Warnings": False, # Enable Warnings
 		"GAMERULES": False, # Enable gamerules and gamemode charge
 	},
 
 	# Resources Mirrors
 	"resources": {
-		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": [], "install-requires": []}, 
-		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": [], "install-requires": []},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": [], "install-requires": []}, 
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": [], "install-requires": []},
-		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": [], "install-requires": []}, 
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": [], "install-requires": []},
-		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": [], "install-requires": []}, 
-		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty'], "install-requires": []},
-		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools'], "install-requires": []}, 
-		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": [], "install-requires": []},
-		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": [], "install-requires": ['qt']}, 
 		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": [], "install-requires": ['qt']},
-		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5'], "install-requires": []}, 
-		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5'], "install-requires": []},
-		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": [], "install-requires": []},
-		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []},
+		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": [], "install-requires": ['qt']}, 
+		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": [], "install-requires": []}, 
 		"deb": {"filename": "deb.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/deb-pkg.py", "py-libs": ['python-debian'], "install-requires": []},
+		"enchant": {"filename": "enchant.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/enchant.py", "py-libs": [], "install-requires": []},
+		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": [], "install-requires": []}, 
 		"figlet": {"filename": "figlet.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/figlet.py", "py-libs": ['pyfiglet'], "install-requires": []},
+		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": [], "install-requires": []}, 
+		"gen": {"filename": "gen.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/gen/gen.dll", "py-libs": [], "install-requires": []},
+		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": [], "install-requires": []}, 
+		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": [], "install-requires": []},
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": [], "install-requires": []},
 		"openpad": {"filename": "openpad.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/openpad.py", "py-libs": [], "install-requires": []},
-		"enchant": {"filename": "enchant.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/enchant.py", "py-libs": [], "install-requires": []}
-		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
+		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []},		
+		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5'], "install-requires": []},
+		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools'], "install-requires": []}, 
+		"qt-draw": {"filename": "draw.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-draw/draw.py", "py-libs": ['PyQt5'], "install-requires": []},
+		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5'], "install-requires": []}, 
+		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": [], "install-requires": []},
+		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty'], "install-requires": []},
+		
 		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 		#"": {"filename": "", "url": "", "py-libs": [], "install-requires": []}
 	},
@@ -439,6 +440,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "gping": self.gping(report=report)
 			elif cmd.split()[0] == "ifconfig": self.ifconfig(self.replace(cmd) if self.replace(cmd) else hostname())
 			elif cmd.split()[0] == "netstat": print(self.netstat())
+			elif cmd.split()[0] == "np": self.np(self.replace(cmd))
 
 			# The boy of files
 			#
@@ -586,6 +588,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "help": self.help()
 			elif cmd.split()[0] == "yes": self.ThreadOut(self.replace(cmd))
+			elif cmd.split()[0] == "no": self.clear(), print(self.replace(cmd) if self.replace(cmd) else "")
 			#elif cmd.split()[0] == "":
 
 
@@ -598,8 +601,7 @@ class OpenTTY:
 				if cmd.split()[0] in library['internals']: self.shell(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}")
 				elif cmd.split()[0] in library[f'{os.name}-commands']: local(cmd)
 
-				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: VirtualDisk(cmd) # The BOX Plugin -> Virtual Disk Utilities
-				elif cmd.split()[0] in ["!mount", "!unmount", "!eject", "!warp"]: OpenDiskManager(cmd) 
+				elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: OpenDiskManager(cmd) if library['experiments']['Revolution-Daemon'] else VirtualDisk(cmd) # The BOX Plugin -> Virtual Disk Utilities
 
 				elif cmd.split()[0] in library['scripts']: self.shell(f"; {library['scripts'][cmd.split()[0]]['url']} {self.replace(cmd)}", root=root)
 								
@@ -629,7 +631,7 @@ class OpenTTY:
 		except UnicodeDecodeError: return print(f"{report}{cmd.split()[0]}: {self.basename(self.replace(cmd).split()[0])}: is a binary-like file.")
 		except PermissionError: return print(f"{report}{cmd.split()[0]}: permission denied.\n"), traceback.print_exc()
 		except IndexError as missing: print(f"{report}{cmd.split()[0]}: missing operand [{missing}]..."), self.rmprocess(cmd.split()[0])
-		except (ValueError, NameError, OSError, RuntimeError, UnboundLocalError, KeyError): return traceback.print_exc(), self.rmprocess(cmd.split()[0])
+		except (ValueError, NameError, OSError, RuntimeError, UnboundLocalError, KeyError, OverflowError): return traceback.print_exc(), self.rmprocess(cmd.split()[0])
 		except (StaticError, NoneError, NotStaticError): return traceback.print_exc(), self.rmprocess(cmd.split()[0])
 
 		
@@ -695,7 +697,7 @@ class OpenTTY:
 		
 		print(f"{report}kill: ({pid}) - No such process" if pid else f"{report}kill: missing operand [PID]...")
 
-	def bg(self, method, args): # Run tasks in background 
+	def bg(self, method, args=()): # Run tasks in background 
 		thread = threading.Thread(target=method, args=args)
 		thread.start()
 
@@ -902,7 +904,47 @@ class OpenTTY:
 		except Exception as error: return falsecode
 
 		return truecode	
-	
+	def np(self, port): # Netcat Python remake
+		if port:
+			try:
+				server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				server.settimeout(4095)
+				server.bind(('0.0.0.0', int(port)))
+				server.listen()
+
+				def get_msg(size=4096):
+					while True:
+						if not connect: return 
+
+						try: print(client_socket.recv(size).decode())
+						except OSError: break
+
+				while True:
+					try:
+						connect = True
+						client_socket, client_address = server.accept()
+
+						thread = self.bg(get_msg)
+
+						while True:
+							try:
+								text = input()
+
+								client_socket.send(text.encode())
+
+							except (KeyboardInterrupt, EOFError):
+								client_socket.close()
+								connect = False
+
+								break
+
+					except KeyboardInterrupt: return server.close(), thread.join()
+
+			except UnboundLocalError: return
+
+		else: raise IndexError("port")
+		
+
 	# The boy of files
 	#
 	# "File Utilities"
@@ -1592,7 +1634,7 @@ class OpenTTY:
 		print("   grep, gear, genn, genip, gaddr, get, gzip, gping, gt, help, hash,")
 		print("   head, hat, hostname, hostid, install, insmod, ifconfig, initd, idle,")
 		print("   join, json, kill, ls, login, ll, ln, logname, mkdir, md, mode, mount,") 
-		print("   more, mt, mv, mkswap, merge, netstat, no, nl, nuke, nslookup, nm,")
+		print("   more, mt, mv, mkswap, merge, netstat, no, nl, np, nuke, nslookup, nm,")
 		print("   open, od, path, ping, passwd, paste, patch, ps, pwd, pull, public,") 
 		print("   pub, reset, rm, rmdir, route, rmswap, run, rss, resume, rev, read,") 
 		print("   rem, remm, start, swap, stty, sleep, sync, sudo, su, sort, server,") 
@@ -1712,19 +1754,19 @@ class OpenDiskManager(OpenTTY): # Virtual Compact Disk System (Deploy Version)
 	def __init__(self, cmd):
 		if not cmd: return
 	
-		if cmd.split()[0] == "!mount": # Wizard for command "mount"
+		if cmd.split()[0] == "mount": # Wizard for command "mount"
 			cmd = super().replace(cmd)
 
 			if cmd: self.mount("SDMMC", cmd)
 			else: raise IndexError("zip.archive")
-		elif cmd.split()[0] == "!unmount": # Wizard for command "unmount" 
+		elif cmd.split()[0] == "unmount": # Wizard for command "unmount" 
 			cmd = super().replace(cmd)
 
 			if f"{library['root-dir']}/SDMMC" in os.getcwd(): raise OSError("Unable to unmount drive. You are working here.")
 
 			if self.SDMMCStatus(): self.unmount("SDMMC")
 			else: raise OSError("[Errno 102] SDMMC is not Mounted")
-		elif cmd.split()[0] == "!eject": # Wizard for command "eject" 
+		elif cmd.split()[0] == "eject": # Wizard for command "eject" 
 			cmd = super().replace(cmd)
 
 			if f"{library['root-dir']}/SDMMC" in os.getcwd(): raise OSError("Unable to eject drive. You are working here.")
@@ -1732,7 +1774,7 @@ class OpenDiskManager(OpenTTY): # Virtual Compact Disk System (Deploy Version)
 			if self.SDMMCStatus(): self.eject("SDMMC")
 			else: raise OSError("[Errno 102] SDMMC is not Mounted")
 
-		elif cmd.split()[0] == "!warp": # Wizard for command "warp"
+		elif cmd.split()[0] == "warp": # Wizard for command "warp"
 			if self.SDMMCStatus(): self.warpto("SDMMC")
 			else: raise OSError("[Errno 102] SDMMC is not Mounted")
 

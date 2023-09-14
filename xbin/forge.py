@@ -29,6 +29,7 @@ library["experiments"] = {
         "Desktop": True, 
         "RRAW-IS-CURL": True, 
         "Revolution-Line": True, 
+        "Revolution-Daemon": False,
         "Dumpsys": True, 
         "GAMERULES": True, 
     },

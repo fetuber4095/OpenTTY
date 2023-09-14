@@ -38,6 +38,7 @@ library["experiments"] = {
         "Desktop": False, # Add support for Virtual Desktop emulation
         "RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
         "Revolution-Line": False, # Active new command line
+        "Revolution-Daemon": False, # Active new daemons and functions for OpenTTY Revolution
         "Dumpsys": False, # Enable dumpsys
         "GAMERULES": False, # Enable gamerules and gamemode charge
     },
