@@ -50,8 +50,9 @@ app = OpenTTY() # Start OpenTTY Method instance
 
 if __name__ == "__main__":
     
-    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""))
-    except IndexError: app.help()
+    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), makepipe=True, root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), makepipe=True)
+        except IndexError: app.help()
+
 
     # Classic PSH Initialization
     #app.connect("NAME-OF-SESSION", port=8080, admin=False) # Start PSH session [PORT is PID of psh at OpenTTY Envirronment]

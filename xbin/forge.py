@@ -48,8 +48,9 @@ passwd = "1234"
 app = OpenTTY() 
 
 if __name__ == "__main__": 
-    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""))
+    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), makepipe=True, root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), makepipe=True)
     except IndexError: app.help()
+
 
     #app.connect("/dev/forge.py", admin=False if not "--admin" in sys.argv else True)
 

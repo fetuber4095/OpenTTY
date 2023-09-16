@@ -10,22 +10,24 @@ Usage: python -m opentty [--admin - Start as ROOT]
 	utilities in a single Python Module. The shell in this build
 	is configured to run built-in utilities without $PATH search, 
 	only considering the Assets in profile directory. 
-	To run external python programs, use (. <filename> [arguments]...)
 
 Built-in commands:
-	((expr)), alias, attrib, arch, asset, add-repo, basename, bg, bind, 
-	builtin, basic, block, build, cal, cd, chmod, chown, chroot, clear, 
-	cmp, cmatrix, cp, cron, clone, connect, catbin, curl, dd, df, du, 
-	dumpsys, dir, del, declare, del, deamon, diff, date, dog, echo, exit, 
-	eval, exec, enable, export, false, find, fw, feed, for, from, fstab, 
-	grep, gear, genn, genip, gaddr, get, gzip, gping, gt, help, hash, 
-	head, hat, hostname, hostid, install, insmod, ifconfig, init, idle,
-	join, json, kill, ls, login, ll, ln, logname, mkdir, md, mode, mount, 
-	more, mt, mv, mkswap, merge, netstat, no, nl, nuke, nslookup, nm, 
-	open, od, path, ping, passwd, paste, patch, ps, pwd, pull, public, 
-	pub, reset, rm, rmdir, route, rmswap, run, rss, resume, rev, read, 
-	rem, remm, start, swap, stty, sleep, sync, sudo, su, sort, server, 
-	seq, stat, static, stop, svc, system, stdin, stdout, sh, share, tac, 
-	tar, tail, tap, tr, thread, time, timeout, true, touch, test, type, 
-	tty, uname, unmount, unzip, untar, uptime, vi, version, var, 
-	vip, wc, wget, where, whoami, wait, xargs, yes, zipinfo
+	(( expression )); add-repo; alias; arch; asset; app; basename; bg;
+	bc; bind; build; builtin; block; cal; cat; chmod; chown; chroot; 
+	clear; cp; cpm; clone; catbin; connect; curl; cron; command; case;
+	date; diff; dd; df; du; dumpsys; dir; del; declare; diff; dist; dm;
+	dog; echo; exit; eval; exec; enable; export; env; expand; etk; find;
+	false; function; fw; feed; fold; gen; genn; genip; gzip; grep; gear; 
+	get; gping; gt; gaddr; getopt; getty; head; hash; help; hostname; 
+	hostid; install; insmod; ifconfig; initd; idle; id; join; json; kill;
+	ls; lsattr; login; ll; logname; mkdir; md; misc; mode; mount; more;
+	mt; mv; merge; mod; mapinfo; netstat; np; nm; nl; nuke; no; nldd;
+	open; od; path; ping; passwd; paste; patch; popd; ps; popon; pull;
+	pwd; public; pub; poweroff; part; reset; rm; rmdir; route; rmmod; 
+	run; rss; resume; rev; read; realpath; return; reboot; start; sleep;
+	stty; sh; sort; sync; su; sleep; stdin; stdout; share; seq; sed; 
+	set; source; suspend; stat; system; setup; tac; tar; tail; tap; tr; 
+	thread; time; timeout; true; touch; test; type; tty; ttysize; trap; 
+	unalias; unmount; uname; unzip; untar; unexpand; usleep; var; vi; 
+	version; vip; vkss; wc; wait; watch; wget; whoami; which; warn;
+	xargs; xxd; xml; xz; yes; zipinfo

@@ -14,7 +14,10 @@ cool and funny. If you found an issue, please report and
 help development team to turn the OpenTTY better.  
  
 ## Release Notes  
-
+ 
+This release is focused in OpenTTY performance, it remove 
+some unnecessary flags from module kernel and compact many
+methods for turn they more fast.
 
 
 Contributors: Mr. Lima  
