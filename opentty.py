@@ -293,6 +293,11 @@ class OpenTTY:
 
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
 
+
+	def stat(self): # Show module status
+		print(f"{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\n")
+		print(f"Process running:"), self.pslist()
+
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host="localhost", port=8080, warpin=True, admin=False):
 
