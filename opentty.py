@@ -1883,6 +1883,7 @@ class RunConfig(OpenTTY): # Run Settings from CONFIG.SYS
 
 
 
+
 class SocketStdout(io.TextIOBase): # Class for REMOTE Plugin (Stdout method)
 	def __init__(self, sock): self.sock = sock
 
