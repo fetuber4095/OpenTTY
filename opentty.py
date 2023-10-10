@@ -43,16 +43,12 @@ passwd = ""
 library = {
 	# Informations for current installation
     "appname": "OpenTTY", 
-    "version": "1.6.3", "build": "09H7",
+    "version": "1.6.4", "build": "09H8",
     "subject": "The Resources Upgrade",
 	"patch": [
 		"OpenTTY 98",
-		"Performance Update",
-		"Moved `dir' for utility `lsattr'",
-		"New NETMAN Utility `np' - Netcat Python remake",
-		"Bug fix for 'no quit for python console'",
-		"Bug fix: better `hash' daemon encryption",
-		"Restricted RELOAD for debugmode only",
+		""
+		
 	],
     
     "developer": "Mr. Lima",
@@ -79,8 +75,8 @@ library = {
 	"internals": {
 		"cls": "clear", "date": "echo &time", "version": "echo &appname v&version [&subject]", "by": "echo &developer", 
 		"profile": "echo [&profile]", "repo": "github", "globals": ": print(globals())", "logout": "true", "vi": "busybox vi",
-		"type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod", "nslookup": "hostname",
-		"floppy": "warp a", "ll": "busybox ls --color=auto", "help": "curl https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/help.txt"
+		"type": "stdin.read()", "ash": "busybox sh", "md": "mkdir", "system": "uname -s", "wl": "chmod", "nslookup": "hostname", 
+		"floppy": "warp a", "ll": "busybox ls --color=auto"
 	},
 
 	# Disabled Commands list
@@ -294,9 +290,6 @@ class OpenTTY:
 		if library['experiments']['RRAW-IS-CURL']: library['internals']['rraw'] = "curl"
 
 
-	def stat(self): # Show module status
-		print(f"{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\n")
-		print(f"Process running:"), self.pslist()
 
 	# OpenTTY - Client Interface [Module API]
 	def connect(self, host="localhost", port=8080, warpin=True, admin=False):
@@ -489,7 +482,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "flush": self.flush(self.replace(cmd))
 			elif cmd.split()[0] == "rmmod": self.rmmod(self.replace(cmd))
 			elif cmd.split()[0] == "xml": self.xml(self.replace(cmd), rlback=True)
-			elif cmd.split()[0] == "pub": self.json_explorer(jsoniten=self.functions)
+			elif cmd.split()[0] == "lsmod": self.json_explorer(jsoniten=self.functions)
 			elif cmd.split()[0] == "function": self.function(self.replace(cmd))
 
 			elif cmd.startswith("@"): self.callmethod(cmd.replace("@", ""))
@@ -506,8 +499,8 @@ class OpenTTY:
 				except Exception as error: traceback.print_exc()
 			
 			elif cmd.split()[0] == "cl0": self.locals = {}
-			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "lsattr": self.shell(f": print(dir({self.replace(cmd)}))", builtin=True) if self.replace(cmd) else print(f"{report}lsattr: missing operand [object]...")
+			elif cmd.split()[0] == "reset.nm": self.globals['nm'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			elif cmd.split()[0] == "reset.cf": self.uninstall("CONFIG.SYS", report="reset: ", root=True)
 
 			elif cmd.split()[0] == "remm": self.json_explorer(jsoniten=self.config)
@@ -556,7 +549,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "warn": warnings.warn(self.replace(cmd), UserWarning) if self.replace(cmd) else print(f"{report}warn: missing operand [notify]...")
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
-			elif cmd.split()[0] == "pwd": print(os.getcwd())
+			elif cmd.split()[0] == "realpath": print(os.getcwd())
+			elif cmd.split()[0] == "pwd": print(os.getcwd().replace(os.path.expanduser("~"), "~"))
 			elif cmd.split()[0] == "arch": print(platform.architecture()[0])
 			elif cmd.split()[0] == "getopt": print(f" {'-' * len(self.replace(cmd).split()[0])} {self.replace(self.replace(cmd))}" if self.replace(cmd) else f"{report}getopt: missing operand [element]...")
 			#
@@ -603,6 +597,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "help": self.help()
 			elif cmd.split()[0] == "yes": self.ThreadOut(self.replace(cmd))
 			elif cmd.split()[0] == "no": self.clear(), print(self.replace(cmd) if self.replace(cmd) else "")
+			elif cmd.split()[0] == "timeout": timeout(library['timeout'])
 			#elif cmd.split()[0] == "":
 
 

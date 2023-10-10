@@ -27,7 +27,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='opentty',
-    version='1.6.2',
+    version='1.6.3',
     author='Mr. Lima',
     author_email='felipebr4095@gmail.com',
     description='The OpenTTY is a Terminal Emulator created tottaly in python based-on Unix-Like Shells',
