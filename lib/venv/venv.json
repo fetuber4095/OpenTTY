@@ -1,7 +1,9 @@
 {
-    "version": "1.0",
+    "version": "1.1",
     "interface": "github.com",
 
     "libexec": "/lib/venv/profiles.py",
-    "workspace": "OpenTTY &version"
+    "lib-beta": "/lib/venv/venv.py",
+
+    "workspace": "OpenTTY.venv.profile.creator"
 }

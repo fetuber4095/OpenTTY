@@ -3,5 +3,5 @@
     "interface": "github.com",
 
     "libexec": "/lib/qt-draw/draw.py",
-    "workspace": "opentty.qtsdk.window.application.draw"
+    "workspace": "OpenTTY.qt.sdk.window.application.draw"
 }

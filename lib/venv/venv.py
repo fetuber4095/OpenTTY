@@ -4,24 +4,22 @@
 #  
 
 from opentty import *
+from optty import *
 
 
 # Setup your profile
 #
-library['profile'] = "NAME-OF-PROFILE" # Set name of profile
-
+library['profile'] = "Your-profile-name" # Set name of your profile
 library['debugmode'] = False # Enable or disable OpenTTY [debug mode]
-library['ipinfo-token'] = "" # Setup your "https://ipinfo.io" acess token for command FW
-library['openai-api'] = "" # Setup your openai api key
 
-library['do-auth'] = False # Ask for password at start
-library['goto-home'] = True # Enable or disable go to user home directory when join PSH
+library['goto-home'] = True # Enable goto home directory in psh start
+library['do-auth'] = False # Ask for password at psh start
 
 library['aliases']['ALIAS-NAME'] = "COMMAND" # Modify "ALIAS-NAME" with asset name and "COMMAND" with alias content 
 library['whitelist'].append("filename") # Add files permanently at whitelist
 
 library['head-lines'] = 10 # Setup number of file lines that will be show in 'head' and 'tail' commands
-library['max-byte-len'] = 32 # Setup for HASH and UHASH Services (Bytes to warp)
+library['hash'] = 32 # Setup for HASH and UHASH Services (Bytes to warp)
 library['hidden-files-prefix'] = "." # Setup prefix of hidden Files
 
 library['dircolors']['extension'] = "\033[COLORCODEm" # Add and modify files colors
@@ -33,25 +31,13 @@ library['resources']['RESOURCE-NAME'] = { # Setup your assets
     "install-requires": [] # OpenTTY other assets dependence
 }
 
-library["experiments"] = {
-        "Are-ROOT": False, # Beahivor as computer admin
-        "Disable-SU": False, # Disable charge user while running PSH
-        "Desktop": False, # Add support for Virtual Desktop emulation
-        "RRAW-IS-CURL": False, # If TRUE command rraw will call CURL
-        "Revolution-Line": False, # Active new command line
-        "Revolution-Daemon": False, # Active new daemons and functions for OpenTTY Revolution
-        "Dumpsys": False, # Enable dumpsys
-        "GAMERULES": False, # Enable gamerules and gamemode charge
-    },
-
-
 passwd = "1234" # Setup your password
 
 app = OpenTTY() # Start OpenTTY Method instance
 
 if __name__ == "__main__":
     
-    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), makepipe=True, root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", "").replace("-b", ""), makepipe=True)
+    try: app.shell(' '.join(sys.argv[1:]).replace("--admin", ""), root=False) if not "--admin" in sys.argv else app.runas(' '.join(sys.argv[1:]).replace("--admin", ""))
     except IndexError: app.help()
 
 

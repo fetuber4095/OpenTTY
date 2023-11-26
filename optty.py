@@ -26,15 +26,15 @@ from os import system as local
 from socket import gethostname as hostname
 from random import randint, choice
 from time import sleep as timeout
-from contextlib import redirect_stdout
 from sys import exit as close
 
 from sys import stdin, stdout, stderr
+#from setuptools import setup, find_packages
 
 import os, sys, json, time, random, platform, subprocess, calendar
 import http, http.server, urllib, socket, socketserver, urllib.request
 import shutil, getpass, zipfile, datetime, shlex, traceback, code, io
-import threading, tarfile, warnings
+import threading, tarfile, warnings, uuid
 import xml.etree.ElementTree as ET
 
 
@@ -71,7 +71,7 @@ library = {
 	# Aliases for users (client/ root)
 	"aliases": {}, 
 	"internals": {
-		"python": "exec python", "pip": "exec pip", "git": "exec git", "date": "echo &time" 
+		"date": "echo &time", "bb": "busybox", "ash": "busybox sh"
 	}, 
 		
 	# Firewall and root settings
@@ -94,7 +94,9 @@ library = {
 	"hash": 32, # Lenght of OpenTTY word warp (hash/ uhash)
 
 
-	"no-kill-services": ['sh'], 
+
+	"no-kill-services": ['psh'], 
+	"open-disk": "ResidentFlash",
 	
 	"timeout": 5, # Timeout for Network connections
 
@@ -122,21 +124,14 @@ library = {
 	# Resources Mirrors
 	"resources": {
 		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": [], "install-requires": []},
-		"browser": {"filename": "qt-browser.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qt-browser.ui", "py-libs": [], "install-requires": ['qt']},
 		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": [], "install-requires": ['qt']}, 
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": [], "install-requires": []}, 
 		"enchant": {"filename": "enchant.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/enchant.py", "py-libs": [], "install-requires": []},
 		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": [], "install-requires": []}, 
 		"figlet": {"filename": "figlet.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/figlet.py", "py-libs": ['pyfiglet'], "install-requires": []},
-		"forge": {"filename": "forge.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/forge.py", "py-libs": [], "install-requires": []}, 
-		"lagg": {"filename": "lagg.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/lagg.exe", "py-libs": [], "install-requires": []}, 
-		"midnight": {"filename": "midnight.zip", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/share/midnight/midclient.zip", "py-libs": [], "install-requires": []},
 		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": [], "install-requires": []},
 		"openpad": {"filename": "openpad.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/openpad.py", "py-libs": [], "install-requires": []},
-		"pname": {"filename": "pname.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/pname.py", "py-libs": [], "install-requires": []},		
-		"qmote": {"filename": "qmote.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/qmote.py", "py-libs": ['PyQt5'], "install-requires": []},
 		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools'], "install-requires": []}, 
-		"qt-draw": {"filename": "draw.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-draw/draw.py", "py-libs": ['PyQt5'], "install-requires": []},
 		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5'], "install-requires": []}, 
 		"ram": {"filename": "ram.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/ram.py", "py-libs": [], "install-requires": []},
 		"rundll": {"filename": "rundll.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/rundll.py", "py-libs": ['opentty'], "install-requires": []},
@@ -148,16 +143,16 @@ library = {
 	"scripts": {
 		"pypi": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/build.sh"},
 		"news": {"url": "https://github.com/fetuber4095/ResidentFlash/raw/main/packages/news"},
-		"psh.test": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/deploy/psh-tester.sh"},
+		"psh.test": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/test.sh"},
 		"rss": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/rss.dll"},
 		"notify-send": {"url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/libexec/notify-send.dll"},
-		#"": {"url": ""},
+		
 		#"": {"url": ""},
 		#"": {"url": ""},
 	}, 
 
 	"setup": {
-		"initd": {"filename": "&root/CONFIG.SYS", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/etc/initd"}
+		
 	},
 
 	"docs": {
@@ -166,9 +161,9 @@ library = {
 	},
 
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
-	"opentty.py": "https://github.com/fetuber4095/OpenTTY/raw/main/opentty.py",
+	"opentty.py": "https://github.com/fetuber4095/OpenTTY/raw/main/optty.py",
 
-	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/venv/profiles.py"
+	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/venv/venv.py"
 
 }
 
@@ -181,7 +176,7 @@ class OpenTTY:
 		self.subject = library['subject'] # Saving release name
 				
 
-		self.ttyname = "/"
+		self.ttyname = None
 
 		self.root, self.puppydir = library['root-dir'], library['root-dir']
 
@@ -206,7 +201,7 @@ class OpenTTY:
 	def __exit__(self, exc_type, c_value, traceback): return 
 
 	# OpenTTY Client
-	def connect(self, host="/dev/localhost", port=8080, admin=False):
+	def connect(self, host="/dev/localhost", port=8080, admin=False): # Connect into 
 
 		if library['do-auth'] or admin: self.runas("true"), self.stop("true") # Make user Authentication 
 		if library['goto-home']: os.chdir(self.root if admin else os.path.expanduser("~")) # Warp to user home or to profile directory
@@ -217,7 +212,7 @@ class OpenTTY:
 
 			print(f"\n\n\033[m{self.appname} v{self.version} ({platform.system()} {platform.release()}) built-in shell ({library['sh']})\nEnter 'help' for more informations.\n")
 
-		while True:
+		while library['sh'] in self.process:
 			try: 
 				self.globals['config'] = self.loadconfig(f"{self.root}/CONFIG.SYS") # Reload for RunDLL environment
 
@@ -239,7 +234,6 @@ class OpenTTY:
 			except (IndexError, TypeError): traceback.print_exc()	
 			except (RecursionError, EOFError): break
 			except UnboundLocalError: continue
-
 	def disconnect(self, code=""): # Disconnect from python client 
 		if not code: code = 0
 
@@ -407,8 +401,8 @@ class OpenTTY:
 			elif cmd.split()[0] == "remm": self.json(jsondict=self.globals['config'])
 
 			# "Hash Security"
-			elif cmd.split()[0] == "hash": print(self.encript(self.replace(cmd)))
-			elif cmd.split()[0] == "uhash": print(self.decript(self.replace(cmd)))
+			elif cmd.split()[0] == "hash": print(self.hash(self.replace(cmd)))
+			elif cmd.split()[0] == "uhash": print(self.uhash(self.replace(cmd)))
 
 			# The Archive Plugin
 			elif cmd.split()[0] in ["mount", "unmount", "eject", "warp"]: OpenDiskManager(cmd)
@@ -418,6 +412,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "gzip": self.gunzip(self.replace(cmd))
 
 			# The PSH
+			elif cmd.split()[0] == "pname": self.pname(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "uname": self.uname(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "export": self.export(self.replace(cmd))
 			elif cmd.split()[0] == "env": self.environ(self.replace(cmd), report=report)
@@ -425,7 +420,7 @@ class OpenTTY:
 			elif cmd.split()[0] == "exec": local(self.replace(cmd))
 			elif cmd.split()[0] == "popon": print(os.popen(self.replace(cmd)).read() if self.replace(cmd) else f"{report}popon: missing operand [command]...\n", end="")
 			elif cmd.split()[0] == "rem": self.write32u(self.replace(cmd))
-			elif cmd.split()[0] == "sh" or cmd.split()[0] == library['sh']: self.connect(self.ttyname, 8080, admin=root)
+			elif cmd.split()[0] == "sh" or cmd.split()[0] == library['sh']: self.stop(cmd.split()[0]), self.connect(self.ttyname, 8080, admin=root)
 			elif cmd.split()[0] == "df": self.diskfree(self.replace(cmd))			
 			elif cmd.split()[0] == "builtin": self.server(self.replace(cmd), report="builtin: ", builtin=True, root=root) if self.replace(cmd) else print(f"{report}builtin: missing operand [command]...")
 			elif cmd.split()[0] == "eval": print(self.server(self.replace(cmd), report="eval: ", root=root) if self.replace(cmd) else f"{report}eval: missing operand [command]...")
@@ -433,12 +428,12 @@ class OpenTTY:
 			elif cmd.split()[0] == "echo": print(self.replace(cmd))
 			elif cmd.split()[0] == "prompt": input(self.replace(cmd))
 			elif cmd.split()[0] == "stty": self.stty(self.replace(cmd))
-			elif cmd.split()[0] == "tty": print(self.ttyname if self.ttyname != "/" else f"{report}tty: not a tty openned.")
+			elif cmd.split()[0] == "tty": print(self.ttyname if self.ttyname else f"{report}tty: not a tty openned.")
 			elif cmd.split()[0] == "exit": self.disconnect(self.replace(cmd))
-			elif cmd.split()[0] == "se": raise SystemExit(self.replace(cmd))
 			elif cmd.split()[0] == "venv": self.venv(self.replace(cmd), report=report, root=root)
 			elif cmd.split()[0] == "sleep": self.sleep(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "setup": self.setup(self.replace(cmd), report=report, root=root)
+			elif cmd.split()[0] == "gen": self.gen(self.replace(cmd), report=report)
 			elif cmd.split()[0] == "warn": warnings.warn(self.replace(cmd), UserWarning) if self.replace(cmd) else print(f"{report}warn: missing operand [notify]...")
 			elif cmd.split()[0] == "cd": self.pushdir(self.replace(cmd))
 			elif cmd.split()[0] == "popd": self.pushdir(self.puppydir)
@@ -468,7 +463,7 @@ class OpenTTY:
 			# "OpenTTY Process Manager"
 			elif cmd.split()[0] == "ps": self.pslist()
 			elif cmd.split()[0] == "kill": self.kill(self.replace(cmd), report=report)
-			elif cmd.split()[0] == "bg": self.bg(self.shell, args=(self.replace(cmd), report, builtin, root)) if self.replace(cmd) else print(f"{report}bg: missing operand [command]...")
+			elif cmd.split()[0] == "bg": self.bg(self.server, args=(self.replace(cmd), report, builtin, root)) if self.replace(cmd) else print(f"{report}bg: missing operand [command]...")
 			
 			# The Remote Plugin
 			elif cmd.split()[0] == "bind": self.bind(int(self.replace(cmd)) if self.replace(cmd) else random.randint(1000, 4095))
@@ -481,7 +476,6 @@ class OpenTTY:
 			elif cmd.split()[0] == "genn": self.gen_numner(self.replace(cmd))
 			elif cmd.split()[0] == "timeout": timeout(library['timeout'])
 			elif cmd.split()[0] == "seq": self.sequence(self.replace(cmd), report=report)
-			elif cmd.split()[0] == "reload": self.reload(self.replace(cmd), root=root)
 			elif cmd.split()[0] == "help": self.help()
 			#elif cmd.split()[0] == "":
 
@@ -496,8 +490,9 @@ class OpenTTY:
 
 			else:
 				if cmd.split()[0] in library['internals']: self.server(f"{library['internals'][cmd.split()[0]]} {self.replace(cmd)}", root=root)
-
 				elif cmd.split()[0] in library['scripts']: self.server(f"; {library['scripts'][cmd.split()[0]]['url']} {self.replace(cmd)}", root=root)
+
+				elif cmd.split()[0] in ['python', 'python3', 'pip', 'pip3', 'git', 'busybox']: local(cmd)
 								
 				elif f"{cmd.split()[0]}.py" in os.listdir(self.root) and not builtin: local(f"python {self.root}\\{cmd.split()[0]}.py {self.replace(cmd)}") if os.name == "nt" else local(f"python {self.root}/{cmd.split()[0]}.py {self.replace(cmd)}")
 				elif f"{cmd.split()[0]}.ui" in os.listdir(self.root) and not builtin: self.server(f"qt {self.root}/{cmd.split()[0]}.ui {self.replace(cmd)}", report=report, builtin=False,  root=root)
@@ -507,7 +502,7 @@ class OpenTTY:
 				
 				elif cmd.split()[0] in library['resources'] and not builtin:
 					if library['resources'][cmd.split()[0]]['filename'] in os.listdir(self.root): print(f"{report}{cmd.split()[0]}: asset is actived.")
-					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.rmprocess(cmd.split()[0])
+					else: return print(f"{report}{cmd.split()[0]}: asset not installed."), self.stop(cmd.split()[0])
 				elif cmd.split()[0] in os.listdir(self.root): print(f"{report}{cmd.split()[0]}: asset is actived.")
 				
 				elif os.path.isfile(cmd): print(open(cmd))
@@ -527,7 +522,7 @@ class OpenTTY:
 
 		return True, self.stop(cmd.split()[0]) # Default service end
 
-	def start(self, app, pid=randint(1024, 9999)): self.process[app] = pid # Start process
+	def start(self, app): self.process[app] = randint(1024, 9999) # Start process
 	def stop(self, app): # Stop process 
 		try: 
 			if app in library['no-kill-services']: return
@@ -535,6 +530,24 @@ class OpenTTY:
 			del self.process[app]
 
 		except KeyError: return
+	
+	def pslist(self): # List running process at PSH 
+		print("     PID  CMD")
+		print('\n'.join([f"    {self.process[process]}  {process}" for process in self.process]))
+	def kill(self, pid, report=""): # Kill a process by virtual PID 
+		for process in self.process:
+			if self.process[process] == str(pid): 
+				del self.process[process]
+
+				return True
+		
+		print(f"{report}kill: ({pid}) - No such process" if pid else f"{report}kill: missing operand [pid]...")
+
+	def bg(self, method, args=()): # Run tasks in background 
+		thread = threading.Thread(target=method, args=args)
+		thread.start()
+
+		return thread
 
 	# OpenTTY "Text API"
 	def basename(self, path): return os.path.basename(path) # Get base name
@@ -1143,19 +1156,7 @@ class OpenTTY:
 		if function: raise NameError("function not found.")
 	#
 	# "Hash Security"
-	def decript(self, text, advance=library['hash'], table=library['char-table']): 
-		encrypted_text = ""
-
-		for char in text:
-			if char in table:
-				index = table.index(char)
-				new_index = (index - advance) % len(table)
-				encrypted_text += table[new_index]
-			else:
-				encrypted_text += char
-
-		return encrypted_text
-	def encript(self, text, advance=library['hash'], table=library['char-table']): 
+	def hash(self, text, advance=library['hash'], table=library['char-table']): 
 		decrypted_text = ""
 
 		for char in text:
@@ -1167,7 +1168,19 @@ class OpenTTY:
 				decrypted_text += char
 
 		return decrypted_text
+	def uhash(self, text, advance=library['hash'], table=library['char-table']): 
+		encrypted_text = ""
 
+		for char in text:
+			if char in table:
+				index = table.index(char)
+				new_index = (index - advance) % len(table)
+				encrypted_text += table[new_index]
+			else:
+				encrypted_text += char
+
+		return encrypted_text
+	
 	# The Archive Plugin
 	def zipinfo(self, zip_path, report=""): # Show Informations for a zip archive 
 		if zip_path: 
@@ -1210,6 +1223,17 @@ class OpenTTY:
 		else: raise IndexError("filename << source")
 	
 	# The PSH
+	def pname(self, argv="", report=""): # Show Informations about Python installation 
+		if cmd:
+			if "-a" in cmd: print(f"Python {platform.python_version()} ({platform.python_build()[0]} {platform.python_build()[1]}) [{platform.python_compiler()}]")
+
+			elif "-b" in cmd: print(platform.python_build()[0])
+			elif "-d" in cmd: print(platform.python_build()[1])
+			elif "-c" in cmd: print(platform.python_compiler())
+
+			else: print(f"{report}pname: {cmd}: invalid option")
+
+		else: print(f"Python {platform.python_version()}")
 	def uname(self, argv="", report=""): # Show Informations about system and machine 
 		if argv:
 			if "-a" in argv: print(f"{platform.system()} {platform.node()} {platform.release()} {platform.version()} {platform.machine()}")
@@ -1256,15 +1280,6 @@ class OpenTTY:
 			self.puppydir = os.getcwd()
 
 			return os.chdir(path)
-	def reload(self, cmdline="", root=True): # Reload OpenTTY Program 
-		if not "--confirm" in cmdline: return print(f"reload: it can charge normal {self.appname} beahvior. Cache will be cleaned.\nIf are you sure, run 'sudo reload --confirm'")
-
-		if library['debugmode']:
-			os.chdir(self.root), local(f"{'python ' if sys.argv[0] in ['opentty', 'opentty.py'] else ' '}{' '.join(sys.argv)}")
-
-			raise SystemExit
-
-		else: raise RuntimeError("RELOAD isn't enabled. Turn on this resource with `debugmode`.")
 	def venv(self, venvname, report="", root=False): # Create profiles from network template 
 		if venvname:
 			if not root: raise PermissionError("Unable to create profiles. Are you root?")
@@ -1291,6 +1306,33 @@ class OpenTTY:
 			else: print(f"{report}setup: unknown setting '{resource}'")
 
 		else: raise IndexError("config")
+	def gen(self, cmd, report=""): # Compile a python package roofs
+		if not cmd: print(f"{report}gen: missing setup file (Use 'gen -t [filename]...')")
+
+		if '-t' in cmd:
+			if not app.replace(cmd): raise IndexError("filename")
+
+			with open(app.replace(cmd), "wt+") as file:
+				file.write('{\n    "name": "",\n    "version": "",\n\n    "author": "",\n    "author_email": "",\n\n    "description": "",\n    "long_description_filename": "",\n    "long_description_content_type": "text/markdown",\n\n    "url": "",\n    "packages": ["."],\n    "classifiers": [],\n\n    "keywords": "",\n    "install_requires": [\n\n\n    ],\n\n\n\n    "script-args": ["sdist", "bdist_wheel"]}')
+
+		else:
+			settings = json.load(open(cmd, "r"))
+
+		setup(
+			name=settings['name'],
+			version=settings['version'],
+			author=settings['author'],
+			author_email=settings['author_email'],
+			description=settings['description'],
+			long_description=open(settings['long_description_filename'], "r").read(),
+			long_description_content_type=settings['long_description_content_type'],
+			url=settings['url'],
+			packages=settings['packages'],
+			classifiers=settings['classifiers'],
+			keywords=settings['keywords'], script_args=settings['script-args'],
+			install_requires=settings['install_requires']
+		)
+
 	#
 	# "Alias Manager"
 	def alias(self, cmd=""): # Create and show aliases 
@@ -1406,17 +1448,36 @@ class OpenTTY:
 		else: raise IndexError("max.number")
 
 	def help(self): # OpenTTY HELP
-		print(f"OpenTTY v{library['version']} ({library['system']}) Python Utilities.")
-		print(f'OpenTTY (C) 2023 - Copyrighted by "{library["developer"]}"')
+		print(f"{self.appname} v{self.version} ({library['system']}) Python Utilities.")
+		print(f'{self.appname} (C) 2023 - Copyrighted by "{library["developer"]}"')
 		print("Licensed under MIT. See source distribution in GitHub")
 		print("repository for more informations.\n")
-		print("Usage: python -m opentty [--admin - Start as ROOT]")
-		print("   or: python -m opentty [-b :: Active experiments daemon]\n")
+		print(f"Usage: python -m opentty [cmd - Execute a {self.appname} command]")
+		print("   or: python -m opentty [--admin :: Run commands as admin]\n")
 		print("   OpenTTY is a Terminal Emulator that combine many common Unix")
 		print("   utilities in a single Python Module. The shell in this build")
 		print("   is configured to run built-in utilities without $PATH search,") 
 		print("   only considering the Assets in profile directory.\n")
 		print("Built-in commands:")
+		print("   (( expression )); add-repo; alias; arch; asset; app; bg;")
+		print("   basename; bind; build; builtin; block; busybox; cal; cat;")
+		print("   chvt; chmod; chown; chroot; clear; cp; cpm; catbin; clone;") 
+		print("   connect; curl; cron; command; case; cut; crazy; date; dc;")
+		print("   dd; df; du; dir; diff; dumpsys; del; declare; debug; deal;")
+		print("   dpmod; echo; exit; eval; exec; export; false; function; fw;")
+		print("   feed; fold; file; find; gen; genn; genip; gzip; gear; grep;")
+		print("   get; gaddr; getopt; help; heal; head; hash; hostname; hostid;")
+		print("   install; insmod; ifconfig; io; json; join; kill; ls; lsattr;")
+		print("   lsmod; login; logout; load; mkdir; mkmap; mount; main; mode;")
+		print("   misc; mt; mv; merge; mapinfo; netstat; nm; np; nl; no; nldd;")
+		print("   open; ops; ping; ping6; passwd; patch; popd; ps; popon; pull;")
+		print("   pwd; public; part; rm; rmdir; rmmod; route; resume; run; rss;")
+		print("   read; realpath; start; sleep; stty; sh; sort; sync; su; seq;")
+		print("   stdin; stdout; stderr; share; set; source; stat; sed; system;")
+		print("   setup; tac; tar; tail; tap; tr; thread; timeout; time; test;")
+		print("   type; true; touch; tty; trap; unalias; unmount; uhash; uname;")
+		print("   unzip; uuid; var; version; vconfig; wget; watch; whoami; wc;")
+		print("   warn; xargs; xxd; xml; xz; yes; zipinfo")
 		
  
 	# The Remote Plugin
@@ -1464,41 +1525,41 @@ class OpenTTY:
 				return 
 
 class OpenDiskManager(OpenTTY): # Virtual Compact Disk System (Deploy Version)
-	def __init__(self, cmd):
+	def __init__(self, cmd, drive=library['open-disk']):
 		if not cmd: return
 	
 		if cmd.split()[0] == "mount": # Wizard for command "mount"
 			cmd = super().replace(cmd)
 
-			if cmd: self.mount("SDMMC", cmd)
+			if cmd: self.mount(drive, cmd)
 			else: raise IndexError("zip.archive")
 		elif cmd.split()[0] == "unmount": # Wizard for command "unmount" 
 			cmd = super().replace(cmd)
 
-			if f"{library['root-dir']}/SDMMC" in os.getcwd(): raise OSError("Unable to unmount drive. You are working here.")
+			if f"{library['root-dir']}/{drive}" in os.getcwd(): raise OSError("Unable to unmount drive. You are working here.")
 
-			if self.SDMMCStatus(): self.unmount("SDMMC")
-			else: raise OSError("[Errno 102] SDMMC is not Mounted")
+			if self.DiskStatus(drive): self.unmount(drive, cmd if cmd else drive)
+			else: raise OSError(f"[Errno 102] {drive} is not mounted")
 		elif cmd.split()[0] == "eject": # Wizard for command "eject" 
 			cmd = super().replace(cmd)
 
-			if f"{library['root-dir']}/SDMMC" in os.getcwd(): raise OSError("Unable to eject drive. You are working here.")
+			if f"{library['root-dir']}/{drive}" in os.getcwd(): raise OSError("Unable to eject drive. You are working here.")
 
-			if self.SDMMCStatus(): self.eject("SDMMC")
-			else: raise OSError("[Errno 102] SDMMC is not Mounted")
+			if self.DiskStatus(drive): self.eject(drive)
+			else: raise OSError(f"[Errno 102] {drive} is not mounted")
 
 		elif cmd.split()[0] == "warp": # Wizard for command "warp"
-			if self.SDMMCStatus(): self.warpto("SDMMC")
-			else: raise OSError("[Errno 102] SDMMC is not Mounted")
+			if self.DiskStatus(drive): self.warp(drive)
+			else: raise OSError(f"[Errno 102] {drive} is not mounted")
 
-	def warpto(self, drive): super().pushdir(f"{library['root-dir']}/{drive}") # Warp to a virtual compact disk
+	def warp(self, drive): super().pushdir(f"{library['root-dir']}/{drive}") # Warp to a virtual compact disk
 
 	def mount(self, drive, filename): super().unzip(f"{filename} {library['root-dir']}/{drive}") # Mount a virtual disk	
-	def unmount(self, drive): super().gunzip(f"{drive}.zip {library['root-dir']}/{drive}/"), super().removedir(f"{library['root-dir']}/{drive}") # Dismount and save disk in a zip archive
-	def eject(self, drive): super().removedir(f"{library['root-dir']}/{drive}")# Dismount a compact disk without save into a zip archive
+	def unmount(self, drive, filename): super().gunzip(f"{filename}.zip {library['root-dir']}/{drive}/"), super().removedir(f"{library['root-dir']}/{drive}") # Dismount and save disk in a zip archive
+	def eject(self, drive): super().removedir(f"{library['root-dir']}/{drive}") # Dismount a compact disk without save into a zip archive
 
 
-	def SDMMCStatus(self, drive="SDMMC"): return os.path.isdir(f"{library['root-dir']}/{drive}")
+	def DiskStatus(self, drive="SDMMC"): return os.path.isdir(f"{library['root-dir']}/{drive}")
 
 
 

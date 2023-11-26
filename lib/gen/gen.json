@@ -3,5 +3,7 @@
     "interface": "github.com",
 
     "libexec": "/lib/gen/gen.dll",
-    "workspace": "opentty.runtime.generators"
+    "workspace": "opentty.runtime.generators",
+
+    "state": "uncontinued"
 }
