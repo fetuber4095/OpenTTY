@@ -1,7 +1,7 @@
 #!/opentty.py rundll
 # -*- coding: utf-8 -*-
 #
-#  Copyright (C) 2023 "Mr. Lima" [nget.py]
+#  Copyright (C) 2023 "Mr. Lima" [figlet.py]
 #
 #  This code is part of OpenTTY Package Repository
 #  
@@ -23,5 +23,15 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-"NGET IS A PACKAGE INSTALLER FOR WINDOWS APPLICATIONS"
-"PROJECT WILL BE ADDED IN FUTURE!"
+global pyfiglet
+import pyfiglet
+
+def figlet(text, font="standard"):
+    try:
+        ascii_art = pyfiglet.figlet_format(text, font=font)
+        return ascii_art
+    except pyfiglet.FigletError as e:
+        return str(e)
+
+if cmd: print(figlet(cmd))
+else: print("figlet: missing operand [text]...")

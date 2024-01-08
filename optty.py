@@ -1257,7 +1257,7 @@ class OpenTTY:
 		if setting:
 			if setting == ".": setting = ""
 			
-			with open(f"{self.root}/CONFIG.SYS", "a") as configsys:
+			with open(f"{self.root}/CONFIG.SYS", "a+") as configsys:
 				configsys.write(f"{setting}\n")
 				
 		else: 
@@ -1265,7 +1265,7 @@ class OpenTTY:
 				code = open(f"{self.root}/CONFIG.SYS", "r").read()
 
 				print(code if show else "", end="")
-			except FileNotFoundError: self.write32u(f"{library['appname']} - CONFIG.SYS\n")
+			except FileNotFoundError: self.write32u(f"{library['appname']} - Config database\n")
 	def diskfree(self, cmd=""): # Show disk usage 
 		if os.name == "posix": os.system(f"df {cmd}")
 		elif os.name == "nt": os.system("wmic logicaldisk get deviceid,size,freespace")

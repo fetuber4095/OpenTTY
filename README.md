@@ -15,32 +15,28 @@ help development team to turn the OpenTTY better.
  
 ## Release Notes  
  
-This release is focused in OpenTTY performance, it remove   
-some unnecessary flags from module kernel and compact many  
-methods for turn they more fast.  
+OpenTTY UNMANTEINED Version  
 
-1. NetPy added into Netman Plugin  
+I'm acttualy making some charges into OpenTTY project  
+and it end support for some versions of OpenTTY, reffered  
+of Open Assets Library, it happen 'cause I have charge 
+repository structure.
 
-The `NetPy` is a chat service that create a two-directional   
-message, it's inspired in GNU Utility (`netcat`).   
-  
-`NetPy` is only used to create the server, to connect into one  
-you need use the classic command of OpenTTY `connect`  
-  
-2. Moved utility dir for lsattr	
 
-The python access for the python function `dir` to the new  
-command `lsattr` that not require the parenthesis 'cause it is  
-not directed on internal runtime but interpreted by Shell.  
+1. OpenTTY BournedAgain
+If you want test the beta versions of OpenTTY use:  
+`python -m optty <commands>` removing 'en' from word  
+Open.  
 
-3. OpenTTY.connect added argument `makepipe` to warp to console   
+It works with all experiments enable by default, and isnt  
+possible to turn off. 
 
-In the last release of OpenTTY, a minimal bug in Shell Out-runner  
-that the pipes for console wasn't created, and it result in the  
-impossibility for acess the console.  
-
-4. Restricted command `reload` only for debugmode  
-5. Bug fix for 'no quit for python console'
+2. Beta Resources
+It uses all experimental services, and can't be deactived.  
+If you want use the normal version, starts by default command.  
+But a lot of assets isn't more at github path and I'll upload  
+separated for users fix this problem at UNMANTEINED version of  
+OpenTTY.
 
 Contributors: Mr. Lima  
 GitHub Repository: https://github.com/fetuber4095/OpenTTY  
