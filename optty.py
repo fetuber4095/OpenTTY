@@ -123,13 +123,13 @@ library = {
 
 	# Resources Mirrors
 	"resources": {
-		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/busybox.exe", "py-libs": [], "install-requires": []},
+		"busybox": {"filename": "busybox.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/app.utils.busybox.exe", "py-libs": [], "install-requires": []},
 		"calendar": {"filename": "calendar.ui", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/calendar.ui", "py-libs": [], "install-requires": ['qt']}, 
 		"cowsay": {"filename": "cowsay.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/cowsay.py", "py-libs": [], "install-requires": []}, 
 		"enchant": {"filename": "enchant.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/enchant.py", "py-libs": [], "install-requires": []},
 		"favicon": {"filename": "favicon.ico", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/root/favicon.ico", "py-libs": [], "install-requires": []}, 
 		"figlet": {"filename": "figlet.dll", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/usr/games/figlet.py", "py-libs": ['pyfiglet'], "install-requires": []},
-		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib32/nano.exe", "py-libs": [], "install-requires": []},
+		"nano": {"filename": "nano.exe", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/app.utils.nano32.exe", "py-libs": [], "install-requires": []},
 		"openpad": {"filename": "openpad.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/openpad.py", "py-libs": [], "install-requires": []},
 		"qt": {"filename": "qt.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/qt-sdk/qt.py", "py-libs": ['PyQt5', 'pyqt5-tools'], "install-requires": []}, 
 		"qt-tree": {"filename": "qt-tree.py", "url": "https://github.com/fetuber4095/OpenTTY/raw/main/xbin/explorer.py", "py-libs": ['PyQt5'], "install-requires": []}, 
@@ -163,7 +163,7 @@ library = {
 	"github.com": "https://github.com/fetuber4095/OpenTTY",
 	"opentty.py": "https://github.com/fetuber4095/OpenTTY/raw/main/optty.py",
 
-	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/venv/venv.py"
+	"venv": "https://github.com/fetuber4095/OpenTTY/raw/main/lib/optty.profiles.template.py"
 
 }
 
